@@ -8,8 +8,8 @@ import ProductTeaser from './ProductTeaser'
 import Loader from 'react-loaders'
 
 export const pageQuery = gql`
-query($id: Int!, $skip: Int!, $limit: Int!) {
-  allProducts(subcategoryId: $id, skip: $skip, limit: $limit) {
+query($id: Int, $searchPhrase: String, $skip: Int!, $limit: Int!) {
+  allProducts(subcategoryId: $id, searchPhrase: $searchPhrase, skip: $skip, limit: $limit) {
     total,
     records {
       id
@@ -21,7 +21,11 @@ query($id: Int!, $skip: Int!, $limit: Int!) {
 const ProductList = (props) => {
   const perPage = Number.parseInt(props.limit) || 50
   const page = Number.parseInt(props.page) || 1
-  const variables = { id: Number.parseInt(props.subcategoryId), skip: (page -1) * perPage, limit: perPage }
+  const variables = {
+    id: Number.parseInt(props.subcategoryId),
+    searchPhrase: props.searchPhrase,
+    skip: (page -1) * perPage, limit: perPage
+  }
   return (
     <Query query={pageQuery} variables={variables}>
       {
@@ -29,11 +33,24 @@ const ProductList = (props) => {
           if (loading) return <Loader type="ball-scale-ripple-multiple" />
           if (err) return <div>Error fetching data: {err}</div>
 
+          let clientSideLink = ''
+          let serverSideLink = ''
+
+          if (props.subcategoryId) {
+            clientSideLink += `/subcategory/?subcategoryId=${props.subcategoryId}`
+            serverSideLink += `/subcategory/${props.subcategoryId}`
+          }
+
+          if (props.searchPhrase) {
+            clientSideLink += clientSideLink.length > 0 ? `&searchPhrase=${props.searchPhrase}` : `/search/${props.searchPhrase}`
+            serverSideLink += `/search/${props.searchPhrase}`
+          }
+
           const makePageLink = (page, text) =>
             <font size="-1" key={page}>
               <Link
-                href={`/subcategory/?subcategoryId=${props.subcategoryId}&pageNo=${page}`}
-                as={`/subcategory/${props.subcategoryId}/page/${page}`}>
+                href={`${clientSideLink}&pageNo=${page}`}
+                as={`${serverSideLink}/page/${page}`}>
                   <a>{text}</a>
               </Link>
             </font>

@@ -16,6 +16,13 @@ const knex = require('knex')({
   },
 })
 
+const validateArgs = (args) => {
+  args = Object.assign({}, { skip: 0, limit: 50 }, args)
+  if (args.limit > 200) args.limit = 200
+  if (args.skip < 0) args.skip = 0
+  return args
+}
+
 class MyDB extends SQLDataSource {
   constructor() {
     super()
@@ -79,33 +86,40 @@ class MyDB extends SQLDataSource {
   }
 
   listProducts(args) {
-    if (!args.subcategoryId) return Promise.reject(`subcategoryId is required`)
+    args = validateArgs(args)
 
-    args = Object.assign({}, { skip: 0, limit: 50 }, args)
-    if (args.limit > 200) args.limit = 200
+    let dataQuery =
+      this.db.select(this.productFields())
+        .from('Products')
+        .innerJoin('Category', 'Products.Category', 'Category.ID')
+        .innerJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
 
-    const dataQuery =
-        this.db.select(this.productFields())
-          .from('Products')
-          .where('Products.SubCategory', args.subcategoryId)
-          .orWhere('Products.SubCategoryB', args.subcategoryId)
-          .orWhere('Products.SubCategoryC', args.subcategoryId)
-          .innerJoin('Category', 'Products.Category', 'Category.ID')
-          .innerJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
-          .offset(args.skip)
-          .limit(args.limit)
-          .orderBy('Products.ID', 'ASC')
+    let countQuery = this.db.count('* as nRecords').from('Products').first()
 
+    if (args.subcategoryId) {
+      dataQuery = dataQuery.where('Products.SubCategory', args.subcategoryId)
+                   .orWhere('Products.SubCategoryB', args.subcategoryId)
+                   .orWhere('Products.SubCategoryC', args.subcategoryId)
+      countQuery = countQuery.where('Products.SubCategory', args.subcategoryId)
+                   .orWhere('Products.SubCategoryB', args.subcategoryId)
+                   .orWhere('Products.SubCategoryC', args.subcategoryId)
+    }
+    
+    if (args.searchPhrase) {
+      dataQuery = dataQuery.orWhere('Products.ItemName', 'like', `%${args.searchPhrase}%`)
+                   .orWhere('Products.Description', 'like', `%${args.searchPhrase}%`)
+                   .orWhere('Products.Keywords', 'like', `%${args.searchPhrase}%`)
 
+     countQuery = countQuery.orWhere('Products.ItemName', 'like', `%${args.searchPhrase}%`)
+                  .orWhere('Products.Description', 'like', `%${args.searchPhrase}%`)
+                  .orWhere('Products.Keywords', 'like', `%${args.searchPhrase}%`)
 
-    const countQuery =
-        this.db.count('* as nRecords')
-            .from('Products')
-            .where('Products.Subcategory', args.subcategoryId)
-            .orWhere('Products.SubCategoryB', args.subcategoryId)
-            .orWhere('Products.SubCategoryC', args.subcategoryId)
-            .first()
+    }
 
+    dataQuery = dataQuery
+      .orderBy('ID', 'ASC')
+      .offset(args.skip)
+      .limit(args.limit)
 
     return Promise.all([dataQuery, countQuery ])
   }

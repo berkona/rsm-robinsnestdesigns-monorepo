@@ -24,7 +24,8 @@ const IsWithinDateRange = (timestamp, rangeStart, rangeEnd) => {
 }
 
 const ProductTeaser = (props) => (
-  <Query key={props.id} query={pageQuery} variables={{ id: props.id }}>
+  <div className="ProductTeaser" key={props.id}>
+  <Query query={pageQuery} variables={{ id: props.id }}>
   {({ loading, error, data }) => {
     if (loading) return <Loader type="ball-scale-ripple-multiple" />
     if (error) return <div>Error fetching data: {error}</div>
@@ -127,6 +128,7 @@ const ProductTeaser = (props) => (
   )
   }}
   </Query>
+  </div>
 )
 
 export default ProductTeaser

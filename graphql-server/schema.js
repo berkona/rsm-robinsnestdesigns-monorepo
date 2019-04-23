@@ -8,7 +8,7 @@ const typeDefs = gql`
     allCategories: [Category!]!
     allSubcategories(categoryId: Int!): [SubCategory!]!
     product(productId: Int!): Product
-    allProducts(subcategoryId: Int!, searchPhrase: String, skip: Int, limit: Int): ProductList!
+    allProducts(subcategoryId: Int, searchPhrase: String, skip: Int, limit: Int): ProductList!
   }
 
   type Category {
