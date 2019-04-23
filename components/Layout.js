@@ -11,7 +11,7 @@ const Layout = props => (
   <div id="page_border">
     <Head>
       {/* Import CSS for nprogress */}
-      <link rel='stylesheet' type="text/css" href="/static/loader.min.css" />
+      <link rel='stylesheet' type="text/css" href="/static/loaders.min.css" />
       <link rel='stylesheet' type='text/css' href='/static/nprogress.css' />
       {/* CSS for robinsnestdesigns */}
       <link rel='stylesheet' type='text/css' href='/static/site.css' />
