@@ -1,11 +1,11 @@
 import React from "react"
-import Link from 'next/link'
 import { Query } from 'react-apollo'
 
 import gql from 'graphql-tag'
 
 import ProductTeaser from './ProductTeaser'
-import Loader from 'react-loaders'
+import Loader from './Loader'
+import { SearchLink } from './Links'
 
 export const pageQuery = gql`
 query($id: Int, $searchPhrase: String, $skip: Int!, $limit: Int!) {
@@ -30,29 +30,18 @@ const ProductList = (props) => {
     <Query query={pageQuery} variables={variables}>
       {
         ({ loading, err, data }) => {
-          if (loading) return <Loader type="ball-scale-ripple-multiple" />
+          if (loading) return <Loader />
           if (err) return <div>Error fetching data: {err}</div>
-
-          let clientSideLink = ''
-          let serverSideLink = ''
-
-          if (props.subcategoryId) {
-            clientSideLink += `/subcategory/?subcategoryId=${props.subcategoryId}`
-            serverSideLink += `/subcategory/${props.subcategoryId}`
-          }
-
-          if (props.searchPhrase) {
-            clientSideLink += clientSideLink.length > 0 ? `&searchPhrase=${props.searchPhrase}` : `/search/${props.searchPhrase}`
-            serverSideLink += `/search/${props.searchPhrase}`
-          }
 
           const makePageLink = (page, text) =>
             <font size="-1" key={page}>
-              <Link
-                href={`${clientSideLink}&pageNo=${page}`}
-                as={`${serverSideLink}/page/${page}`}>
-                  <a>{text}</a>
-              </Link>
+              <SearchLink
+                searchPhrase={props.searchPhrase}
+                subcategoryId={props.subcategoryId}
+                pageNo={page}
+              >
+                <a>{text}</a>
+              </SearchLink>
             </font>
 
           const lastPage = Math.ceil(data.allProducts.total / perPage)
@@ -91,7 +80,7 @@ const ProductList = (props) => {
           return (
             <div id="results">
               <h1>Search Results</h1>
-              <div align="center"><b><Link href="/search"><a>Search Again</a></Link></b></div>
+              <div align="center"><b><SearchLink><a>Search Again</a></SearchLink></b></div>
               <hr align="CENTER" size="3" width="400" color="Black"></hr>
               <div align="center">
                 <font face="Arial,Helvetica,sans-serif" size="2"><b>A total of <font color="Red">{data.allProducts.total}</font> records matched your search.</b></font>

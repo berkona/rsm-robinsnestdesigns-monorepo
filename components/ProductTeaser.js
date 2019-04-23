@@ -1,8 +1,8 @@
 import React from "react"
-import Link from 'next/link'
 import { Query } from 'react-apollo'
-import Loader from 'react-loaders'
 import gql from 'graphql-tag'
+import Loader from './Loader'
+import { ProductLink } from "./Links"
 
 export const pageQuery = gql`
 query($id: Int!) {
@@ -27,7 +27,7 @@ const ProductTeaser = (props) => (
   <div className="ProductTeaser" key={props.id}>
   <Query query={pageQuery} variables={{ id: props.id }}>
   {({ loading, error, data }) => {
-    if (loading) return <Loader type="ball-scale-ripple-multiple" />
+    if (loading) return <Loader />
     if (error) return <div>Error fetching data: {error}</div>
     const isOnSale = data.product.salePrice > 0 && IsWithinDateRange(Date.now(), data.product.saleStart, data.product.saleEnd)
     return (
@@ -40,9 +40,9 @@ const ProductTeaser = (props) => (
                 <tr>
                 	<td>
                     <font color="#000000">
-                      <Link href={`/product?productId=${props.id}`} as={`/product/${props.id}`}>
+                      <ProductLink productId={props.id}>
                         <a>{data.product.name}</a>
-                      </Link>
+                      </ProductLink>
                     </font>
                   </td>
                   {
@@ -62,11 +62,11 @@ const ProductTeaser = (props) => (
   	              <td colSpan="2">
                     {
                       (data.product.thumbnail || data.product.image) ? (
-                        <Link href={`/product?productId=${props.id}`} as={`/product/${props.id}`}>
+                        <ProductLink productId={props.id}>
                           <a>
                             <img src={`http://www.robinsnestdesigns.com/ahpimages/${data.product.thumbnail || data.product.image}`} border="0" alt="Product thumbnail" align="LEFT"></img>
                           </a>
-                        </Link>
+                        </ProductLink>
                       ) : <span></span>
                     }
                     {data.product.description}

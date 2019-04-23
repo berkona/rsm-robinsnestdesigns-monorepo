@@ -26,19 +26,6 @@ app
 			app.render(req, res, '/category', { categoryId: req.params.categoryId })
 		})
 
-    let handleSearch = (req, res) => {
-      const params = {
-        subcategoryId: req.params.subcategoryId ,
-        pageNo: req.params.pageNo,
-        searchPhrase: req.params.searchPhrase,
-      }
-			app.render(req, res, '/subcategory', params)
-		}
-
-    expressApp.get('/search/:searchPhrase/page/:pageNo', handleSearch)
-    expressApp.get('/subcategory/:subcategoryId/page/:pageNo', handleSearch)
-    expressApp.get('/subcategory/:subcategoryId/search/:searchPhrase/page/:pageNo', handleSearch)
-
     expressApp.get('/product/:productId', (req, res) => {
       app.render(req, res, '/product', { productId: req.params.productId })
     })

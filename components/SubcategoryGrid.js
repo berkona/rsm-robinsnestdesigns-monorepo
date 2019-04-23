@@ -4,6 +4,7 @@ import { Query } from 'react-apollo'
 
 import gql from 'graphql-tag'
 import Loader from 'react-loaders'
+import {SearchLink } from './Links'
 
 export const pageQuery = gql`
 query($categoryId: Int!) {
@@ -42,9 +43,9 @@ const SubcategoryGrid = (props) => (
                           <tr>
                             <td>
                               <div className="subcategory">
-                                <Link href={`/subcategory?subcategoryId=${arr[idx].id}&pageNo=1`} as={`/subcategory/${arr[idx].id}/page/1`}>
-                                  <a><span dangerouslySetInnerHTML={{__html: arr[idx].title}}></span></a>
-                                </Link>
+                                <SearchLink subcategoryId={arr[idx].id} pageNo={1}>
+                                    <a><span dangerouslySetInnerHTML={{__html: arr[idx].title}}></span></a>
+                                </SearchLink>
                               </div>
                             </td>
                           </tr>

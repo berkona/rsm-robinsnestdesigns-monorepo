@@ -26,7 +26,7 @@ class SearchBlock extends React.Component {
  handleSubmit(event) {
    event.preventDefault()
    if (this.state.value && this.state.value.length >= 2) {
-     document.location.pathname = `/search/${this.state.value}/page/1`
+     document.location.href = `/search?searchPhrase=${this.state.value}`
    }
  }
 

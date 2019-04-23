@@ -1,13 +1,34 @@
 import React from "react"
+import Link from 'next/link'
 
 const TopLinks = (props) => (
   // TODO: Fix these links
   <div id="topLinks">
     <ul>
-	  <li><a href="add_to_cart.cfm"><img src="http://www.robinsnestdesigns.com/ahpimages/buttons/viewmycart1.gif" alt="View My Cart" border="0" /></a></li>
-      <li><a href="wish_list.cfm"><img src="http://www.robinsnestdesigns.com/ahpimages/buttons/viewmylist1.gif" alt="View My List" border="0" /></a></li>
-      <li><a href="on_sale.cfm">On Sale</a></li>
-      <li><a href="whats_new.cfm">What's New</a></li>
+	   <li>
+        <Link href="/cart">
+          <a>
+            <img src="/static/viewmycart1.gif" alt="View My Cart" border="0" />
+          </a>
+        </Link>
+      </li>
+      <li>
+        <Link href="/wishlist">
+          <a>
+            <img src="/static/viewmylist1.gif" alt="View My List" border="0" />
+          </a>
+        </Link>
+      </li>
+      <li>
+        <Link href="/on-sale">
+        <a>On Sale</a>
+        </Link>
+      </li>
+      <li>
+        <Link href="/whats-new">
+          <a>What's New</a>
+        </Link>
+      </li>
     </ul>
   </div>
 )

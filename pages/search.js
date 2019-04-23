@@ -2,7 +2,7 @@ import ProductList from '../components/ProductList'
 
 import { withRouter } from 'next/router'
 
-const Subcategory = withRouter((props) => (
+const SearchPage = withRouter((props) => (
   <ProductList
     searchPhrase={props.router.query.searchPhrase}
     subcategoryId={props.router.query.subcategoryId}
@@ -10,4 +10,4 @@ const Subcategory = withRouter((props) => (
   />
 ))
 
-export default Subcategory
+export default SearchPage
