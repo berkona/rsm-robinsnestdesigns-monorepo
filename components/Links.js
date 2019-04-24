@@ -2,18 +2,13 @@ import React from 'react'
 import Link from 'next/link'
 
 export const ProductLink = (props) => (
-  <Link
-    href={`/product?productId=${props.productId}`}
-    as={`/product/${props.productId}`}
-    >
+  <Link href={`/product?productId=${props.productId}`}>
     {props.children}
   </Link>
 )
 
 export const CategoryLink = (props) => (
-  <Link
-    href={`/category?categoryId=${props.categoryId}`}
-    as={`/category/${props.categoryId}`}>
+  <Link href={`/category?categoryId=${props.categoryId}`}>
     {props.children}
   </Link>
 )
@@ -24,8 +19,7 @@ export const SearchLink = ({ subcategoryId, searchPhrase, pageNo, children }) =>
   let queryString = Object.keys(args).filter(key => key && args[key]).map(key => key + '=' + args[key]).join('&')
   if (queryString.length > 0) queryString = '?' + queryString
   return (
-    <Link
-      href={`/search${queryString}`}>
+    <Link href={`/search${queryString}`}>
       {children}
     </Link>
   )

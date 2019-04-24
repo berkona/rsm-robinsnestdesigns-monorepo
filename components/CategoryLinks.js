@@ -1,7 +1,6 @@
 import { Query } from 'react-apollo'
-import Link from 'next/link'
 import gql from 'graphql-tag'
-import Loader from 'react-loaders'
+import { CategoryLink } from './Links'
 
 export const sidebarQuery = gql`
   query {
@@ -15,7 +14,7 @@ export const sidebarQuery = gql`
 const CategoryLinks = () => (
   <Query query={sidebarQuery}>
     {({ loading, error, data }) => {
-      if (loading) return <Loader type="ball-scale-ripple-multiple" />
+      if (loading) return <div>Loading sidebar...</div>
       if (error) return <div>Error fetching data: <p>{error.toString()}</p></div>
       var categoryPrefixes = {}
       data.allCategories.forEach((e) => {
@@ -43,9 +42,9 @@ const CategoryLinks = () => (
                 <ul>
                   { prefixObj.children.map(c => (
                       <li key={`sidebar-category-${c.id}`}>
-                        <Link href={`/category?categoryId=${c.id}`}>
+                        <CategoryLink categoryId={c.id}>
                           <a>{c.suffix}</a>
-                        </Link>
+                        </CategoryLink>
                       </li>
                     )
                   )}
