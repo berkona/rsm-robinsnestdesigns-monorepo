@@ -1,35 +1,19 @@
 import React from "react"
-import { Query } from 'react-apollo'
-import gql from 'graphql-tag'
-import Loader from './Loader'
 import { ProductLink } from "./Links"
 
-export const pageQuery = gql`
-query($id: Int!) {
-  product(productId: $id) {
-    id
-    name
-    price
-    salePrice
-    saleStart
-    saleEnd
-    description
-    thumbnail
-  }
-}
-`
-
 const IsWithinDateRange = (timestamp, rangeStart, rangeEnd) => {
-  return timestamp > Date.parse(rangeStart) && timestamp < Date.parse(rangeEnd)
+  return timestamp > rangeStart && timestamp < rangeEnd
 }
 
-const ProductTeaser = (props) => (
-  <div className="ProductTeaser" key={props.id}>
-  <Query query={pageQuery} variables={{ id: props.id }}>
-  {({ loading, error, data }) => {
-    if (loading) return <Loader />
-    if (error) return <div>Error fetching data: {error.toString()}</div>
-    const isOnSale = data.product.salePrice > 0 && IsWithinDateRange(Date.now(), data.product.saleStart, data.product.saleEnd)
+const ProductTeaser = (props) => {
+    let parseDate = (dateStr) => {
+      try {
+        return Number.parseInt(dateStr)
+      } catch (err) {
+        return Date.parse(dateStr)
+      }
+    }
+    const isOnSale = props.product.salePrice > 0 && IsWithinDateRange(Date.now(), parseDate(props.product.saleStart), parseDate(props.product.saleEnd))
     return (
       <table style={{ marginBottom: '17px' }} className="item" width="100%" border="1" cellSpacing="0" cellPadding="5" bordercolor="Black">
       <tbody>
@@ -40,8 +24,8 @@ const ProductTeaser = (props) => (
                 <tr>
                 	<td>
                     <font color="#000000">
-                      <ProductLink productId={props.id}>
-                        <a>{data.product.name}</a>
+                      <ProductLink productId={props.product.id}>
+                        <a>{props.product.name}</a>
                       </ProductLink>
                     </font>
                   </td>
@@ -61,15 +45,15 @@ const ProductTeaser = (props) => (
                 <tr>
   	              <td colSpan="2">
                     {
-                      (data.product.thumbnail || data.product.image) ? (
-                        <ProductLink productId={props.id}>
+                      (props.product.thumbnail || props.product.image) ? (
+                        <ProductLink productId={props.product.id}>
                           <a>
-                            <img src={`http://www.robinsnestdesigns.com/ahpimages/${data.product.thumbnail || data.product.image}`} border="0" alt="Product thumbnail" align="LEFT"></img>
+                            <img src={`http://www.robinsnestdesigns.com/ahpimages/${props.product.thumbnail || props.product.image}`} border="0" alt="Product thumbnail" align="LEFT"></img>
                           </a>
                         </ProductLink>
                       ) : <span></span>
                     }
-                    {data.product.description}
+                    {props.product.description}
                   </td>
                 </tr>
               </tbody>
@@ -83,10 +67,10 @@ const ProductTeaser = (props) => (
                     <form action="add_to_cart.cfm" method="POST">
                       <div align="CENTER">
                         <font color="#000000">
-                          <strong>Your Price:</strong> ${data.product.price.toFixed(2)}
+                          <strong>Your Price:</strong> ${props.product.price.toFixed(2)}
                           <br></br>
                           {isOnSale ? (
-                            <span>Sale Price: <font color="#CC0000">${data.product.salePrice.toFixed(2)}</font></span>
+                            <span>Sale Price: <font color="#CC0000">${props.product.salePrice.toFixed(2)}</font></span>
                           ) : (
                             <span></span>
                           )}
@@ -124,11 +108,8 @@ const ProductTeaser = (props) => (
   	</td>
         </tr>
       </tbody>
-    </table>
-  )
-  }}
-  </Query>
-  </div>
-)
+      </table>
+    )
+}
 
 export default ProductTeaser

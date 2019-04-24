@@ -5,7 +5,7 @@ import { SearchLink } from './Links'
 import gql from 'graphql-tag'
 
 export const pageQuery = gql`
-query($id: Int!) {
+query($id: ID!) {
   product(productId: $id) {
     id,
     name

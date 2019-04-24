@@ -8,11 +8,28 @@ import Loader from './Loader'
 import { SearchLink } from './Links'
 
 export const pageQuery = gql`
-query($id: Int, $searchPhrase: String, $skip: Int!, $limit: Int!) {
-  allProducts(subcategoryId: $id, searchPhrase: $searchPhrase, skip: $skip, limit: $limit) {
+query(
+  $categoryId: ID,
+  $subcategoryId: ID,
+  $searchPhrase: String,
+  $onSaleOnly: Boolean,
+  $skip: Int!, $limit: Int!) {
+  allProducts(
+    categoryId: $categoryId,
+    subcategoryId: $subcategoryId,
+    searchPhrase: $searchPhrase,
+    onSaleOnly: $onSaleOnly,
+    skip: $skip, limit: $limit) {
     total,
     records {
       id
+      name
+      price
+      salePrice
+      saleStart
+      saleEnd
+      description
+      thumbnail
     }
   }
 }
@@ -22,8 +39,10 @@ const ProductList = (props) => {
   const perPage = Number.parseInt(props.limit) || 50
   const page = Number.parseInt(props.page) || 1
   const variables = {
-    id: Number.parseInt(props.subcategoryId),
+    categoryId: props.categoryId ? Number.parseInt(props.categoryId) : undefined,
+    subcategoryId: props.subcategoryId ? Number.parseInt(props.subcategoryId) : undefined,
     searchPhrase: props.searchPhrase,
+    onSaleOnly: props.onSaleOnly,
     skip: (page -1) * perPage, limit: perPage
   }
   return (
@@ -37,7 +56,9 @@ const ProductList = (props) => {
             <font size="-1" key={page}>
               <SearchLink
                 searchPhrase={props.searchPhrase}
+                categoryId={props.categoryId}
                 subcategoryId={props.subcategoryId}
+                onSaleOnly={props.onSaleOnly}
                 pageNo={page}
               >
                 <a>{text}</a>
@@ -99,7 +120,7 @@ const ProductList = (props) => {
                   </tr>
                 </tbody>
               </table>
-              {data.allProducts.records.map(r => <ProductTeaser id={r.id} />)}
+              {data.allProducts.records.map(r => <ProductTeaser key={r.id} product={r} />)}
             </div>
           )
         }
