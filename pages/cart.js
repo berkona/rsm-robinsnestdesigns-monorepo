@@ -1,7 +1,7 @@
 import React from "react"
 import Link from 'next/link'
 import { Query } from 'react-apollo'
-import Loader from 'react-loaders'
+import Loader from '../components/Loader'
 import gql from 'graphql-tag'
 
 import PaymentOptions from '../components/PaymentOptions'
@@ -25,7 +25,7 @@ const ProductPage = (props) => (
   <Query query={query}>
     {
       ({ loading, error, data }) => {
-        if (loading) return <Loader type="ball-scale-ripple-multiple" />
+        if (loading) return <Loader />
         if (error) return <div>Error fetching data: {error}</div>
         if (!data.cartItems || data.cartItems.length == 0) {
           return (
