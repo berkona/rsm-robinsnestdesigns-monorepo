@@ -1,7 +1,5 @@
 const { SQLDataSource } = require("datasource-sql")
 
-const generateId = (sqlId) => '' + sqlId
-
 if (!process.env.SQL_HOST || !process.env.SQL_USER || !process.env.SQL_PWD || !process.env.SQL_DB) {
   throw new Error('You must set the environmental variables: SQL_HOST, SQL_USER, SQL_PWD, SQL_DB before starting server')
 }
@@ -21,6 +19,57 @@ const validateArgs = (args) => {
   if (args.limit > 200) args.limit = 200
   if (args.skip < 0) args.skip = 0
   return args
+}
+
+const productFields =  [
+  'Products.ID as ID',
+  'ItemID',
+  'ItemName',
+  'Description',
+  'ItemPrice',
+  'Thumbnail',
+  'Image',
+  'SalePrice',
+  'Sale_Start',
+  'Sale_Stop',
+  'Category.Category as Category',
+  'Subcategory.Subcategory as Subcategory'
+]
+
+/**
+  Creates a query s.t. it SELECT's productFields + relevance (semantic meaning) based on searchPhrase and filters
+ */
+const buildSearchQuery = (builder, subcategoryId, searchPhrase, countOnly) => {
+  const makeQuery = (weight) => {
+    let q = builder;
+    if (countOnly) {
+      q = q.count('* as nRecords').first()
+    } else {
+      q = q.select(knex.raw(`${weight} as relevance`), 'ID')
+    }
+    q = q.from('Products').where('Active', 1)
+    if (subcategoryId) {
+      q = q.where(builder => builder
+        .orWhere('Products.SubCategory', subcategoryId)
+        .orWhere('Products.SubCategoryB', subcategoryId)
+        .orWhere('Products.SubCategoryC', subcategoryId)
+      )
+    }
+    return q
+  }
+
+  // save work b/c we don't need to do a regex
+  if (!searchPhrase) {
+    return makeQuery(1)
+  } else {
+    return makeQuery(10).where('ItemName', 'like', `%${searchPhrase}%`)
+      .union(
+        makeQuery(5).where('Keywords', 'like', `%${searchPhrase}%`)
+      )
+      .union(
+        makeQuery(2).where('Description', 'like', `%${searchPhrase}%`)
+      )
+  }
 }
 
 class MyDB extends SQLDataSource {
@@ -63,24 +112,13 @@ class MyDB extends SQLDataSource {
     return this.getBatched(query)
   }
 
-  productFields() {
-    return [
-      'Products.ID as ID', 'ItemID',
-      'ItemName', 'Description',
-      'ItemPrice', 'Thumbnail', 'Image', 'SalePrice',
-      'Sale_Start', 'Sale_Stop',
-      'Category.Category as Category',
-      'Subcategory.Subcategory as Subcategory'
-    ]
-  }
-
   getProduct(productId) {
     if (!productId) return Promise.reject(`productId is required`)
-    const query = this.db.select(this.productFields())
+    const query = this.db.select(productFields)
     .from('Products')
     .where('Products.ID', productId)
-    .innerJoin('Category', 'Products.Category', 'Category.ID')
-    .innerJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
+    .leftJoin('Category', 'Products.Category', 'Category.ID')
+    .leftJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
     .first()
     return this.getBatched(query)
   }
@@ -88,40 +126,21 @@ class MyDB extends SQLDataSource {
   listProducts(args) {
     args = validateArgs(args)
 
-    let dataQuery =
-      this.db.select(this.productFields())
-        .from('Products')
-        .innerJoin('Category', 'Products.Category', 'Category.ID')
-        .innerJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
+    const searchQuery = buildSearchQuery(this.db, args.subcategoryId, args.searchPhrase).as('Search')
 
-    let countQuery = this.db.count('* as nRecords').from('Products').first()
-
-    if (args.subcategoryId) {
-      dataQuery = dataQuery.where('Products.SubCategory', args.subcategoryId)
-                   .orWhere('Products.SubCategoryB', args.subcategoryId)
-                   .orWhere('Products.SubCategoryC', args.subcategoryId)
-      countQuery = countQuery.where('Products.SubCategory', args.subcategoryId)
-                   .orWhere('Products.SubCategoryB', args.subcategoryId)
-                   .orWhere('Products.SubCategoryC', args.subcategoryId)
-    }
-    
-    if (args.searchPhrase) {
-      dataQuery = dataQuery.orWhere('Products.ItemName', 'like', `%${args.searchPhrase}%`)
-                   .orWhere('Products.Description', 'like', `%${args.searchPhrase}%`)
-                   .orWhere('Products.Keywords', 'like', `%${args.searchPhrase}%`)
-
-     countQuery = countQuery.orWhere('Products.ItemName', 'like', `%${args.searchPhrase}%`)
-                  .orWhere('Products.Description', 'like', `%${args.searchPhrase}%`)
-                  .orWhere('Products.Keywords', 'like', `%${args.searchPhrase}%`)
-
-    }
-
-    dataQuery = dataQuery
-      .orderBy('ID', 'ASC')
+    const dataQuery =  this.db.select(productFields)
+      .from(searchQuery.clone())
+      .innerJoin('Products', 'Search.ID', 'Products.ID')
+      .leftJoin('Category', 'Products.Category', 'Category.ID')
+      .leftJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
+      .orderBy('relevance', 'desc')
+      .orderBy('ItemName', 'asc')
       .offset(args.skip)
       .limit(args.limit)
 
-    return Promise.all([dataQuery, countQuery ])
+    const countQuery = this.db.count('* as nRecords').from(searchQuery.clone()).first()
+
+    return Promise.all([ dataQuery, countQuery ])
   }
 }
 
