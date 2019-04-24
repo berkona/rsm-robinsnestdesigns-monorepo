@@ -1,6 +1,7 @@
 import React from 'react'
 import { Query } from 'react-apollo'
-import Loader from 'react-loaders'
+import Loader from './Loader'
+import { SearchLink } from './Links'
 import gql from 'graphql-tag'
 
 export const pageQuery = gql`
@@ -21,7 +22,7 @@ query($id: Int!) {
 const ProductDetail = (props) => (
   <Query key={props.productId} query={pageQuery} variables={{ id: Number.parseInt(props.productId) }}>
   {({ loading, error, data}) => {
-    if (loading) return <Loader type="ball-scale-ripple-multiple" />
+    if (loading) return <Loader />
     if (error) return <div>Error fetching product: {error.toString()}</div>
     return (
       <div id="detail">
@@ -97,7 +98,11 @@ const ProductDetail = (props) => (
         </div>
 
       <hr width="400" size="2" color="Black"></hr>
-      <div align="center"><b><a href="search.cfm">Search for another product</a></b><br></br>
+      <div align="center">
+        <SearchLink>
+          <b><a>Search for another product</a></b>
+        </SearchLink>
+        <br></br>
         <br></br>
       </div>
       </div>

@@ -29,9 +29,9 @@ const ProductList = (props) => {
   return (
     <Query query={pageQuery} variables={variables}>
       {
-        ({ loading, err, data }) => {
+        ({ loading, error, data }) => {
           if (loading) return <Loader />
-          if (err) return <div>Error fetching data: {err}</div>
+          if (error) return <div>Error fetching data: {error.toString()}</div>
 
           const makePageLink = (page, text) =>
             <font size="-1" key={page}>
@@ -44,7 +44,8 @@ const ProductList = (props) => {
               </SearchLink>
             </font>
 
-          const lastPage = Math.ceil(data.allProducts.total / perPage)
+          const total = data.allProducts.total
+          const lastPage = Math.ceil(total / perPage)
           const pageLinks = []
           let pageStart = page - 2
           let pageEnd = page + 2
@@ -67,7 +68,7 @@ const ProductList = (props) => {
           if (pageStart != pageEnd) {
             if (pageStart !== 1) pageLinks.push(makePageLink(1, '«'))
             for (var i = pageStart; i <= pageEnd; i++) {
-              const txt = ` [ ${(i-1) * perPage + 1} - ${ i * perPage } ] `;
+              const txt = ` [ ${(i-1) * perPage + 1} - ${ Math.min(i * perPage, total) } ] `;
               if (i === page) {
                 pageLinks.push(<span key={i}>{txt}</span>)
               } else {
