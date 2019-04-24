@@ -1,9 +1,8 @@
 import React from "react"
-import Link from 'next/link'
 import { Query } from 'react-apollo'
 
 import gql from 'graphql-tag'
-import Loader from 'react-loaders'
+import Loader from './Loader'
 import {SearchLink } from './Links'
 
 export const pageQuery = gql`
@@ -24,7 +23,7 @@ const SubcategoryGrid = (props) => (
   <Query query={pageQuery} variables={{ categoryId: Number.parseInt(props.categoryId) }}>
     {
       ({ loading, error, data }) => {
-        if (loading) return <Loader type="ball-scale-ripple-multiple" />
+        if (loading) return <Loader />
         if (error) return <div>Error fetching data: {error.toString()}</div>
         return (
           <div id="category_results">

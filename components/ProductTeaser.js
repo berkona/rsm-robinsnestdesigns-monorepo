@@ -28,7 +28,7 @@ const ProductTeaser = (props) => (
   <Query query={pageQuery} variables={{ id: props.id }}>
   {({ loading, error, data }) => {
     if (loading) return <Loader />
-    if (error) return <div>Error fetching data: {error}</div>
+    if (error) return <div>Error fetching data: {error.toString()}</div>
     const isOnSale = data.product.salePrice > 0 && IsWithinDateRange(Date.now(), data.product.saleStart, data.product.saleEnd)
     return (
       <table style={{ marginBottom: '17px' }} className="item" width="100%" border="1" cellSpacing="0" cellPadding="5" bordercolor="Black">

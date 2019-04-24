@@ -16,7 +16,7 @@ const CategoryLinks = () => (
   <Query query={sidebarQuery}>
     {({ loading, error, data }) => {
       if (loading) return <Loader type="ball-scale-ripple-multiple" />
-      if (error) return <div>Error fetching data: {error}</div>
+      if (error) return <div>Error fetching data: <p>{error.toString()}</p></div>
       var categoryPrefixes = {}
       data.allCategories.forEach((e) => {
         let [ prefix, suffix ] = e.title.split('-')
@@ -43,7 +43,7 @@ const CategoryLinks = () => (
                 <ul>
                   { prefixObj.children.map(c => (
                       <li key={`sidebar-category-${c.id}`}>
-                        <Link href={`/category?categoryId=${c.id}`} as={`/category/${c.id}`}>
+                        <Link href={`/category?categoryId=${c.id}`}>
                           <a>{c.suffix}</a>
                         </Link>
                       </li>

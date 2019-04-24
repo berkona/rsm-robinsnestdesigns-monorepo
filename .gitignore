@@ -1,3 +1,6 @@
 .next/*
+.serverless/*
+.sonarlint/*
 */.sonarlint/*
 node_modules/*
+secrets.yml

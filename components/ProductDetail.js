@@ -1,5 +1,4 @@
 import React from 'react'
-import Link from 'next/link'
 import { Query } from 'react-apollo'
 import Loader from 'react-loaders'
 import gql from 'graphql-tag'

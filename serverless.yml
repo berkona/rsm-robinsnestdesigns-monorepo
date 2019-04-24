@@ -1,0 +1,16 @@
+service:             robins-nest-designs
+
+provider:
+  name:              aws
+  runtime:           nodejs8.10
+
+plugins:
+  - serverless-nextjs-plugin
+
+custom:
+  serverless-nextjs:
+    nextConfigDir:   "./"
+
+package:
+  exclude:
+    - ./**

@@ -1,6 +1,5 @@
 import React from "react"
 import { Query } from 'react-apollo'
-import Loader from 'react-loaders'
 import gql from 'graphql-tag'
 
 const numberItems = gql`
@@ -37,6 +36,7 @@ class SearchBlock extends React.Component {
        <Query query={numberItems}>
          {({ loading, error, data }) => {
            if (loading) return <label>Search our 45700 item online catalog.</label>
+           if (error) return <label>Search our 45700 item online catalog.</label>
              return <label>Search our {data.allProducts.total} item online catalog.</label>
            }}
          </Query>
