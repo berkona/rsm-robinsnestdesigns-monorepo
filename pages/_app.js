@@ -5,6 +5,7 @@ import { ApolloProvider } from 'react-apollo'
 import Layout from '../components/Layout'
 import NProgress from 'nprogress'
 import Router from 'next/router'
+import withGA from "next-ga"
 
 NProgress.configure({
   showSpinner: false,
@@ -36,4 +37,4 @@ class MyApp extends App {
   }
 }
 
-export default withApolloClient(MyApp)
+export default withGA("UA-4561227-5", Router)(withApolloClient(MyApp))

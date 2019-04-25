@@ -25,8 +25,7 @@ const Layout = props => (
       <link rel='stylesheet' type='text/css' href='/static/site.css' />
       <link href="/static/droplinetabs.css" rel="stylesheet" type="text/css" />
     </Head>
-    <script type="text/javascript" src="/static/jquery-1.3.2.min.js"></script>
-    <script type="text/javascript" src="/static/droplinemenu.js"></script>
+
     <div id="masthead">
       <Header />
       <Navbar />
@@ -42,6 +41,9 @@ const Layout = props => (
       </div>
       <SiteInfo />
     </div>
+    
+    <script type="text/javascript" src="/static/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="/static/droplinemenu.js"></script>
   </div>
 )
 
