@@ -13,12 +13,14 @@ query(
   $subcategoryId: ID,
   $searchPhrase: String,
   $onSaleOnly: Boolean,
+  $newOnly: Boolean,
   $skip: Int!, $limit: Int!) {
   allProducts(
     categoryId: $categoryId,
     subcategoryId: $subcategoryId,
     searchPhrase: $searchPhrase,
     onSaleOnly: $onSaleOnly,
+    newOnly: $newOnly,
     skip: $skip, limit: $limit) {
     total,
     records {
@@ -43,6 +45,7 @@ const ProductList = (props) => {
     subcategoryId: props.subcategoryId ? Number.parseInt(props.subcategoryId) : undefined,
     searchPhrase: props.searchPhrase,
     onSaleOnly: props.onSaleOnly,
+    newOnly: props.newOnly,
     skip: (page -1) * perPage, limit: perPage
   }
   return (
@@ -59,6 +62,7 @@ const ProductList = (props) => {
                 categoryId={props.categoryId}
                 subcategoryId={props.subcategoryId}
                 onSaleOnly={props.onSaleOnly}
+                newOnly={props.newOnly}
                 pageNo={page}
               >
                 <a>{text}</a>
@@ -101,8 +105,6 @@ const ProductList = (props) => {
 
           return (
             <div id="results">
-              <h1>Search Results</h1>
-              <div align="center"><b><SearchLink><a>Search Again</a></SearchLink></b></div>
               <hr align="CENTER" size="3" width="400" color="Black"></hr>
               <div align="center">
                 <font face="Arial,Helvetica,sans-serif" size="2"><b>A total of <font color="Red">{data.allProducts.total}</font> records matched your search.</b></font>
@@ -121,6 +123,10 @@ const ProductList = (props) => {
                 </tbody>
               </table>
               {data.allProducts.records.map(r => <ProductTeaser key={r.id} product={r} />)}
+              <hr align="CENTER" size="3" width="400" color="Black"></hr>
+              <div align="CENTER">
+                {[...pageLinks]}
+              </div>
             </div>
           )
         }

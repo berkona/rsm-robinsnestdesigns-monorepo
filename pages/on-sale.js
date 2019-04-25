@@ -42,7 +42,10 @@ const OnSalePage = withRouter((props) => {
     )
   } else {
     return (
-      <ProductList categoryId={props.router.query.categoryId} onSaleOnly={true} page={props.router.query.pageNo} />
+      <div id="onsale">
+        <h1>Items on Sale</h1>
+        <ProductList categoryId={props.router.query.categoryId} onSaleOnly={true} page={props.router.query.pageNo} />
+      </div>
     )
   }
 })
