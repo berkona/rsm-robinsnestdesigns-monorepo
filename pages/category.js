@@ -34,7 +34,7 @@ const Category = withRouter((props) => (
             <SubcategoryGrid categories={data.allSubcategories}>
               {
                 (item) => (
-                  <SearchLink subcategoryId={item.id} pageNo={1}>
+                  <SearchLink categoryId={props.router.query.categoryId} subcategoryId={item.id} pageNo={1}>
                     <a><span dangerouslySetInnerHTML={{__html: item.title}}></span></a>
                   </SearchLink>
                 )

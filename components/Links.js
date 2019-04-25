@@ -13,13 +13,15 @@ export const CategoryLink = (props) => (
   </Link>
 )
 
-export const SearchLink = ({ categoryId, subcategoryId, searchPhrase, pageNo, onSaleOnly, newOnly, children }) => {
-  // TODO: can we alias this to a clean url?
-  const args = { categoryId, subcategoryId, searchPhrase, pageNo }
+export const SearchLinkStr = (args) => {
   let queryString = Object.keys(args).filter(key => key && args[key]).map(key => key + '=' + args[key]).join('&')
   if (queryString.length > 0) queryString = '?' + queryString
-  const prefix = onSaleOnly ? '/on-sale' : newOnly ? 'whats-new' : '/search'
-  const link = prefix + queryString
+  return '/search' + queryString
+}
+
+export const SearchLink = ({ categoryId, subcategoryId, searchPhrase, pageNo, onSaleOnly, newOnly, children }) => {
+  // TODO: can we alias this to a clean url?
+  const link = SearchLinkStr({ categoryId, subcategoryId, searchPhrase, pageNo, onSaleOnly, newOnly })
   return (
     <Link href={link}>
       {children}

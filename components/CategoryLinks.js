@@ -1,6 +1,7 @@
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
-import { CategoryLink } from './Links'
+import { SearchLink } from './Links'
+import { withRouter } from 'next/router'
 
 export const sidebarQuery = gql`
   query {
@@ -11,7 +12,7 @@ export const sidebarQuery = gql`
   }
 `
 
-const CategoryLinks = () => (
+const CategoryLinks = withRouter((props) => (
   <Query query={sidebarQuery}>
     {({ loading, error, data }) => {
       if (loading) return <div>Loading sidebar...</div>
@@ -42,9 +43,10 @@ const CategoryLinks = () => (
                 <ul>
                   { prefixObj.children.map(c => (
                       <li key={`sidebar-category-${c.id}`}>
-                        <CategoryLink categoryId={c.id}>
+                        <SearchLink categoryId={c.id}
+                          searchPhrase={props.router.query.searchPhrase}>
                           <a>{c.suffix}</a>
-                        </CategoryLink>
+                        </SearchLink>
                       </li>
                     )
                   )}
@@ -57,7 +59,7 @@ const CategoryLinks = () => (
       )
      }}
   </Query>
-)
+))
 
 
 export default CategoryLinks

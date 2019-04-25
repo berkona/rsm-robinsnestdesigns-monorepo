@@ -32,7 +32,6 @@ const Layout = props => (
     </div>
     <div id="page_border_inner">
       <div id="navBar">
-        <SearchBlock />
         <TopLinks />
         <CategoryLinks />
       </div>
@@ -41,7 +40,7 @@ const Layout = props => (
       </div>
       <SiteInfo />
     </div>
-    
+
     <script type="text/javascript" src="/static/jquery-1.3.2.min.js"></script>
     <script type="text/javascript" src="/static/droplinemenu.js"></script>
   </div>

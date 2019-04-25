@@ -44,8 +44,8 @@ const ProductList = (props) => {
     categoryId: props.categoryId ? Number.parseInt(props.categoryId) : undefined,
     subcategoryId: props.subcategoryId ? Number.parseInt(props.subcategoryId) : undefined,
     searchPhrase: props.searchPhrase,
-    onSaleOnly: props.onSaleOnly,
-    newOnly: props.newOnly,
+    onSaleOnly: !!props.onSaleOnly,
+    newOnly: !!props.newOnly,
     skip: (page -1) * perPage, limit: perPage
   }
   return (

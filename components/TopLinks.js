@@ -1,5 +1,6 @@
 import React from "react"
 import Link from 'next/link'
+import { SearchLink } from './Links'
 
 const TopLinks = (props) => (
   // TODO: Fix these links
@@ -20,14 +21,14 @@ const TopLinks = (props) => (
         </Link>
       </li>
       <li>
-        <Link href="/on-sale">
+        <SearchLink onSaleOnly={true}>
         <a>On Sale</a>
-        </Link>
+        </SearchLink>
       </li>
       <li>
-        <Link href="/whats-new">
+        <SearchLink newOnly={true}>
           <a>What's New</a>
-        </Link>
+        </SearchLink>
       </li>
     </ul>
   </div>

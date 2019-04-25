@@ -2,280 +2,279 @@
 /* 3col_leftNav.css                             */
 /* Use with template 3col_leftNav.html          */
 /***********************************************/
-
 /***********************************************/
 /* HTML tag styles                             */
-/***********************************************/ 
-
-body{
-	font-family: Arial,sans-serif;
-	color: #333333;
-	line-height: 1.166;
-	margin: 0px;
-	padding: 0px;
-	background-color: #8BA8BC;
-/*	
+/***********************************************/
+body {
+    font-family: Arial, sans-serif;
+    color: #333333;
+    line-height: 1.166;
+    margin: 0px;
+    padding: 0px;
+    background-color: #8BA8BC;
+    /*
 	background-image: url(images/greyBG.gif);
 */
 }
 
-a{
-	color: #006699;
-	text-decoration: none;
+a {
+    color: #006699;
+    text-decoration: none;
 }
 
-a:link{
-	color: #006699;
-	text-decoration: none;
+a:link {
+    color: #006699;
+    text-decoration: none;
 }
 
-a:visited{
-	color: #006699;
-	text-decoration: none;
+a:visited {
+    color: #006699;
+    text-decoration: none;
 }
 
-a:hover{
-	color: #006699;
-	text-decoration: underline;
+a:hover {
+    color: #006699;
+    text-decoration: underline;
 }
 
-h1{
- font-family: Verdana,Arial,sans-serif;
- font-size: 120%;
- color: #006699;
- margin: .5em 0;
- padding: 6px 0 12px 0;
+h1 {
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 120%;
+    color: #006699;
+    margin: .5em 0;
+    padding: 6px 0 12px 0;
 }
 
-h2{
- font-family: Arial,sans-serif;
- font-size: 114%;
- color: #006699;
- margin: 0px;
- padding: 6px 0 12px 0;
+h2 {
+    font-family: Arial, sans-serif;
+    font-size: 114%;
+    color: #006699;
+    margin: 0px;
+    padding: 6px 0 12px 0;
 }
 
-h3{
- font-family: Arial,sans-serif;
- font-size: 100%;
- color: #334d55;
- margin: .5em 0;
- padding: 0px ;
+h3 {
+    font-family: Arial, sans-serif;
+    font-size: 100%;
+    color: #334d55;
+    margin: .5em 0;
+    padding: 0px;
 }
 
-h4{
- font-family: Arial,sans-serif;
- font-size: 100%;
- font-weight: normal;
- color: #333333;
- margin: 0px;
- padding: 0px;
+h4 {
+    font-family: Arial, sans-serif;
+    font-size: 100%;
+    font-weight: normal;
+    color: #333333;
+    margin: 0px;
+    padding: 0px;
 }
 
-h5{
- font-family: Verdana,Arial,sans-serif;
- font-size: 100%;
- color: #334d55;
- margin: 0px;
- padding: 0px;
+h5 {
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 100%;
+    color: #334d55;
+    margin: 0px;
+    padding: 0px;
 }
 
-ul{
- list-style-type: square;
+ul {
+    list-style-type: square;
 }
 
-ul ul{
- list-style-type: disc;
+ul ul {
+    list-style-type: disc;
 }
 
-ul ul ul{
- list-style-type: none;
+ul ul ul {
+    list-style-type: none;
 }
 
-label{
- font-family: Arial,sans-serif;
- font-size: 100%;
- font-weight: bold;
- color: #334d55;
+label {
+    font-family: Arial, sans-serif;
+    font-size: 100%;
+    font-weight: bold;
+    color: #334d55;
 }
 
 p {
-  margin: 0;
-  padding: 3px 0 6px 0;
+    margin: 0;
+    padding: 3px 0 6px 0;
 }
-
 
 /***********************************************/
 /* Layout Divs                                 */
 /***********************************************/
-
 #page_border {
     width: 960px;
-	min-height: 800px;
-	margin: 0px auto;
+    min-height: 800px;
+    margin: 0px auto;
 }
 
 #page_border_inner {
-	border: 1px solid #002b70;
-	background-color: #FFFFFc;
+    border: 1px solid #002b70;
+    background-color: #FFFFFc;
 }
 
-#masthead{
-	padding: 10px 0px 0px 0px;
-	width: 100%;
-	overflow: visible;
+#masthead {
+    padding: 10px 0px 0px 0px;
+    width: 100%;
+    overflow: visible;
 }
 
 #header {
-  height: 150px;
-  padding: 10px;
+    height: 150px;
+    padding: 10px;
 }
 
 #logo {
-	float: left;
+    float: left;
 }
 
 #siteName {
     margin-left: 540px;
     text-align: center;
-	color: #FFFFCC
+    color: #FFFFCC
 }
+
 #siteName H1 {
-	margin-bottom: 6px;
-	margin-top: 16px;
-	color: #FFFFCC;
+    margin-bottom: 6px;
+    margin-top: 16px;
+    color: #FFFFCC;
 }
+
 #siteName P {
-	font-size: 90%;
-	font-weight: bold;
-	margin-top: 12px;
-	margin-bottom: 9px;
+    font-size: 90%;
+    font-weight: bold;
+    margin-top: 12px;
+    margin-bottom: 9px;
 }
 
-
-
-#navBar{
-	float: left;
-	width: 200px;
-	margin: 0px;
-	padding: 0px;
-	background-color: #eeeeee;
-	border-right: 1px solid #cccccc;
-	border-bottom: 1px solid #cccccc;
-	font-size: 14px;
+#navBar {
+    float: left;
+    width: 200px;
+    margin: 0px;
+    padding: 0px;
+    background-color: #eeeeee;
+    border-right: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
+    font-size: 14px;
 }
+
 /************ Home page styles **********************/
 #home IMG {
-  float: left;
-  padding: 0 12px 6px 0;
+    float: left;
+    padding: 0 12px 6px 0;
 }
 
 #home IMG.right {
-  float: right;
-  padding: 0 0px 6px 10px;
+    float: right;
+    padding: 0 0px 6px 10px;
 }
 
 #homeHeader {
-	padding: 10px 20px;
+    padding: 10px 20px;
     margin: 0 0 0 202px;
 }
 
 #homeHeader P {
-  padding-left: 20px;
-  padding-right: 20px;
-  font-size: 90%;
+    padding-left: 20px;
+    padding-right: 20px;
+    font-size: 90%;
 }
 
 #homeContent {
-  margin: 0 0 0 202px;
-  padding: 5px 20px 20px 20px;
-  min-height: 600px;
+    margin: 0 0 0 202px;
+    padding: 5px 20px 20px 20px;
+    min-height: 600px;
 }
 
 #homeContent h2 {
-	color: #FFFFCC;
-	background-color: #587E98;
-	padding: 6px 20px;
-	width: 410px;
-	margin: 8px 0 15px 0;
+    color: #FFFFCC;
+    background-color: #587E98;
+    padding: 6px 20px;
+    width: 410px;
+    margin: 8px 0 15px 0;
 }
+
 #homeContent p {
-  margin-left: 6px;
+    margin-left: 6px;
 }
 
 /************** On sale (right column) styles ***************/
-
-#headlines{
-  float: right;
-  width: 250px;
-  margin: 0px;
-  padding: 0 0 20px 20px;
+#headlines {
+    float: right;
+    width: 250px;
+    margin: 0px;
+    padding: 0 0 20px 20px;
 }
 
 #headlines h2 {
-  color: #FFFFCC;
-  background-color: #587E98;
-  padding: 6px 10px 6px 20px;
-  width: 220px;
-  margin: 8px 0 15px 0;
+    color: #FFFFCC;
+    background-color: #587E98;
+    padding: 6px 10px 6px 20px;
+    width: 220px;
+    margin: 8px 0 15px 0;
 }
+
 #headlines p {
-  margin-left: 6px;
+    margin-left: 6px;
 }
 
 /*************** General Content styles *******************/
-#content{
-  float: left;
+#content {
+    float: left;
 }
 
 /*************** General Code Page styles *****************/
 #content.codePage {
-  width: 745px;
-  min-height: 600px;
+    width: 745px;
+    min-height: 600px;
 }
 
 /*************** General Sub Page styles *****************/
 #content.twoColumns {
-  width: 700px;
-  margin: 0 0 0 0px;
-  padding: 5px 20px 20px 20px;
-  min-height: 600px;
+    width: 700px;
+    margin: 0 0 0 0px;
+    padding: 5px 20px 20px 20px;
+    min-height: 600px;
 }
 
 #content.twoColumns h2 {
-	color: #FFFFCC;
-	background-color: #587E98;
-	padding: 6px 20px;
-	width: 94%;
-	margin: 8px 0 15px 0;
+    color: #FFFFCC;
+    background-color: #587E98;
+    padding: 6px 20px;
+    width: 94%;
+    margin: 8px 0 15px 0;
 }
 
 #content.twoColumns p {
-  margin-left: 6px;
+    margin-left: 6px;
 }
+
 #content.twoColumns IMG {
-  padding: 12px;
+    padding: 12px;
 }
+
 #content.twoColumns IMG.left {
-  float: left;
-  padding: 0 12px 6px 0;
+    float: left;
+    padding: 0 12px 6px 0;
 }
 
 #content.twoColumns IMG.right {
-  float: right;
-  padding: 0 0px 6px 10px;
+    float: right;
+    padding: 0 0px 6px 10px;
 }
-
 
 /************* #globalNav styles **************/
-
-#globalNav{
-	margin: 0 0 0 0px;
-	padding: 0 0px 0 210px;
-	;
-	font-size: 12px;
-	font-weight: bold;
+#globalNav {
+    margin: 0 0 0 0px;
+    padding: 0 0px 0 210px;
+    ;
+    font-size: 12px;
+    font-weight: bold;
 }
+
 /*
 #globalNav img{
  display: block;
@@ -287,224 +286,224 @@ p {
 }
 */
 /*************** #pageName styles **************/
-
-#pageName{
-	margin: 0px;
-	padding: 0px 0px 0px 10px;
+#pageName {
+    margin: 0px;
+    padding: 0px 0px 0px 10px;
 }
 
 /************* #breadCrumb styles *************/
-
-#breadCrumb{
-	font-size: 80%;
-	padding: 2px 0px 0 10px;
+#breadCrumb {
+    font-size: 80%;
+    padding: 2px 0px 0 10px;
 }
-
 
 /************* #siteInfo styles ***************/
-
-#siteInfo{
-	clear: both;
-	border: 1px solid #cccccc;
-	font-size: 75%;
-	color: #999999;
-	padding: 10px 10px 10px 10px;
+#siteInfo {
+    clear: both;
+    border: 1px solid #cccccc;
+    font-size: 75%;
+    color: #999999;
+    padding: 10px 10px 10px 10px;
 }
+
 #siteInfo P {
     font-size: 9px;
 }
 
-#siteInfo img{
-	padding: 4px 4px 4px 10px;
-	vertical-align: middle;
+#siteInfo img {
+    padding: 4px 4px 4px 10px;
+    vertical-align: middle;
 }
+
 #footer {
-  clear:both;
-  color: #666666;
-  height: 30px;
+    clear: both;
+    color: #666666;
+    height: 30px;
 }
 
 #footerLeft, #footerRight {
-  float: left;
-  width: 20%;
+    float: left;
+    width: 20%;
 }
+
 #footerCenter {
-  float: left;
-  width: 59%;
-  text-align: center;
+    float: left;
+    width: 59%;
+    text-align: center;
 }
-
-
 
 /************* #search styles ***************/
-
-#search{
-	padding: 5px 5px 5px 10px;
-	margin-bottom: 10px;
-	border-bottom: 1px solid #cccccc;
-	font-size: 90%;
+#search {
+    padding: 5px 5px 5px 5px;
+    border-bottom: 1px solid #cccccc;
+    font-size: 90%;
 }
 
-#search form{
- margin: 0px;
- padding: 0px;
+#search form {
+    margin: 0px;
+    padding: 0px;
 }
 
-#search label{
-	display: block;
-	margin: 0px;
-	padding: 0px;
+#search label {
+    display: block;
+    margin: 0px;
+    padding: 0px;
 }
+
 /************** #topLinks styles **************/
 #topLinks {
-	padding: 5px 10px 5px 10px;
-	margin-bottom: 10px;
-	border-bottom: 1px solid #cccccc;
+    padding: 5px 10px 5px 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #cccccc;
 }
 
 #topLinks IMG {
-   display: block;
-   text-align: right;
+    display: block;
+    text-align: right;
 }
+
 /************** #categories styles **************/
 #categories {
-	padding: 5px 10px 5px 10px;
-	margin-bottom: 10px;
-	border-bottom: 1px solid #cccccc;
-	color: #006699;
+    padding: 5px 10px 5px 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #cccccc;
+    color: #006699;
 }
+
 #categories li {
     border-bottom: 1px solid #cccccc !important;
 }
+
 #categories a:hover {
-	background-color: #dddddd;
+    background-color: #dddddd;
 }
+
 #categories .subcategory {
-  font-weight: bold;
+    font-weight: bold;
 }
+
 #categories .subcategory LI {
-  margin-left: 15px;
-  font-weight: normal;
+    margin-left: 15px;
+    font-weight: normal;
 }
 
 /*********** #navBar link styles ***********/
-
-#navBar ul a:link, #navBar ul a:visited { 
+#navBar ul a:link, #navBar ul a:visited {
     display: block;
 }
+
 #navBar ul {
-    list-style: none; 
-	margin: 0; 
-	padding: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 /* hack to fix IE/Win's broken rendering of block-level anchors in lists */
 #navBar li {
-  border-bottom: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
 }
 
 /* fix for browsers that don't need the hack */
-html>body #navBar li {border-bottom: none;}
-
-/*********** #sectionLinks styles ***********/
-
-#sectionLinks{
-	position: relative;
-	margin: 0px;
-	padding: 0px;
-	border-bottom: 1px solid #cccccc;
-	font-size: 90%;
+html>body #navBar li {
+    border-bottom: none;
 }
 
-#sectionLinks h3{
-	padding: 10px 0px 2px 10px;
+/*********** #sectionLinks styles ***********/
+#sectionLinks {
+    position: relative;
+    margin: 0px;
+    padding: 0px;
+    border-bottom: 1px solid #cccccc;
+    font-size: 90%;
+}
+
+#sectionLinks h3 {
+    padding: 10px 0px 2px 10px;
 }
 
 #sectionLinks a {
-	display: block;
-	border-top: 1px solid #cccccc;
-	padding: 2px 0px 2px 10px;
+    display: block;
+    border-top: 1px solid #cccccc;
+    padding: 2px 0px 2px 10px;
 }
 
-#sectionLinks a:hover{
-	background-color: #dddddd;
+#sectionLinks a:hover {
+    background-color: #dddddd;
 }
-
 
 /*********** .relatedLinks styles ***********/
-
-.relatedLinks{
-	position: relative;
-	margin: 0px;
-	padding: 0px 0px 10px 10px;
-	font-size: 90%;
+.relatedLinks {
+    position: relative;
+    margin: 0px;
+    padding: 0px 0px 10px 10px;
+    font-size: 90%;
 }
 
-.relatedLinks h3{
-	padding: 10px 0px 2px 0px;
+.relatedLinks h3 {
+    padding: 10px 0px 2px 0px;
 }
 
 .relatedLinks a:link,
 .relatedLinks a:visited {
-	display: block; 
+    display: block;
 }
 
 /************** #advert styles **************/
-
-#advert{
-	padding: 30px 0px 10px;
+#advert {
+    padding: 30px 0px 10px;
 }
 
-#advert img{
-	display: block;
+#advert img {
+    display: block;
 }
-
 
 /************** #headlines styles **************/
-
 #nav {
-	background-color: #E8E8FF;
-	width: 550px;
-	margin: 0;
-	padding: 0;
-	float: left;
-	padding-left: 40px;
-	padding-top: 44px;
-	color: #002b70;
-	font-size: 16px;
+    background-color: #E8E8FF;
+    width: 550px;
+    margin: 0;
+    padding: 0;
+    float: left;
+    padding-left: 40px;
+    padding-top: 44px;
+    color: #002b70;
+    font-size: 16px;
 }
 
 /************ Specific CF Page style ***************/
-
 #category_results {
     width: 600px;
-	margin: 20px auto;
+    margin: 20px auto;
 }
+
 #category_results .instructions {
-   font-weight: bold;
-   text-align: center;
-   padding-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 10px;
 }
+
 #category_results TABLE.subcategory,
 #onsale TABLE.subcategory,
-#search TABLE.subcategory  {
-   background-color: #C9D7E0;
-   border: 1px solid #999999;
-   width: 175px;
+#search TABLE.subcategory {
+    background-color: #C9D7E0;
+    border: 1px solid #999999;
+    width: 175px;
 }
+
 #category_results DIV.subcategory,
 #onsale DIV.subcategory,
 #search DIV.subcategory {
-   width: 100%;
-   text-align: center;
-   min-height: 40px;
-   color: #333333;
+    width: 100%;
+    text-align: center;
+    min-height: 40px;
+    color: #333333;
 }
+
 #category_results DIV.subcategory A,
 #category_results DIV.subcategory A.visited,
 #search DIV.subcategory A,
 #search DIV.subcategory A.visited {
-   color: #333333;
+    color: #333333;
 }
 
 #results,
@@ -513,56 +512,57 @@ html>body #navBar li {border-bottom: none;}
 #addToCart,
 #wishList,
 #wishListRegister {
-  padding: 20px 5px 15px 15px;
-  width: 720px;
+    padding: 20px 5px 15px 15px;
+    width: 720px;
 }
+
 #results TABLE.description IMG,
 #onsale TABLE.description IMG,
 #whatsnew TABLE.description IMG {
-  padding: 0 10px 0 10px;
-  float: left;
-  border: none;
+    padding: 0 10px 0 10px;
+    float: left;
+    border: none;
 }
+
 TR.odd,
 .odd {
-/*
+    /*
   background-color: #C9D7E0;
 */
-  background-color: #ffffff;
+    background-color: #ffffff;
 }
 
 TR.even,
 .even {
-	background-color: #F4F4F4;
+    background-color: #F4F4F4;
 }
 
-#detail,
-#search
-{
-  padding: 20px 15px;
+#detail {
+    padding: 20px 15px;
 }
 
 #detail DIV.description IMG {
-  padding: 10px;
+    padding: 10px;
 }
 
 #addToCart .msg {
-  padding: 40px 20px;
+    padding: 40px 20px;
 }
+
 #addToCart TR.header,
 #addToCart TR.header TD,
 #wishList TR.header,
 #wishList TR.header TD,
 #wishListRegister TR.header,
 #wishListRegister TR.header TD {
-  background-color: #587E98;
+    background-color: #587E98;
 }
 
 #wishList TABLE.login {
-   margin: 20px auto 0 auto;
+    margin: 20px auto 0 auto;
 }
 
 .onSale {
-  color: #CC3300;
-  font-weight: bold;
+    color: #CC3300;
+    font-weight: bold;
 }
