@@ -23,7 +23,9 @@
     "react": "^16.8.6",
     "react-apollo": "^2.5.4",
     "react-dom": "^16.8.6",
-    "react-loaders": "^3.0.1"
+    "react-loaders": "^3.0.1",
+    "react-select": "^2.4.3",
+    "react-toggle": "^4.0.2"
   },
   "devDependencies": {
     "serverless-nextjs-plugin": "^1.5.3"

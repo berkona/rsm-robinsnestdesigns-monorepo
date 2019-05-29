@@ -23,6 +23,7 @@ const Layout = props => (
       <link rel='stylesheet' type='text/css' href='/static/nprogress.css' />
       {/* CSS for robinsnestdesigns */}
       <link rel='stylesheet' type='text/css' href='/static/site.css' />
+      <link  rel="stylesheet" type="text/css" href='/static/ToggleSlider.css' />
       <link href="/static/droplinetabs.css" rel="stylesheet" type="text/css" />
     </Head>
 

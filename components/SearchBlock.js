@@ -2,9 +2,14 @@ import React from "react"
 import {
 	Query
 } from 'react-apollo'
-import Link from 'next/link'
 import gql from 'graphql-tag'
-import { SearchLinkStr, SearchLink } from './Links'
+import Router from 'next/router'
+import { SearchLinkStr } from './Links'
+
+import Select from 'react-select'
+import Toggle from 'react-toggle'
+
+const SEARCH_DELAY = 1000
 
 const numberItems = gql `
 query {
@@ -15,8 +20,8 @@ query {
 `
 
 const findCategory = gql `
-query($categoryId: ID!) {
-  category(categoryId: $categoryId) {
+query {
+  allCategories {
     id
     title
   }
@@ -34,7 +39,7 @@ query($categoryId: ID!) {
 
 class SearchBlock extends React.Component {
 	constructor(props) {
-		super(props);
+		super(props)
     const {
       searchPhrase,
       categoryId,
@@ -49,122 +54,189 @@ class SearchBlock extends React.Component {
       subcategoryId,
       onSaleOnly,
       newOnly,
-		};
+			searchTimeout: null,
+		}
+
+		this.componentDidUpdate = this.componentDidUpdate.bind(this);
 		this.handleSearchChange = this.handleSearchChange.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
+
+		const self = this
+		let handleCheckToggle = (event, stateField) => {
+			const v = event.target.checked
+			const dState = {}
+			dState[stateField] = v
+			self.setState(dState, () => self.handleSubmit(event))
+		}
+		self.handleOnSaleOnlyChange = (event) => handleCheckToggle(event, 'onSaleOnly')
+		self.handleNewOnlyChange = (event) => handleCheckToggle(event, 'newOnly')
+
+		self.handleCategoryChange = (option) => {
+			self.setState({
+				categoryId: option && option.value,
+				subcategoryId: null,
+			}, () => Router.push(SearchLinkStr(self.state)))
+		}
+
+		self.handleSubcategoryChange = (option) => {
+			self.setState({
+				subcategoryId: option && option.value,
+			}, () => Router.push(SearchLinkStr(self.state)))
+		}
+	}
+
+	componentDidUpdate(prevProps) {
+		if (this.props.searchPhrase != prevProps.searchPhrase
+			|| this.props.categoryId != prevProps.categoryId
+		  || this.props.subcategoryId != prevProps.subcategoryId
+		  || this.props.onSaleOnly != prevProps.onSaleOnly
+		  || this.props.newOnly != prevProps.newOnly) {
+				const {
+		      searchPhrase,
+		      categoryId,
+		      subcategoryId,
+		      onSaleOnly,
+		      newOnly
+		    } = this.props
+
+				this.setState({
+		      searchPhrase,
+		      categoryId,
+		      subcategoryId,
+		      onSaleOnly,
+		      newOnly,
+				})
+		}
+
 	}
 
 	handleSearchChange(event) {
-		this.setState({
-			searchPhrase: event.target.value
+		const self = this
+		self.setState({
+			searchPhrase: event.target.value,
+		}, () => {
+			if (self.searchTimeout) {
+				clearTimeout(self.searchTimeout)
+			}
+			self.searchTimeout = setTimeout(() => Router.push(SearchLinkStr(self.state)), SEARCH_DELAY)
 		});
 	}
 
 	handleSubmit(event) {
 		event.preventDefault()
-		document.location.href = SearchLinkStr(this.state)
+		Router.push(SearchLinkStr(this.state))
 	}
 
 	render() {
     const self = this
 		return ( <div id = "search" >
-			<label > Search our 45692 item online catalog. < /label>
-      <form style = {
-				{
-					width: '100%',
-					display: 'flex',
-          flexDirection: 'column',
-				}
-			}
-			onSubmit = {
-				this.handleSubmit
-			} >
       <div style={{ display: 'flex', flexDirection: 'row' }}>
-			<input style = {
-				{
-					width: '95%',
-					fontSize: '20px'
+				<label > Search our 45692 item online catalog. < /label>
+	      <form style = {
+					{
+						width: '100%',
+						display: 'flex',
+	          flexDirection: 'column',
+					}
 				}
-			}
-			type = "text"
-			value = {
-				this.state.searchPhrase
-			}
-			onChange = {
-				this.handleSearchChange
-			}
-			/>
-      <button style = {
-				{
-					width: '36px'
-				}
-			} type = "submit" >
-			   <img src = "/static/magnifying-glass.svg" height = "21" / >
-			</button>
+				onSubmit = {this.handleSubmit} >
+					<input
+						style={{ width: '95%', fontSize: '20px' }}
+						type = "text"
+						value = {this.state.searchPhrase}
+						onChange = {this.handleSearchChange}
+					/>
+		      <button style = {{ width: '36px' }} type = "submit" >
+					   <img src = "/static/magnifying-glass.svg" height = "21" / >
+					</button>
+				</form>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
-        <p>
+
+			<div style={{
+					height: '22px',
+					display: 'flex',
+					flexDirection: 'row',
+    			justifyContent: 'space-between',
+    			marginTop: '8px'
+			}}>
+				<div style={{ width: '286px'}}>
+				Category
+				</div>
+				<div style={{ width: '286px', marginLeft: '10px'}}>
+				Subcategory
+				</div>
+				<div style={{width: '70px', marginLeft: '10px'}}>
+				On Sale
+				</div>
+				<div style={{ width: '70px', marginLeft: '10px' }}>
+				New
+				</div>
+			</div>
+      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+        <div style={{ width: '286px'}}>
           {
-            self.props.categoryId ?
-            <Query query={findCategory} variables={{ categoryId: self.props.categoryId }}>
-              {({ loading, error, data}) => <span>Category: {data && data.category && data.category.title.slice(0, 25) || 'any'}</span>}
+            <Query query={findCategory}>
+              {({ loading, error, data}) => {
+								return <Select
+												options={data && data.allCategories && data.allCategories.map(c => { return { label: c.title, value: c.id } })}
+												isClearable={true}
+												isSearchable={true}
+												isLoading={loading}
+												defaultValue={{ label: loading ? 'Loading...' : 'Select...', value: null }}
+												value={data
+													&& data.allCategories
+													&& data.allCategories
+															.filter(x => x.id == self.state.categoryId)
+															.map(c => { return { label: c.title, value: c.id } })[0]
+													|| null
+												}
+												onChange={self.handleCategoryChange}
+											 />
+							}}
             </Query>
-            :
-            <span>Category: any</span>
           }
-        </p>
-        <p style={{marginLeft: '10px' }}>
+        </div>
+        <div style={{ width: '286px', marginLeft: '10px' }}>
           {
-            self.props.categoryId ?
-            <span>Subcategory:
-              <Link href={`/category?categoryId=${this.props.categoryId}`}>
-                <a style={{ paddingLeft: '5px' }}>
-                {
-                  self.props.subcategoryId ?
-                  <Query query={findSubcategory} variables={{ categoryId: self.props.categoryId }}>
-                    {({ loading, error, data }) => {
-                      if (loading || error) return <span>loading...</span>
-                      else return <span>{data.allSubcategories.filter(x => x.id == self.props.subcategoryId)[0].title.slice(0, 25)}</span>
-                    }}
-                  </Query>
-                  :
-                  <a>Select</a>
-                }
-                </a>
-              </Link>
-            </span>
+            self.state.categoryId ?
+					  <Query query={findSubcategory} variables={{ categoryId: self.state.categoryId }}>
+							{({ loading, error, data}) => {
+								return <Select
+												options={data && data.allSubcategories && data.allSubcategories.map(c => { return { label: c.title, value: c.id } })}
+												isClearable={true}
+												isSearchable={true}
+												isLoading={loading}
+												defaultValue={{ label: loading ? 'Loading...' : 'Select...', value: null }}
+												value={data
+													&& data.allSubcategories
+													&& data.allSubcategories
+															.filter(x => x.id == self.state.subcategoryId)
+															.map(c => { return { label: c.title, value: c.id } })[0]
+													|| null
+												}
+												onChange={self.handleSubcategoryChange}
+											 />
+							}}
+						</Query>
             :
-            <span>Subcategory: any</span>
+						<Select options={[]}
+										isClearable={true}
+										isSearchable={true}
+										isLoading={false}
+										/>
           }
-        </p>
-        <p style={{marginLeft: '10px' }}>
-          On Sale:
-            <SearchLink
-              categoryId={self.props.categoryId}
-              subcategoryId={self.props.subcategoryId}
-              searchPhrase={self.props.searchPhrase}
-              onSaleOnly={!self.props.onSaleOnly}
-              newOnly={self.props.newOnly}>
-              <a style={{ paddingLeft: '5px' }}>
-              {self.props.onSaleOnly ? 'Yes' : 'No'}
-            </a>
-          </SearchLink>
-        </p>
-        <p style={{marginLeft: '10px' }}>
-          New:
-            <SearchLink
-              categoryId={self.props.categoryId}
-              subcategoryId={self.props.subcategoryId}
-              searchPhrase={self.props.searchPhrase}
-              onSaleOnly={self.props.onSaleOnly}
-              newOnly={!self.props.newOnly}>
-              <a style={{ paddingLeft: '5px' }}>
-              {self.props.newOnly ? 'Yes' : 'No'}
-            </a>
-          </SearchLink>
-        </p>
+        </div>
+        <div style={{ width: '70px', marginLeft: '10px' }}>
+					<label style={{ marginTop: '6px' }}>
+						<Toggle checked={!!self.state.onSaleOnly} onChange={self.handleOnSaleOnlyChange} />
+					</label>
+        </div>
+        <div style={{ width: '70px', marginLeft: '10px' }}>
+					<label style={{ marginTop: '6px' }}>
+						<Toggle checked={!!self.state.newOnly} onChange={self.handleNewOnlyChange} />
+					</label>
+        </div>
       </div>
-      </form>
 
       </div>
 		)
