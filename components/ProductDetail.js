@@ -3,6 +3,7 @@ import { Query } from 'react-apollo'
 import Loader from './Loader'
 import { SearchLink } from './Links'
 import gql from 'graphql-tag'
+import SEO from './SEO'
 
 export const pageQuery = gql`
 query($id: ID!) {
@@ -15,6 +16,7 @@ query($id: ID!) {
     price
     image
     thumbnail
+    description
   }
 }
 `
@@ -26,6 +28,7 @@ const ProductDetail = (props) => (
     if (error) return <div>Error fetching product: {error.toString()}</div>
     return (
       <div id="detail">
+      <SEO title={data.product.name} description={data.product.description} />
       <div align="CENTER"><h1>Detailed Item Information</h1></div>
       <div align="center">
       <hr width="400" size="2" color="Black"></hr>

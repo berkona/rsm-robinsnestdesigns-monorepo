@@ -14,6 +14,31 @@ const ProductTeaser = (props) => {
       }
     }
     const isOnSale = props.product.salePrice > 0 && IsWithinDateRange(Date.now(), parseDate(props.product.saleStart), parseDate(props.product.saleEnd))
+    console.log(typeof props.product.name);
+    return (
+      <ProductLink productId={props.product.id} category={props.product.category} subcategory={props.product.subcategory} title={props.product.name}>
+        <a>
+        <div className="product-teaser">
+          {
+            (props.product.thumbnail || props.product.image) ? (
+                <img src={`http://www.robinsnestdesigns.com/ahpimages/${props.product.thumbnail || props.product.image}`} border="0" alt="Product thumbnail" align="LEFT"></img>
+            ) : <span></span>
+          }
+          <h3 className="product-teaser-title">{props.product.name}</h3>
+          <div className="product-teaser-price">
+            <span  className={isOnSale ? 'strikethough' : undefined }>
+            ${props.product.price.toFixed(2)}
+            </span>
+            { isOnSale
+              ? <span className="color-red">${props.product.salePrice.toFixed(2)}</span>
+              : <span></span>
+            }
+          </div>
+        </div>
+        </a>
+      </ProductLink>
+    )
+
     return (
       <table style={{ marginBottom: '17px' }} className="item" width="100%" border="1" cellSpacing="0" cellPadding="5" bordercolor="Black">
       <tbody>
@@ -24,7 +49,7 @@ const ProductTeaser = (props) => {
                 <tr>
                 	<td>
                     <font color="#000000">
-                      <ProductLink productId={props.product.id}>
+                      <ProductLink productId={props.product.id} category={props.product.category} subcategory={props.product.subcategory} title={props.product.name}>
                         <a>{props.product.name}</a>
                       </ProductLink>
                     </font>

@@ -7,6 +7,10 @@ import ProductTeaser from './ProductTeaser'
 import Loader from './Loader'
 import { SearchLink } from './Links'
 
+import Container from 'react-bootstrap/Container'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+
 export const pageQuery = gql`
 query(
   $categoryId: ID,
@@ -26,6 +30,8 @@ query(
     records {
       id
       name
+      category
+      subcategory
       price
       salePrice
       saleStart
@@ -48,6 +54,23 @@ const ProductList = (props) => {
     newOnly: !!props.newOnly,
     skip: (page -1) * perPage, limit: perPage
   }
+  const gridFromArr = (records) => {
+      const max = records.length;
+      const nPerRow = 4;
+      const rows = [];
+      for (let rowStart = 0; rowStart < max; rowStart += nPerRow) {
+        const cols = [];
+        for (let col = 0; col < nPerRow; col++) {
+          let item = records[rowStart + col];
+          if (item) {
+            cols.push(<Col><ProductTeaser key={item.id} product={item} /></Col>)
+          }
+        }
+        rows.push(<Row>{[...cols]}</Row>)
+      }
+      return <Container>{[...rows]}</Container>
+  }
+
   return (
     <Query query={pageQuery} variables={variables}>
       {
@@ -122,7 +145,7 @@ const ProductList = (props) => {
                   </tr>
                 </tbody>
               </table>
-              {data.allProducts.records.map(r => <ProductTeaser key={r.id} product={r} />)}
+              {gridFromArr(data.allProducts.records)}
               <hr align="CENTER" size="3" width="400" color="Black"></hr>
               <div align="CENTER">
                 {[...pageLinks]}

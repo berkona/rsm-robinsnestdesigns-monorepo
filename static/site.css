@@ -566,3 +566,20 @@ TR.even,
     color: #CC3300;
     font-weight: bold;
 }
+
+.strikethough {
+    text-decoration: line-through;
+}
+
+.product-teaser {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-teaser-title {
+    font-size: 1rem;
+}
+
+.product-teaser-price {
+    font-size: 1.25rem;
+}

@@ -1,8 +1,9 @@
 import React from 'react'
 import Link from 'next/link'
+import slugify from 'slugify'
 
 export const ProductLink = (props) => (
-  <Link href={`/product?productId=${props.productId}`}>
+  <Link href={`/product/${slugify('' + props.category)}/${slugify('' + props.subcategory)}/${props.productId}/${slugify('' + props.title)}`}>
     {props.children}
   </Link>
 )
