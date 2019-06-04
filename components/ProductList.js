@@ -63,7 +63,7 @@ const ProductList = (props) => {
         for (let col = 0; col < nPerRow; col++) {
           let item = records[rowStart + col];
           if (item) {
-            cols.push(<Col><ProductTeaser key={item.id} product={item} /></Col>)
+            cols.push(<Col style={{ maxWidth: '24.99%' }}><ProductTeaser key={item.id} product={item} /></Col>)
           }
         }
         rows.push(<Row>{[...cols]}</Row>)

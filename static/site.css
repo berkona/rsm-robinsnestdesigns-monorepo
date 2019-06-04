@@ -572,14 +572,45 @@ TR.even,
 }
 
 .product-teaser {
-    display: flex;
-    flex-direction: column;
+    height: 202px;
+}
+
+.product-teaser .product-thumbnail {
+    height: 150px;
+    line-height: 150px;
+    text-align: center;
+}
+
+.product-teaser .product-thumbnail img {
+    max-width: 100%;
+    max-height: 100%;
+    vertical-align: middle;
 }
 
 .product-teaser-title {
-    font-size: 1rem;
+    color: #222;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .product-teaser-price {
-    font-size: 1.25rem;
+    font-size: 16px;
+    color: #222;
+}
+
+.product-teaser-price .on-sale {
+    color: #CC3300;
+}
+
+.product-teaser-price .promo-details {
+    font-size: 12px;
+    display: inline;
+    margin-left: 3px;
+}
+
+.product-teaser-price .small-price {
+    text-decoration: line-through;
+    font-size:
 }

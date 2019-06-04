@@ -18,23 +18,28 @@ const ProductTeaser = (props) => {
     return (
       <ProductLink productId={props.product.id} category={props.product.category} subcategory={props.product.subcategory} title={props.product.name}>
         <a>
-        <div className="product-teaser">
-          {
-            (props.product.thumbnail || props.product.image) ? (
-                <img src={`http://www.robinsnestdesigns.com/ahpimages/${props.product.thumbnail || props.product.image}`} border="0" alt="Product thumbnail" align="LEFT"></img>
-            ) : <span></span>
-          }
-          <h3 className="product-teaser-title">{props.product.name}</h3>
-          <div className="product-teaser-price">
-            <span  className={isOnSale ? 'strikethough' : undefined }>
-            ${props.product.price.toFixed(2)}
-            </span>
-            { isOnSale
-              ? <span className="color-red">${props.product.salePrice.toFixed(2)}</span>
-              : <span></span>
-            }
+          <div className="product-teaser">
+            <div className="product-thumbnail">
+              {
+                (props.product.thumbnail || props.product.image)
+                ? <img src={`http://www.robinsnestdesigns.com/ahpimages/${props.product.thumbnail || props.product.image}`}></img>
+                : <img src="/static/no-image.png"/>
+              }
+            </div>
+            <h3 className="product-teaser-title">{props.product.name}</h3>
+            <div className="product-teaser-price">
+              {
+                isOnSale
+                ? <span className="large-price on-sale">${props.product.salePrice.toFixed(2)}</span>
+                : <span className="large-price">${props.product.price.toFixed(2)}</span>
+              }
+              {
+                isOnSale
+                ? <div className="promo-details"><span className="small-price">${props.product.price.toFixed(2)}</span><span> ({ ((1.0 - (props.product.salePrice / props.product.price)) * 100.0).toFixed(0) }% off)</span></div>
+                : <span></span>
+              }
+            </div>
           </div>
-        </div>
         </a>
       </ProductLink>
     )
