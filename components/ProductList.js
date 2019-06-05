@@ -41,7 +41,9 @@ query(
       saleStart
       saleEnd
       description
+      image
       thumbnail
+      hyperlinkedImage
     }
   }
 }
@@ -59,22 +61,6 @@ const ProductList = (props) => {
     newOnly: !!props.newOnly,
     skip: (page -1) * perPage, limit: perPage,
     sort: props.sortOrder,
-  }
-
-  const gridFromArr = (records) => {
-      return (
-        <Container>
-          <Row>
-            {
-              records.map((item) => (
-                <Col  xs={6} md={4} lg={3}>
-                  <ProductTeaser key={item.id} product={item} />
-                </Col>
-              ))
-            }
-          </Row>
-        </Container>
-      )
   }
 
   return (
@@ -135,7 +121,17 @@ const ProductList = (props) => {
 
           return (
             <div id="results">
-              {gridFromArr(data.allProducts.records)}
+              <Container>
+                <Row>
+                  {
+                    data.allProducts.records.map((item) => (
+                      props.colSize
+                      ? <Col xs={props.colSize}><ProductTeaser key={item.id} product={item} /></Col>
+                      : <Col xs={6} md={4} lg={3}><ProductTeaser key={item.id} product={item} /></Col>
+                    ))
+                  }
+                </Row>
+              </Container>
               {
                 !isTeaser
                   ? <>

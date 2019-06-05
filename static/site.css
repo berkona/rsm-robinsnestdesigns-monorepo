@@ -598,5 +598,40 @@ TR.even,
 
 .product-teaser-price .small-price {
     text-decoration: line-through;
-    font-size:
+}
+
+.product-detail .product-large-image {
+    height: 450px;
+    line-height: 450px;
+    text-align: center;
+}
+
+.product-detail .product-large-image img {
+    max-width: 100%;
+    max-height: 100%;
+    vertical-align: middle;
+}
+
+.product-detail .product-title {
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.product-detail .product-price {
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.product-detail .product-price .on-sale {
+    color: #CC3300;
+}
+
+.product-detail .product-price .promo-details {
+    font-size: 12px;
+    display: inline;
+    margin-left: 3px;
+}
+
+.product-detail .product-price .small-price {
+    text-decoration: line-through;
 }

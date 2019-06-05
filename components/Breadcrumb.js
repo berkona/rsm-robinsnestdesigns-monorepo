@@ -34,7 +34,8 @@ const MyBreadcrumb = (props) => {
       categoryId,
       subcategoryId,
       onSaleOnly,
-      newOnly
+      newOnly,
+      product,
     } = props.query;
     return (
       <Breadcrumb>
@@ -62,13 +63,14 @@ const MyBreadcrumb = (props) => {
               const subcategory = (loading || error)
                 ? { title: '' + subcategoryId }
                 : data.allSubcategories.reduce((accum, next) => next.id == subcategoryId ? next : accum, { title: '' + subcategoryId })
-              return MakeBreadcrumbItem(SearchLinkStr({ categoryId, subcategoryId, onSaleOnly, newOnly }), subcategory.title, !searchPhrase)
+              return MakeBreadcrumbItem(SearchLinkStr({ categoryId, subcategoryId, onSaleOnly, newOnly }), subcategory.title, !searchPhrase && !product)
             }
           }
          </Query>
          : <></>
          }
          { searchPhrase ? <Breadcrumb.Item active>"{searchPhrase}"</Breadcrumb.Item> : <></> }
+         { product ? <Breadcrumb.Item active>{product.name}</Breadcrumb.Item> : <></> }
       </Breadcrumb>
     )
 }

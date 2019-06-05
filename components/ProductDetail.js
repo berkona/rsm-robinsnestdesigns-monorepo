@@ -4,6 +4,13 @@ import Loader from './Loader'
 import { SearchLink } from './Links'
 import gql from 'graphql-tag'
 import SEO from './SEO'
+import Breadcrumb from './Breadcrumb'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import Form from 'react-bootstrap/Form'
+import Button from 'react-bootstrap/Button'
+import Link from 'next/link'
+import ProductList from './ProductList'
 
 export const pageQuery = gql`
 query($id: ID!) {
@@ -11,103 +18,107 @@ query($id: ID!) {
     id,
     name
     category
+    categoryId
     subcategory
+    subcategoryId
     sku
     price
+    salePrice
+    saleStart
+    saleEnd
     image
     thumbnail
+    hyperlinkedImage
     description
   }
 }
 `
+
+const IsWithinDateRange = (timestamp, rangeStart, rangeEnd) => {
+  return timestamp > rangeStart && timestamp < rangeEnd
+}
 
 const ProductDetail = (props) => (
   <Query key={props.productId} query={pageQuery} variables={{ id: Number.parseInt(props.productId) }}>
   {({ loading, error, data}) => {
     if (loading) return <Loader />
     if (error) return <div>Error fetching product: {error.toString()}</div>
+    const parseDate = (dateStr) => {
+      try {
+        return Number.parseInt(dateStr)
+      } catch (err) {
+        return Date.parse(dateStr)
+      }
+    }
+    const isOnSale = data.product.salePrice > 0 && IsWithinDateRange(Date.now(), parseDate(data.product.saleStart), parseDate(data.product.saleEnd))
     return (
-      <div id="detail">
-      <SEO title={data.product.name} description={data.product.description} />
-      <div align="CENTER"><h1>Detailed Item Information</h1></div>
-      <div align="center">
-      <hr width="400" size="2" color="Black"></hr>
-      <div align="center" className="description">
-        <table width="500">
-          <tbody><tr>
-            <td align="RIGHT"><b><font size="+1">Item Name: </font></b></td>
-            <td align="LEFT"><i><font size="+1">{data.product.name}</font></i></td>
-          </tr>
-          <tr>
-            <td align="RIGHT"><b>Category:</b></td>
-            <td align="LEFT">{data.product.category}</td>
-          </tr>
-          <tr>
-            <td align="RIGHT"><b>Sub-Category:</b></td>
-            <td align="LEFT">{data.product.subcategory}</td>
-          </tr>
+      <div className="product-detail">
+      <SEO
+        title={data.product.name + ' | ' + data.product.category + ' | ' + data.product.subcategory}
+        description={'Buy ' + data.product.name + ' now. ' + data.product.description}
+      />
+      <Row>
+        <Col>
+          <Breadcrumb query={{categoryId: data.product.categoryId, subcategoryId: data.product.subcategoryId, product: data.product }} />
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={12} md={7}>
+          <div style={{  padding: '0px 24px' }}>
+            <div className="product-large-image">
+              {
+                (data.product.hyperlinkedImage || data.product.thumbnail || data.product.image)
+                ? <img src={data.product.hyperlinkedImage || `https://www.robinsnestdesigns.com/ahpimages/${data.product.thumbnail || data.product.image}`}></img>
+                : <img src="/static/no-image.png"/>
+              }
+            </div>
+          </div>
+        </Col>
+        <Col xs={12} md={5}>
+          <div style={{  padding: '0px 24px' }}>
+            <h3 className="product-title">{data.product.name}</h3>
+            <div className="product-price" style={{ marginBottom: '5px' }}>
+              {
+                isOnSale
+                ? <span className="large-price on-sale">${data.product.salePrice.toFixed(2)}</span>
+                : <span className="large-price">${data.product.price.toFixed(2)}</span>
+              }
+              {
+                isOnSale
+                ? <div className="promo-details"><span className="small-price">${data.product.price.toFixed(2)}</span><span> ({ ((1.0 - (data.product.salePrice / data.product.price)) * 100.0).toFixed(0) }% off)</span></div>
+                : <span></span>
+              }
+            </div>
+            <Form>
+              <Form.Group controlId="cartQuantity">
+                <Form.Label>Quantity</Form.Label>
+                <Form.Control value={1} type="number" minValue={1} />
+              </Form.Group>
+              <Button variant="dark" type="submit" block>Add to Cart</Button>
+            </Form>
+            <hr style={{ color: '#888' }} />
+            <h2>Shipping</h2>
+            <p>Ready to ship in 1-2 days</p>
+            <p><Link href="/ShippingInfo/shipping"><a>See shipping policy</a></Link></p>
 
-            <tr>
-              <td align="RIGHT"><b>Item Number:</b></td>
-              <td align="LEFT">{data.product.sku}</td>
-            </tr>
-
-            <tr>
-              <td align="RIGHT"><b>Your Price:</b></td>
-              <td align="LEFT">${data.product.price.toFixed(2)}</td>
-            </tr>
-
-            <tr>
-              <td colSpan="2">
-                  {
-                    (data.product.image || data.product.thumbnail) ?
-                    <div align="center"><img src={`http://www.robinsnestdesigns.com/ahpimages/${data.product.image || data.product.thumbnail}`} border="0" alt=""></img></div>
-                    : <div></div>
-                  }
-                 </td>
-            </tr>
-
-          <tr>
-            <td colSpan="2"><b></b></td>
-          </tr>
-        </tbody></table>
-      </div>
-      <hr width="400" size="2" color="Black"></hr>
-      <form action="add_to_cart.cfm" method="POST">
-
-      <div align="CENTER">
-        <table cellSpacing="0" cellPadding="0">
-
-          <tbody><tr>
-            <td colSpan="2"><div align="CENTER"><b>Qty:</b>
-                <input type="text" name="Quantity" value="1" size="2" maxLength="4" />
-              </div></td>
-          </tr>
-        </tbody></table>
-      </div>
-
-
-
-
-      <table cellSpacing="0" cellPadding="0">
-        <tbody><tr>
-          <td> <div align="center">
-              <input type="Image" name="Submit" src="http://www.robinsnestdesigns.com/ahpimages/buttons/addtocart1.gif" border="0" />
-            </div></td>
-        </tr>
-        </tbody></table>
-        </form>
-
-        </div>
-
-      <hr width="400" size="2" color="Black"></hr>
-      <div align="center">
-        <SearchLink>
-          <b><a>Search for another product</a></b>
-        </SearchLink>
-        <br></br>
-        <br></br>
-      </div>
+            <hr style={{ color: '#888' }} />
+            <h2>Returns</h2>
+            <p>Returns and exchanges accepted</p>
+            <p><Link href="/Policies/Policies"><a>See return policy</a></Link></p>
+          </div>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <div style={{ padding: '0px 24px' }}>
+            <h1>Description</h1>
+            <p>{data.product.description}</p>
+            <hr style={{ color: '#888' }} />
+            <h1>Related Items</h1>
+            <ProductList isTeaser={true} limit={8} categoryId={data.product.categoryId} subcategoryId={data.product.subcategoryId} />
+          </div>
+        </Col>
+      </Row>
       </div>
     )
   }}

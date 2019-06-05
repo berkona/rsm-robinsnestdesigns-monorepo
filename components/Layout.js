@@ -12,9 +12,9 @@ const Layout = props => (
     <Head>
       <title>Exclusive needlework charts and kits for cross stitch and needlepoint | Robin's Next Designs</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-      <meta name="Author" content="Robin S. Monroe" />
-      <meta name="Description" content="Needlework designs, kits, fabric, floss and accessories for cross stitch, needlepoint and punchneedle" />
-      <meta name="KeyWords" content="cross,stitch,needlepoint,quilting,punchneedle,patterns,charts,graphs,needles,DMC,Anchor,Mill,Hill,Pearl,perle,cotton,beads,floss,kits,linen,Aida,Lugana,evenweave,afghans,tabletop,placemats,napkins,bread,covers,cloths,Jubilee,Jobelan,Wichelt,Zweigart,Charles,Kreinik,metallic,threads,Marlitt,Lavender,Lace,Mirabilia,Butternut,Road,nora,Corbett,Marilyn,Imblum,Pooh,Disney,John,James,Piecemakers,tapestry,beading,baby,bibs,towels,bookmark,fabrics,leaflets,books,needlework,stitchery,needlearts,sewing,crafts,keepsakes,collectibles,heirloom,gifts,home,decor,furnishings,flowers,Christmas,ornaments,cats,dogs" />
+      <meta name="author" content="Robin S. Monroe" />
+      <meta name="description" content="Needlework designs, kits, fabric, floss and accessories for cross stitch, needlepoint and punchneedle" />
+      <meta name="keywords" content="cross,stitch,needlepoint,quilting,punchneedle,patterns,charts,graphs,needles,DMC,Anchor,Mill,Hill,Pearl,perle,cotton,beads,floss,kits,linen,Aida,Lugana,evenweave,afghans,tabletop,placemats,napkins,bread,covers,cloths,Jubilee,Jobelan,Wichelt,Zweigart,Charles,Kreinik,metallic,threads,Marlitt,Lavender,Lace,Mirabilia,Butternut,Road,nora,Corbett,Marilyn,Imblum,Pooh,Disney,John,James,Piecemakers,tapestry,beading,baby,bibs,towels,bookmark,fabrics,leaflets,books,needlework,stitchery,needlearts,sewing,crafts,keepsakes,collectibles,heirloom,gifts,home,decor,furnishings,flowers,Christmas,ornaments,cats,dogs" />
       <meta httpEquiv="PICS-Label" content="(PICS-1.0 &quot;http://www.rsac.org/ratingsv01.html&quot; l gen true comment &quot;RSACi North America Server&quot; by &quot;robndesign@aol.com&quot; for &quot;http://www.stitching.com/robinsnest/&quot; on &quot;1997.03.09T11:03-0500&quot; exp &quot;1997.07.01T08:15-0500&quot; r (n 0 s 0 v 0 l 0))" />
 
       <link rel='shortcut icon' href="/static/favicon.ico" type="image/x-icon" />
