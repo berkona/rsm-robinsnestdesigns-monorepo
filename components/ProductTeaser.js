@@ -14,7 +14,6 @@ const ProductTeaser = (props) => {
       }
     }
     const isOnSale = props.product.salePrice > 0 && IsWithinDateRange(Date.now(), parseDate(props.product.saleStart), parseDate(props.product.saleEnd))
-    console.log(typeof props.product.name);
     return (
       <ProductLink productId={props.product.id} category={props.product.category} subcategory={props.product.subcategory} title={props.product.name}>
         <a>
@@ -22,7 +21,7 @@ const ProductTeaser = (props) => {
             <div className="product-thumbnail">
               {
                 (props.product.thumbnail || props.product.image)
-                ? <img src={`http://www.robinsnestdesigns.com/ahpimages/${props.product.thumbnail || props.product.image}`}></img>
+                ? <img src={`https://www.robinsnestdesigns.com/ahpimages/${props.product.thumbnail || props.product.image}`}></img>
                 : <img src="/static/no-image.png"/>
               }
             </div>

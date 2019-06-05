@@ -3,7 +3,7 @@ import Link from 'next/link'
 import slugify from 'slugify'
 
 export const ProductLink = (props) => (
-  <Link href={`/product/${slugify('' + props.category)}/${slugify('' + props.subcategory)}/${props.productId}/${slugify('' + props.title)}`}>
+  <Link href={`/product/${props.productId}/${slugify('' + props.category)}/${slugify('' + props.subcategory)}/${slugify('' + props.title)}`}>
     {props.children}
   </Link>
 )
@@ -20,9 +20,9 @@ export const SearchLinkStr = (args) => {
   return '/search' + queryString
 }
 
-export const SearchLink = ({ categoryId, subcategoryId, searchPhrase, pageNo, onSaleOnly, newOnly, children }) => {
+export const SearchLink = ({ categoryId, subcategoryId, searchPhrase, pageNo, onSaleOnly, newOnly, sortOrder, children }) => {
   // TODO: can we alias this to a clean url?
-  const link = SearchLinkStr({ categoryId, subcategoryId, searchPhrase, pageNo, onSaleOnly, newOnly })
+  const link = SearchLinkStr({ categoryId, subcategoryId, searchPhrase, pageNo, onSaleOnly, newOnly, sortOrder })
   return (
     <Link href={link}>
       {children}

@@ -1,46 +1,88 @@
+import React from 'react'
+import Navbar from 'react-bootstrap/Navbar'
+import Nav from 'react-bootstrap/Nav'
+import Form from 'react-bootstrap/Form'
+import FormControl from 'react-bootstrap/FormControl'
+import Button from 'react-bootstrap/Button'
 import Link from 'next/link'
+import Router from 'next/router'
+import { SearchLinkStr } from './Links'
+import { withRouter } from 'next/router'
 
-const Navbar = () => (
-  <div id="globalNav" className="droplinetabs">
-    <ul>
-	  <li><Link href="/"><a ><span>Home</span></a></Link></li>
-	  <li><a href="/Newsletters/newsletter"><span>Newsletter</span></a>
-	    <ul>
-  	      <li><a href="/Newsletters/newsletter">Current</a></li>
- 	      <li><a href="/Newsletters/newsletter-signup">Subscribe</a></li>
-	    </ul>
-	  </li>
-	  <li><a href="/ShoppingInfo/how2order"><span>Shopping&nbsp;Info</span></a>
-	    <ul>
-		  <li><a href="/ShoppingInfo/how2order">How to Order</a></li>
-		  <li><a href="/ShoppingInfo/paymentOptions">Payment Options</a></li>
-		  <li><a href="/static/orderform.htm">Order Form (Online orders preferred)</a></li>
-		</ul>
-	  </li>
-	  <li><a href="/ShippingInfo/shipping"><span>Shipping&nbsp;Info</span></a>
-	    <ul>
-  	      <li><a href="/ShippingInfo/shipping">USA</a></li>
- 	      <li><a href="/ShippingInfo/shipping#canada">Canada</a></li>
-	      <li><a href="/ShippingInfo/shipping#international">International</a></li>
-	      <li><a href="/ShippingInfo/shipping#processing">Order Processing</a></li>
-	    </ul>
-	  </li>
-	  <li><a href="/Policies/Policies"><span>Policies</span></a>
-	    <ul>
-  	      <li><a href="/Policies/Policies">Return Policy</a></li>
-  	      <li><a href="/Policies/Policies#cancellation">Cancellation Policy</a></li>
- 	      <li><a href="/Policies/Policies#privacy">Privacy Policy</a></li>
-	      <li><a href="/Policies/Policies#security">Security Policy</a></li>
-	    </ul>
-	  </li>
-	  <li><a href="/About/About"><span>About Us</span></a>
-	    <ul>
-		  <li><a href="/About/About">History</a></li>
-		  <li><a href="/About/Contact">Contact</a></li>
-		</ul>
-	  </li>
-	</ul>
-  </div>
-)
+class MyNavbar extends React.Component {
 
-export default Navbar
+  constructor(props) {
+      super(props);
+
+      const {
+        searchPhrase,
+        categoryId,
+        subcategoryId,
+        onSaleOnly,
+        newOnly
+      } = props.router.query
+
+  		this.state = {
+        searchPhrase,
+        categoryId,
+        subcategoryId,
+        onSaleOnly,
+        newOnly,
+  		}
+
+      this.handleSearchChange = this.handleSearchChange.bind(this);
+      this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
+  }
+
+  handleSearchChange() {
+      this.setState({
+        searchPhrase: event.target.value
+      })
+  }
+
+  handleSearchSubmit() {
+    event.preventDefault()
+    Router.push(SearchLinkStr(this.state));
+  }
+
+  render () {
+    return (
+      <Navbar bg="light" expand="lg">
+        <Link href="/">
+          <Navbar.Brand>Robin's Nest Designs</Navbar.Brand>
+        </Link>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Form inline onSubmit={this.handleSearchSubmit}>
+            <FormControl type="text" placeholder="Search" className="mr-sm-2" value={this.state.searchPhrase} onChange={this.handleSearchChange} />
+            <Button variant="dark" type="submit">Search</Button>
+          </Form>
+          <Nav className="ml-auto">
+            <Nav.Item>
+              <Link href="/register" passHref>
+                <Nav.Link>Register</Nav.Link>
+              </Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Link href="/signin" passHref>
+                <Nav.Link>Sign In</Nav.Link>
+              </Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Link href="/wishlist" passHref>
+                <Nav.Link>My Wish List</Nav.Link>
+              </Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Link href="/cart" passHref>
+                <Nav.Link>My Cart</Nav.Link>
+              </Link>
+            </Nav.Item>
+          </Nav>
+        </Navbar.Collapse>
+      </Navbar>
+    )
+  }
+}
+
+export default withRouter(MyNavbar)

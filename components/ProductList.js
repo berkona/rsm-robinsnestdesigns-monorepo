@@ -18,14 +18,18 @@ query(
   $searchPhrase: String,
   $onSaleOnly: Boolean,
   $newOnly: Boolean,
-  $skip: Int!, $limit: Int!) {
+  $sort: ProductSortType,
+  $skip: Int!,
+  $limit: Int!) {
   allProducts(
     categoryId: $categoryId,
     subcategoryId: $subcategoryId,
     searchPhrase: $searchPhrase,
     onSaleOnly: $onSaleOnly,
     newOnly: $newOnly,
-    skip: $skip, limit: $limit) {
+    skip: $skip,
+    limit: $limit,
+    sort: $sort) {
     total,
     records {
       id
@@ -44,6 +48,7 @@ query(
 `
 
 const ProductList = (props) => {
+  const isTeaser = !!props.isTeaser
   const perPage = Number.parseInt(props.limit) || 50
   const page = Number.parseInt(props.page) || 1
   const variables = {
@@ -52,23 +57,24 @@ const ProductList = (props) => {
     searchPhrase: props.searchPhrase,
     onSaleOnly: !!props.onSaleOnly,
     newOnly: !!props.newOnly,
-    skip: (page -1) * perPage, limit: perPage
+    skip: (page -1) * perPage, limit: perPage,
+    sort: props.sortOrder,
   }
+
   const gridFromArr = (records) => {
-      const max = records.length;
-      const nPerRow = 4;
-      const rows = [];
-      for (let rowStart = 0; rowStart < max; rowStart += nPerRow) {
-        const cols = [];
-        for (let col = 0; col < nPerRow; col++) {
-          let item = records[rowStart + col];
-          if (item) {
-            cols.push(<Col style={{ maxWidth: '24.99%' }}><ProductTeaser key={item.id} product={item} /></Col>)
-          }
-        }
-        rows.push(<Row>{[...cols]}</Row>)
-      }
-      return <Container>{[...rows]}</Container>
+      return (
+        <Container>
+          <Row>
+            {
+              records.map((item) => (
+                <Col  xs={6} md={4} lg={3}>
+                  <ProductTeaser key={item.id} product={item} />
+                </Col>
+              ))
+            }
+          </Row>
+        </Container>
+      )
   }
 
   return (
@@ -87,6 +93,7 @@ const ProductList = (props) => {
                 onSaleOnly={props.onSaleOnly}
                 newOnly={props.newOnly}
                 pageNo={page}
+                sortOrder={props.sortOrder}
               >
                 <a>{text}</a>
               </SearchLink>
@@ -128,28 +135,17 @@ const ProductList = (props) => {
 
           return (
             <div id="results">
-              <hr align="CENTER" size="3" width="400" color="Black"></hr>
-              <div align="center">
-                <font face="Arial,Helvetica,sans-serif" size="2"><b>A total of <font color="Red">{data.allProducts.total}</font> records matched your search.</b></font>
-              </div>
-              <hr align="CENTER" size="3" width="400" color="Black"></hr>
-              <div align="CENTER">
-                {[...pageLinks]}
-              </div>
-              <table width="100%" cellSpacing="1">
-                <tbody>
-                  <tr>
-                      <td align="left"><b><u><font size="+1">Item Information</font></u></b></td>
-                      <td><div align="CENTER">Click on the Item Name for more detailed information.</div></td>
-                      <td align="right"><b><u><font size="+1">Purchase Options</font></u></b></td>
-                  </tr>
-                </tbody>
-              </table>
               {gridFromArr(data.allProducts.records)}
-              <hr align="CENTER" size="3" width="400" color="Black"></hr>
-              <div align="CENTER">
-                {[...pageLinks]}
-              </div>
+              {
+                !isTeaser
+                  ? <>
+                      <hr align="CENTER" size="3" width="400" color="Black"></hr>
+                      <div align="CENTER">
+                        {[...pageLinks]}
+                      </div>
+                    </>
+                  : makePageLink(1, 'See more...')
+              }
             </div>
           )
         }

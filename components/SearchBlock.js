@@ -9,7 +9,7 @@ import { SearchLinkStr } from './Links'
 import Select from 'react-select'
 import Toggle from 'react-toggle'
 
-const SEARCH_DELAY = 1000
+import Form from 'react-bootstrap/Form'
 
 const numberItems = gql `
 query {
@@ -45,7 +45,8 @@ class SearchBlock extends React.Component {
       categoryId,
       subcategoryId,
       onSaleOnly,
-      newOnly
+      newOnly,
+			sortOrder,
     } = props
 
 		this.state = {
@@ -54,19 +55,17 @@ class SearchBlock extends React.Component {
       subcategoryId,
       onSaleOnly,
       newOnly,
-			searchTimeout: null,
+			sortOrder,
 		}
 
 		this.componentDidUpdate = this.componentDidUpdate.bind(this);
-		this.handleSearchChange = this.handleSearchChange.bind(this);
-		this.handleSubmit = this.handleSubmit.bind(this);
 
 		const self = this
 		let handleCheckToggle = (event, stateField) => {
 			const v = event.target.checked
 			const dState = {}
 			dState[stateField] = v
-			self.setState(dState, () => self.handleSubmit(event))
+			self.setState(dState, () => Router.push(SearchLinkStr(self.state)))
 		}
 		self.handleOnSaleOnlyChange = (event) => handleCheckToggle(event, 'onSaleOnly')
 		self.handleNewOnlyChange = (event) => handleCheckToggle(event, 'newOnly')
@@ -107,76 +106,22 @@ class SearchBlock extends React.Component {
 		      newOnly,
 				})
 		}
-
-	}
-
-	handleSearchChange(event) {
-		const self = this
-		self.setState({
-			searchPhrase: event.target.value,
-		}, () => {
-			if (self.searchTimeout) {
-				clearTimeout(self.searchTimeout)
-			}
-			self.searchTimeout = setTimeout(() => Router.push(SearchLinkStr(self.state)), SEARCH_DELAY)
-		});
-	}
-
-	handleSubmit(event) {
-		event.preventDefault()
-		Router.push(SearchLinkStr(this.state))
 	}
 
 	render() {
     const self = this
-		return ( <div id = "search" >
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
-				<label > Search our 45692 item online catalog. < /label>
-	      <form style = {
+		return (
+			<Form>
+				<Form.Group>
+					<Form.Label>Special Offers</Form.Label>
+					<Form.Check type="checkbox" label="On Sale" checked={self.state.onSaleOnly} onChange={self.handleOnSaleOnlyChange}></Form.Check>
+					<Form.Check type="checkbox" label="Recently Added" checked={self.state.newOnly} onChange={self.handleNewOnlyChange}></Form.Check>
+				</Form.Group>
+				<Form.Group controlId="categoryId">
+					<Form.Label>Category</Form.Label>
 					{
-						width: '100%',
-						display: 'flex',
-	          flexDirection: 'column',
-					}
-				}
-				onSubmit = {this.handleSubmit} >
-					<input
-						style={{ width: '95%', fontSize: '20px' }}
-						type = "text"
-						value = {this.state.searchPhrase}
-						onChange = {this.handleSearchChange}
-					/>
-		      <button style = {{ width: '36px' }} type = "submit" >
-					   <img src = "/static/magnifying-glass.svg" height = "21" / >
-					</button>
-				</form>
-      </div>
-
-			<div style={{
-					height: '22px',
-					display: 'flex',
-					flexDirection: 'row',
-    			justifyContent: 'space-between',
-    			marginTop: '8px'
-			}}>
-				<div style={{ width: '286px'}}>
-				Category
-				</div>
-				<div style={{ width: '286px', marginLeft: '10px'}}>
-				Subcategory
-				</div>
-				<div style={{width: '70px', marginLeft: '10px'}}>
-				On Sale
-				</div>
-				<div style={{ width: '70px', marginLeft: '10px' }}>
-				New
-				</div>
-			</div>
-      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-        <div style={{ width: '286px'}}>
-          {
-            <Query query={findCategory}>
-              {({ loading, error, data}) => {
+						<Query query={findCategory}>
+							{({ loading, error, data}) => {
 								return <Select
 												options={data && data.allCategories && data.allCategories.map(c => { return { label: c.title, value: c.id } })}
 												isClearable={true}
@@ -193,13 +138,14 @@ class SearchBlock extends React.Component {
 												onChange={self.handleCategoryChange}
 											 />
 							}}
-            </Query>
-          }
-        </div>
-        <div style={{ width: '286px', marginLeft: '10px' }}>
-          {
-            self.state.categoryId ?
-					  <Query query={findSubcategory} variables={{ categoryId: self.state.categoryId }}>
+						</Query>
+					}
+				</Form.Group>
+				<Form.Group controlId="subcategoryId">
+					<Form.Label>Subcategory</Form.Label>
+					{
+						self.state.categoryId ?
+						<Query query={findSubcategory} variables={{ categoryId: self.state.categoryId }}>
 							{({ loading, error, data}) => {
 								return <Select
 												options={data && data.allSubcategories && data.allSubcategories.map(c => { return { label: c.title, value: c.id } })}
@@ -218,27 +164,15 @@ class SearchBlock extends React.Component {
 											 />
 							}}
 						</Query>
-            :
+						:
 						<Select options={[]}
 										isClearable={true}
 										isSearchable={true}
 										isLoading={false}
 										/>
-          }
-        </div>
-        <div style={{ width: '70px', marginLeft: '10px' }}>
-					<label style={{ marginTop: '6px' }}>
-						<Toggle checked={!!self.state.onSaleOnly} onChange={self.handleOnSaleOnlyChange} />
-					</label>
-        </div>
-        <div style={{ width: '70px', marginLeft: '10px' }}>
-					<label style={{ marginTop: '6px' }}>
-						<Toggle checked={!!self.state.newOnly} onChange={self.handleNewOnlyChange} />
-					</label>
-        </div>
-      </div>
-
-      </div>
+					}
+				</Form.Group>
+			</Form>
 		)
 	}
 }

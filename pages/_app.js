@@ -9,7 +9,6 @@ import withGA from "next-ga"
 
 NProgress.configure({
   showSpinner: false,
-  parent: '#content',
   trickleSpeed: 200,
 });
 

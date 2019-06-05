@@ -1,15 +1,17 @@
 import Head from 'next/head'
+import Container from 'react-bootstrap/Container'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
 
 import Header from './Header'
-import CategoryLinks from './CategoryLinks'
 import Navbar from './Navbar'
 import SiteInfo from './SiteInfo'
-import TopLinks from './TopLinks'
 
 const Layout = props => (
-  <div id="page_border">
+  <Container id="page_border">
     <Head>
       <title>Exclusive needlework charts and kits for cross stitch and needlepoint | Robin's Next Designs</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
       <meta name="Author" content="Robin S. Monroe" />
       <meta name="Description" content="Needlework designs, kits, fabric, floss and accessories for cross stitch, needlepoint and punchneedle" />
       <meta name="KeyWords" content="cross,stitch,needlepoint,quilting,punchneedle,patterns,charts,graphs,needles,DMC,Anchor,Mill,Hill,Pearl,perle,cotton,beads,floss,kits,linen,Aida,Lugana,evenweave,afghans,tabletop,placemats,napkins,bread,covers,cloths,Jubilee,Jobelan,Wichelt,Zweigart,Charles,Kreinik,metallic,threads,Marlitt,Lavender,Lace,Mirabilia,Butternut,Road,nora,Corbett,Marilyn,Imblum,Pooh,Disney,John,James,Piecemakers,tapestry,beading,baby,bibs,towels,bookmark,fabrics,leaflets,books,needlework,stitchery,needlearts,sewing,crafts,keepsakes,collectibles,heirloom,gifts,home,decor,furnishings,flowers,Christmas,ornaments,cats,dogs" />
@@ -32,24 +34,34 @@ const Layout = props => (
       <link href="/static/droplinetabs.css" rel="stylesheet" type="text/css" />
     </Head>
 
-    <div id="masthead">
+    <Row id="masthead" className="d-none d-sm-block">
       <Header />
-      <Navbar />
-    </div>
-    <div id="page_border_inner">
-      <div id="navBar">
-        <TopLinks />
-        <CategoryLinks />
-      </div>
-      <div id="content" className="codePage">
-        {props.children}
-      </div>
-      <SiteInfo />
-    </div>
+    </Row>
+
+    <Row noGutters={true}>
+      <Col>
+        <Navbar />
+      </Col>
+    </Row>
+
+    <Row>
+      <Col>
+        <div id="page_border_inner">
+          <Row>
+            {props.children}
+          </Row>
+          <Row>
+            <Col>
+              <SiteInfo />
+            </Col>
+          </Row>
+        </div>
+      </Col>
+    </Row>
 
     <script type="text/javascript" src="/static/jquery-1.3.2.min.js"></script>
     <script type="text/javascript" src="/static/droplinemenu.js"></script>
-  </div>
+  </Container>
 )
 
 export default Layout
