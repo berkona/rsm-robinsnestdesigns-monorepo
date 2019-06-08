@@ -8,8 +8,17 @@ import Link from 'next/link'
 import Router from 'next/router'
 import { SearchLinkStr } from './Links'
 import { withRouter } from 'next/router'
+import { parseCookies } from 'nookies'
+import { CurrentUserContext } from '../lib/auth'
 
 class MyNavbar extends React.Component {
+  static contextType = CurrentUserContext
+
+  static async getInitialProps(ctx) {
+    return {
+      cookies: parseCookies(ctx)
+    }
+  }
 
   constructor(props) {
       super(props);
@@ -46,6 +55,7 @@ class MyNavbar extends React.Component {
   }
 
   render () {
+    const isLoggedIn = this.context.isLoggedIn()
     return (
       <Navbar bg="light" expand="lg">
         <Link href="/">
@@ -58,21 +68,34 @@ class MyNavbar extends React.Component {
             <Button variant="dark" type="submit">Search</Button>
           </Form>
           <Nav className="ml-auto">
-            <Nav.Item>
-              <Link href="/register" passHref>
-                <Nav.Link>Register</Nav.Link>
-              </Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Link href="/signin" passHref>
-                <Nav.Link>Sign In</Nav.Link>
-              </Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Link href="/wishlist" passHref>
-                <Nav.Link>My Wish List</Nav.Link>
-              </Link>
-            </Nav.Item>
+            {isLoggedIn
+              ?
+              <>
+              <Nav.Item>
+                <Link href="/myaccount" passHref>
+                  <Nav.Link>My Account</Nav.Link>
+                </Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Link href="/wishlist" passHref>
+                  <Nav.Link>My Wish List</Nav.Link>
+                </Link>
+              </Nav.Item>
+              </>
+              :
+              <>
+                <Nav.Item>
+                  <Link href="/register" passHref>
+                    <Nav.Link>Register</Nav.Link>
+                  </Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Link href="/signin" passHref>
+                    <Nav.Link>Sign In</Nav.Link>
+                  </Link>
+                </Nav.Item>
+              </>
+            }
             <Nav.Item>
               <Link href="/cart" passHref>
                 <Nav.Link>My Cart</Nav.Link>

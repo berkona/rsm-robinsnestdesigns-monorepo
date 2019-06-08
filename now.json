@@ -1,10 +1,12 @@
 {
   "version": 2,
   "name": "robins-nest-designs",
-  "builds": [{ "src": "next.config.js", "use": "@now/next" }],
+  "builds": [
+    { "src": "next.config.js", "use": "@now/next" }
+  ],
   "routes": [
     { "src": "/_next/static/(?:[^/]+/pages|chunks|runtime)/.+", "headers": { "cache-control": "immutable" } },
-    { "src": "/product/(?<productId>[^/]+/[^/]+/[^/]+).*$", "dest": "/product?productId=$productId" },
+    { "src": "/product/(?<productId>[^/]+).*$", "dest": "/product?productId=$productId" },
     { "src": "/category/(?<categoryId>[^/]+).*$", "dest": "/category?categoryId=$categoryId" }
   ]
 }

@@ -1,16 +1,15 @@
 import React from 'react'
 import { Query } from 'react-apollo'
 import Loader from './Loader'
-import { SearchLink } from './Links'
 import gql from 'graphql-tag'
 import SEO from './SEO'
 import Breadcrumb from './Breadcrumb'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
-import Button from 'react-bootstrap/Button'
 import Link from 'next/link'
 import ProductList from './ProductList'
+import AddToCart from './AddToCart'
 
 export const pageQuery = gql`
 query($id: ID!) {
@@ -89,13 +88,9 @@ const ProductDetail = (props) => (
                 : <span></span>
               }
             </div>
-            <Form>
-              <Form.Group controlId="cartQuantity">
-                <Form.Label>Quantity</Form.Label>
-                <Form.Control value={1} type="number" minValue={1} />
-              </Form.Group>
-              <Button variant="dark" type="submit" block>Add to Cart</Button>
-            </Form>
+
+            <AddToCart productId={data.product.id} />
+
             <hr style={{ color: '#888' }} />
             <h2>Shipping</h2>
             <p>Ready to ship in 1-2 days</p>
@@ -112,10 +107,10 @@ const ProductDetail = (props) => (
         <Col>
           <div style={{ padding: '0px 24px' }}>
             <h1>Description</h1>
-            <p>{data.product.description}</p>
+            <p dangerouslySetInnerHTML={{__html: data.product.description }}></p>
             <hr style={{ color: '#888' }} />
             <h1>Related Items</h1>
-            <ProductList isTeaser={true} limit={8} categoryId={data.product.categoryId} subcategoryId={data.product.subcategoryId} />
+            <ProductList isTeaser={true} limit={8} categoryId={data.product.categoryId} subcategoryId={data.product.subcategoryId} sortOrder="random" />
           </div>
         </Col>
       </Row>

@@ -24,7 +24,7 @@ const SortWidget = (props) => (
       <Dropdown.Menu>
         {
           Object.keys(sortQueryMapping).map((sortKey) => (
-            <Dropdown.Item href={SearchLinkStr(Object.assign({}, props.router.query, { sortOrder: sortKey }))}>{sortQueryMapping[sortKey]}</Dropdown.Item>
+            <Dropdown.Item key={sortKey} href={SearchLinkStr(Object.assign({}, props.router.query, { sortOrder: sortKey }))}>{sortQueryMapping[sortKey]}</Dropdown.Item>
           ))
         }
       </Dropdown.Menu>

@@ -635,3 +635,30 @@ TR.even,
 .product-detail .product-price .small-price {
     text-decoration: line-through;
 }
+
+.nav-icon {
+    display: block;
+    text-align: center;
+    color: #666666;
+    float: none;
+    font-size: 20px;
+    min-width: 20px;
+    top: auto;
+    position: static;
+    margin: 0 auto 0;
+    width: auto;
+    overflow: visible;
+    text-indent: 0;
+    background: none;
+    height: 32px;
+    line-height: 32px;
+}
+
+.text-link {
+    display: block;
+    clear: left;
+    white-space: nowrap;
+    color: #595959;
+    font-size: 12px;
+    margin-top: -2px;
+}

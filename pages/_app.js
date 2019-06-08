@@ -6,6 +6,11 @@ import Layout from '../components/Layout'
 import NProgress from 'nprogress'
 import Router from 'next/router'
 import withGA from "next-ga"
+import Cookies from 'nookies'
+import { CurrentUserProvider } from '../lib/auth'
+
+const USER_TOKEN = 'USER_TOKEN'
+const USER_CART = 'CUSTOMER_ID'
 
 NProgress.configure({
   showSpinner: false,
@@ -22,14 +27,72 @@ Router.events.on('routeChangeComplete', () => NProgress.done())
 Router.events.on('routeChangeError', () => NProgress.done())
 
 class MyApp extends App {
+  static async getInitialProps({ ctx }) {
+    return {
+      cookies: Cookies.get(ctx)
+    }
+  }
+
+  constructor(props) {
+    super(props)
+    const { cookies } = this.props
+    this.state = {
+      currentUserToken: cookies && cookies[USER_TOKEN],
+      currentUserCartId: cookies && cookies[USER_CART],
+    }
+  }
+
+  componentDidMount() {
+    const { cookies } = this.props
+    this.setState({
+      currentUserToken: cookies && cookies[USER_TOKEN],
+      currentUserCartId: cookies && cookies[USER_CART],
+    })
+  }
+
   render () {
     const { Component, pageProps, apolloClient } = this.props
+    let token = this.state.currentUserToken
+    let cartId = this.state.currentUserCartId
+    const CurrentUser = {
+      login: (newToken) => {
+        Cookies.set(null, USER_TOKEN, newToken)
+        this.setState({
+          currentUserToken: newToken
+        })
+      },
+      isLoggedIn: () => {
+        return !!token
+      },
+      getToken: () => {
+        return token
+      },
+      logout: () => {
+        Cookies.delete(null, USER_TOKEN)
+        Cookies.delete(null, USER_CART)
+        this.setState({
+          currentUserToken: null,
+          currentUserCartId: null,
+        })
+      },
+      getCartId: () => {
+        return cartId
+      },
+      setCartId: (newCartId) => {
+        Cookies.set(null, USER_CART, newCartId)
+        this.setState({
+          currentUserCartId: newCartId,
+        })
+      },
+    }
     return (
       <Container>
         <ApolloProvider client={apolloClient}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
+          <CurrentUserProvider value={CurrentUser}>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </CurrentUserProvider>
         </ApolloProvider>
       </Container>
     )

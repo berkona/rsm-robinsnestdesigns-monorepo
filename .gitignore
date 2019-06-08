@@ -3,4 +3,4 @@
 .sonarlint/*
 */.sonarlint/*
 node_modules/*
-secrets.yml
+*secrets.yml

@@ -3,126 +3,325 @@ import Link from 'next/link'
 import { Query } from 'react-apollo'
 import Loader from '../components/Loader'
 import gql from 'graphql-tag'
-
+import Col from 'react-bootstrap/Col'
+import Row from 'react-bootstrap/Row'
 import PaymentOptions from '../components/PaymentOptions'
-import { ProductLink } from '../components/Links'
+import { PayPalButton } from "react-paypal-button-v2"
+import Form from 'react-bootstrap/Form'
+import Button from 'react-bootstrap/Button'
+import { CurrentUserContext } from '../lib/auth'
+import { Mutation } from 'react-apollo'
+import { FaTrash, FaSpinner } from 'react-icons/fa'
+import Router from 'next/router'
 
 const query = gql`
-  query {
-    cartItems @client {
-      product {
+  query($orderId: ID!) {
+    cart(orderId: $orderId) {
+      id
+      subtotal
+      items {
         id
-        sku
-        name
-        price
+        qty
+        product {
+          id
+          sku
+          name
+          price
+        }
       }
-      qty
     }
   }
 `
 
-const ProductPage = (props) => (
-  <Query query={query}>
-    {
-      ({ loading, error, data }) => {
-        if (loading) return <Loader />
-        if (error) return <div>Error fetching data: {error}</div>
-        if (!data.cartItems || data.cartItems.length == 0) {
-          return (
-            <div id="addToCart">
-              <h1>My Shopping Cart</h1>
-              <div class="msg" align="center"> <h3>Your Shopping Cart Is Empty</h3> </div>
-              <div align="center">
-                <Link href="/search">
-                  <button>Continue Shopping</button>
-                </Link>
-              </div>
-              <br></br>
-              <PaymentOptions />
-            </div>
-          )
-        } else {
-          const subtotal = data.cartItems.reduce((total, next) => total + next.product.price * next.qty).toFixed(2)
-
-          return (
-            <div id="addToCart">
-              <h1>My Shopping Cart</h1>
-              <table class="cartItems" width="100%" cellPadding="2" cellSpacing="0" style="border:#CCCCCC solid 1px;">
-                <tbody>
-                <tr class="header" bgcolor="#587E98">
-    <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Item ID </div></b></font></td>
-    <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Item Name </div></b></font></td>
-    <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Quantity </div></b></font></td>
-    <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Price </div></b></font></td>
-    <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Subtotal </div></b></font></td>
-    <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Delete </div></b></font></td>
-  </tr>
-
-                  {data.map(({product, qty}) => {
-                    return <tr key={product.id} class="odd" bgcolor="#E4EDF4">
-                      <td style="border-top:#CCCCCC solid 1px;">
-                        <div align="center">
-                          <Link href={`/product?productId=${product.id}`} as={`/product/${product.id}`}>
-                            <a>{product.sku}</a>
-                          </Link>
-                        </div>
-                      </td>
-                      <td style="border-top:#CCCCCC solid 1px;">
-                        <div align="center">
-                          <font size="-1">{product.name}</font>
-                        </div>
-                      </td>
-                      <td style="border-top:#CCCCCC solid 1px;">
-                        <div align="center">
-                          <input type="text" name="Quantity" value={qty} size="3" maxLength="6" />
-                        </div>
-                      </td>
-                      <td style="border-top:#CCCCCC solid 1px;"><div align="center">${product.price}</div></td>
-                      <td style="border-top:#CCCCCC solid 1px;"><div align="center">${product.price}</div></td>
-                      <td style="border-top:#CCCCCC solid 1px;">
-                        <div align="center">
-                          <form action="delete.cfm" method="post" style="margin-bottom: 0">
-
-                              <input type="hidden" name="History" value="test" />
-                              <input type="hidden" name="KeyWords" value="test" />
-
-                            <input type="hidden" name="ID" value="200115" />
-                            <input type="hidden" name="ItemID" value="SCBB012" />
-                            <input type="Hidden" name="ProductID" value="8711" />
-
-                                <input type="submit" value="Delete" />
-
-                          </form>
-                        </div>
-                      </td>
-                    </tr>
-                  })}
-  	<tr>
-          <td colspan="6" align="right" style="border-top:#CCCCCC solid 1px;"><strong>Running Subtotal:</strong></td>
-          <td style="border-top:#CCCCCC solid 1px;"><strong>${subtotal}</strong></td>
-      </tr></tbody></table>
-
-              <div align="center">
-                <table width="100%" cellpadding="0" cellspacing="0" style="border:#CCCCCC solid 1px; background-color: #587E98">
-                    <tbody><tr class="header" bgcolor="#587E98">
-
-                      // <form action="https://www.robinsnestdesigns.com/secure/customer_account.cfm" method="post" onsubmit="return checkCheckBox(this)"></form>
-                        <td align="right"><input type="hidden" name="CustomerID" value="29821189" />
-                        <input type="checkbox" value="0" name="agree" /> <font color="#FFFFFF">I agree to the <a href="http://www.robinsnestdesigns.com/ShippingInfo/shipping.cfm" style="color:#FFFFCC; text-decoration: underline;">shipping terms/order processing</a> and <a href="http://www.robinsnestdesigns.com/Policies/Policies.cfm" style="color:#FFFFCC; text-decoration: underline;">policies</a></font>
-                        <input type="submit" value="I Am Ready To Checkout Now" align="right" />
-                        </td>
-
-                    </tr>
-                </tbody></table>
-              </div>
-              <br></br>
-              <PaymentOptions />
-            </div>
-          )
+const deleteCartItem = gql`
+  mutation($cartItemId: ID!) {
+    removeFromCart(cartItemId: $cartItemId) {
+      id
+      subtotal
+      items {
+        id
+        qty
+        product {
+          id
+          sku
+          name
+          price
         }
       }
     }
-  </Query>
-)
+  }
+`
+
+const counties = "Alamance | Alexander | Alleghany | Anson | Ashe | Avery | Beaufort | Bertie | Bladen | Brunswick | Buncombe | Burke | Cabarrus | Caldwell | Camden | Carteret | Caswell | Catawba | Chatham | Cherokee | Chowan | Clay | Cleveland | Columbus | Craven | Cumberland | Currituck | Dare | Davidson | Davie | Duplin | Durham | Edgecombe | Forsyth | Franklin | Gaston | Gates | Graham | Granville | Greene | Guilford | Halifax | Harnett | Haywood | Henderson | Hertford | Hoke | Hyde | Iredell | Jackson | Johnston | Jones | Lee | Lenoir | Lincoln | McDowell | Macon | Madison | Martin | Mecklenburg | Mitchell | Montgomery | Moore | Nash | New Hanover | Northampton | Onslow | Orange | Pamlico | Pasquotank | Pender | Perquimans | Person | Pitt | Polk | Randolph | Richmond | Robeson | Rockingham | Rowan | Rutherford | Sampson | Scotland | Stanly | Stokes | Surry | Swain | Transylvania | Tyrrell | Union | Vance | Wake | Warren | Washington | Watauga | Wayne | Wilkes | Wilson | Yadkin | Yancey".split(' | ')
+
+const taxes = {
+  Durham: 7.5,
+}
+
+const isZipValid = (zip) => {
+  return zip && zip.length == 5
+}
+
+class ProductPage extends React.Component {
+  constructor(props) {
+      super(props)
+      this.state = {
+        shippingCost: '3.99',
+        taxIsValid: false,
+      }
+  }
+
+  render() {
+    return <CurrentUserContext.Consumer>
+      {currentUser => {
+        const cartId = currentUser.getCartId()
+        if (!cartId) {
+          return (
+            <Col>
+              <div id="addToCart" style={{ padding: '24px' }}>
+                <h1>My Shopping Cart</h1>
+                <div class="msg" align="center"> <h3>Your Shopping Cart Is Empty</h3> </div>
+                <div align="center">
+                  <Link href="/">
+                    <button>Continue Shopping</button>
+                  </Link>
+                </div>
+                <br></br>
+                <PaymentOptions />
+              </div>
+            </Col>
+          )
+        } else {
+          return (
+            <Col>
+            <div style={{padding: '24px'}}>
+            <Query query={query} variables={{ orderId: cartId }}>
+              {
+                ({ loading, error, data }) => {
+                  if (loading) return <Loader />
+                  if (error) return <div>Error fetching data: <span>{error.message}</span></div>
+                  if (!data.cart || data.cart.items.length == 0) {
+                    return (
+                      <div id="addToCart">
+                        <h1>My Shopping Cart</h1>
+                        <div class="msg" align="center"> <h3>Your Shopping Cart Is Empty</h3> </div>
+                        <div align="center">
+                          <Link href="/search">
+                            <button>Continue Shopping</button>
+                          </Link>
+                        </div>
+                        <br></br>
+                        <PaymentOptions />
+                      </div>
+                    )
+                  } else {
+                      const subtotal = data.cart.subtotal.toFixed(2)
+
+                      let shippingCost = (this.state.shippingZipIsValid && this.state.shippingCost) || '0.00'
+
+                      let tax =  this.state.taxIsValid && this.state.tax || '0.00'
+                      tax = (Number.parseFloat(shippingCost) + Number.parseFloat(subtotal)) * (Number.parseFloat(tax) / 100.0)
+                      tax = tax.toFixed(2)
+
+                      let total = Number.parseFloat(subtotal) + Number.parseFloat(shippingCost) + Number.parseFloat(tax)
+                      total = total.toFixed(2)
+
+                      return (
+
+                        <div id="addToCart">
+                        <Row>
+                        <Col md={8}>
+                          <h1>My Shopping Cart</h1>
+                          <table className="cartItems" width="100%" cellPadding="2" cellSpacing="0" style={{borderTop: "#CCCCCC solid 1px"}}>
+                            <tbody>
+                            <tr className="header" bgcolor="#587E98">
+                <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Item ID </div></b></font></td>
+                <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Item Name </div></b></font></td>
+                <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Quantity </div></b></font></td>
+                <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Price </div></b></font></td>
+                <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Subtotal </div></b></font></td>
+                <td  bgcolor="#587E98"></td>
+                <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Delete </div></b></font></td>
+              </tr>
+
+                              {data.cart.items.map(({ id, product, qty }, idx) => {
+                                return <tr key={idx} className="odd" bgcolor="#E4EDF4">
+                                  <td style={{borderTop: "#CCCCCC solid 1px"}}>
+                                    <div align="center">
+                                      <Link href={`/product?productId=${product.id}`} as={`/product/${product.id}`}>
+                                        <a>{product.sku}</a>
+                                      </Link>
+                                    </div>
+                                  </td>
+                                  <td style={{borderTop: "#CCCCCC solid 1px"}}>
+                                    <div align="left">
+                                      <font size="-1">{product.name}</font>
+                                    </div>
+                                  </td>
+                                  <td style={{borderTop: "#CCCCCC solid 1px"}}>
+                                    <div align="center">
+                                      <input type="text" name="Quantity" value={qty} size="3" maxLength="6" />
+                                    </div>
+                                  </td>
+                                  <td style={{borderTop: "#CCCCCC solid 1px"}}><div align="right">${product.price.toFixed(2)}</div></td>
+                                  <td style={{borderTop: "#CCCCCC solid 1px"}}><div align="right">${product.price.toFixed(2)}</div></td>
+                                  <td style={{borderTop: "#CCCCCC solid 1px"}}></td>
+                                  <td style={{borderTop: "#CCCCCC solid 1px"}}>
+                                    <div align="center">
+                                      <Mutation mutation={deleteCartItem} update={(cache, { data }) => {
+                                        cache.writeQuery({
+                                          query: query,
+                                          variables: { orderId: cartId },
+                                          data: { cart: data.removeFromCart }
+                                        })
+                                      }}>
+                                        {(deleteCartItem, { data, error, loading }) => {
+                                          if (error) return <p>Error deleting cart item: {error.toString()}</p>
+                                          return <Form
+                                            style={{ marginBottom: '0' }}
+                                            onSubmit={() => {
+                                              event.preventDefault()
+                                              deleteCartItem({ variables: { cartItemId: id } })
+                                            }}>
+
+                                            <Button type="submit" variant="danger" disabled={loading}>
+                                              {loading && <><FaSpinner style={{ marginRight: '5px' }} /> Working...</> }
+                                              {!loading && <><FaTrash /> Remove</>}
+                                            </Button>
+
+                                          </Form>
+                                        }}
+                                      </Mutation>
+                                    </div>
+                                  </td>
+                                </tr>
+                              })}
+              	 <tr>
+                      <td colSpan="4" align="right" style={{borderTop: "#CCCCCC solid 1px"}}><strong>Subtotal:</strong></td>
+                      <td style={{borderTop: "#CCCCCC solid 1px"}} align="right"><strong>${subtotal}</strong></td>
+                        <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
+                        <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
+                  </tr>
+                  <tr>
+                     <td colSpan="4" align="right" style={{borderTop: "#CCCCCC solid 1px"}}><strong>Shipping:</strong></td>
+                     <td style={{borderTop: "#CCCCCC solid 1px"}} align="right"><strong>${shippingCost}</strong></td>
+                       <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
+                       <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
+                   </tr>
+                   <tr>
+                      <td colSpan="4" align="right" style={{borderTop: "#CCCCCC solid 1px"}}><strong>Tax:</strong></td>
+                      <td style={{borderTop: "#CCCCCC solid 1px"}} align="right"><strong>${tax}</strong></td>
+                        <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
+                        <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
+                    </tr>
+                    <tr>
+                       <td colSpan="4" align="right" style={{borderTop: "#CCCCCC solid 1px"}}><strong>Total:</strong></td>
+                       <td style={{borderTop: "#CCCCCC solid 1px"}} align="right"><strong>${total}</strong></td>
+                         <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
+                         <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
+                     </tr>
+                  </tbody></table>
+                  </Col>
+                  <Col md={4}>
+                          <div align="left" style={{ padding: '16px' }}>
+                            <h1>Checkout</h1>
+                            <div align="left">
+                            <Form>
+                              <Form.Group controlId="shippingZip">
+                                <Form.Label>Enter your zipcode to start</Form.Label>
+                                <Form.Control type="number" value={this.state.shippingZip} onChange={() => this.setState({ shippingZip: event.target.value, shippingZipIsValid: isZipValid(event.target.value) })}/>
+                              </Form.Group>
+                              {this.state.shippingZipIsValid
+                                && (this.state.shippingZip.startsWith('27') || this.state.shippingZip.startsWith('28'))
+                                &&
+                                <Form.Group controlId="shippingZipCounty">
+                                  <Form.Label>
+                                    Enter the county you reside in
+                                  </Form.Label>
+                                  <Form.Control as="select" onChange={() => this.setState({ taxIsValid: true, tax: taxes[event.target.value] || 0 })}>
+                                    {[...counties.map((c) => <option>{c}</option>)]}
+                                  </Form.Control>
+                                </Form.Group>}
+                              {this.state.shippingZip
+                                &&
+                                this.state.shippingZipIsValid
+                                &&
+                                <Form.Group>
+                                <fieldset>
+                                  <Form.Check
+                                    type="radio"
+                                    name="shippingMethod"
+                                    label="First Class Mail: $3.99"
+                                    checked={this.state.shippingCost == '3.99'}
+                                    onClick={() => this.setState({ shippingCost: '3.99'})}
+                                  />
+                                  <Form.Check
+                                    type="radio"
+                                    name="shippingMethod"
+                                    label="Priority Mail: $7.99"
+                                    checked={this.state.shippingCost == '7.99'}
+                                    onClick={() => this.setState({ shippingCost: '7.99' })}
+                                  />
+                                </fieldset>
+                              </Form.Group>
+                              }
+                              {this.state.shippingZip
+                                &&
+                                this.state.shippingZipIsValid
+                                &&
+                                <Form.Group>
+                                <p>By placing an order you agree to the <Link href="/ShippingInfo/shipping">
+                                <a target="_blank">
+                                shipping terms/order processing</a>
+                                </Link> and
+                                <Link href="/Policies/Policies">
+                                  <a style={{ paddingLeft: '5px' }} target="_blank">
+                                  policies
+                                  </a>
+                                  </Link>
+                                  </p>
+                                  <Form.Check
+                                    name="shippingMethod"
+                                    label="I agree"
+                                    checked={this.state.agreeToPolicies}
+                                    onClick={() => this.setState({ agreeToPolicies: event.target.checked})}
+                                  >
+                                  </Form.Check>
+                                </Form.Group>
+                              }
+                            </Form>
+                            {this.state.shippingZipIsValid && this.state.agreeToPolicies && <PayPalButton
+                                amount={total}
+                                onSuccess={(details, data) => {
+                                  alert("Transaction completed by " + details.payer.name.given_name);
+
+                                  // OPTIONAL: Call your server to save the transaction
+                                  return fetch("/paypal-transaction-complete", {
+                                    method: "post",
+                                    body: JSON.stringify({
+                                      orderID: data.orderID
+                                    })
+                                  });
+                                }}
+                                />}
+                          </div>
+                          </div>
+                          </Col>
+                          </Row>
+                        </div>
+
+                      )
+                    }
+                  }
+                }
+              </Query>
+              </div>
+              </Col>
+            )
+        }
+      }}
+    </CurrentUserContext.Consumer>
+  }
+}
 
 export default ProductPage

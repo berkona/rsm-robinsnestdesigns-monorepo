@@ -4,7 +4,8 @@ import Loader from 'react-loaders'
 export default (props) => (
   <div style={{
     display: 'flex',
-    marginTop: '200px',
+    marginTop: '100px',
+    marginBottom: '100px',
     justifyContent: 'center',
     alignItems: 'center',
     height: '100%', }
