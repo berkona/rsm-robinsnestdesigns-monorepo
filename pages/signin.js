@@ -6,6 +6,7 @@ import gql from 'graphql-tag'
 import { Mutation } from 'react-apollo'
 import Router from 'next/router'
 import { CurrentUserContext } from '../lib/auth'
+import { FaSpinner } from 'react-icons/fa'
 
 const SIGNIN = gql`
 mutation Signin($email: String!, $password: String!) {
