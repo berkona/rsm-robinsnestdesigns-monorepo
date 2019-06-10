@@ -14,8 +14,9 @@ import AddToCart from './AddToCart'
 export const pageQuery = gql`
 query($id: ID!) {
   product(productId: $id) {
-    id,
+    id
     name
+    qtyInStock
     category
     categoryId
     subcategory
@@ -50,6 +51,7 @@ const ProductDetail = (props) => (
       }
     }
     const isOnSale = data.product.salePrice > 0 && IsWithinDateRange(Date.now(), parseDate(data.product.saleStart), parseDate(data.product.saleEnd))
+    const shippingTime = data.product.qtyInStock > 0 ? 'Ships in 1-2 business days' : 'Order by Tuesday at 12 PM EST'
     return (
       <div className="product-detail">
       <SEO
@@ -93,7 +95,7 @@ const ProductDetail = (props) => (
 
             <hr style={{ color: '#888' }} />
             <h2>Shipping</h2>
-            <p>Ready to ship in 1-2 days</p>
+            <p>{shippingTime}</p>
             <p><Link href="/ShippingInfo/shipping"><a>See shipping policy</a></Link></p>
 
             <hr style={{ color: '#888' }} />

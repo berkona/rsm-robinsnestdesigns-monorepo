@@ -7,6 +7,7 @@
   "routes": [
     { "src": "/_next/static/(?:[^/]+/pages|chunks|runtime)/.+", "headers": { "cache-control": "immutable" } },
     { "src": "/product/(?<productId>[^/]+).*$", "dest": "/product?productId=$productId" },
-    { "src": "/category/(?<categoryId>[^/]+).*$", "dest": "/category?categoryId=$categoryId" }
+    { "src": "/category/(?<categoryId>[^/]+).*$", "dest": "/category?categoryId=$categoryId" },
+    { "src": "/googlea7696e4bbcfecd2f.html", "dest": "/static/googlea7696e4bbcfecd2f.html" }
   ]
 }

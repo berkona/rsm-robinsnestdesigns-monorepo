@@ -4,8 +4,6 @@ import Button from 'react-bootstrap/Button'
 import Collapse from 'react-bootstrap/Collapse'
 import gql from 'graphql-tag'
 import { Mutation } from 'react-apollo'
-import cookies from 'nookies'
-import Loader from './Loader'
 import Router from 'next/router'
 import {FaSpinner} from 'react-icons/fa'
 import { CurrentUserContext } from '../lib/auth'
@@ -53,7 +51,7 @@ class AddToCart extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      quanityToAdd: 1
+      quanityToAdd: '1'
     }
     this.onChange = this.onChange.bind(this)
   }
@@ -65,7 +63,6 @@ class AddToCart extends React.Component {
   }
 
   render() {
-    const c = cookies.get()
     return (
       <CurrentUserContext.Consumer>
       { currentUser => {
@@ -73,11 +70,12 @@ class AddToCart extends React.Component {
           mutation={ADD_TO_CART}
           variables={{
             productId: this.props.productId,
-            orderId: c.CUSTOMER_ID,
-            qty: this.state.quanityToAdd
+            orderId: currentUser.getCartId(),
+            qty: Number.parseInt(this.state.quanityToAdd),
           }}
           onCompleted={(data) => {
             if (!currentUser.getCartId() && data && data.addToCart && data.addToCart.id) {
+              console.log('setting cartId to ', data.addToCart.id)
               currentUser.setCartId(data.addToCart.id)
             }
           }}

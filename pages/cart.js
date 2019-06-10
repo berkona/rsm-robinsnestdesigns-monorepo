@@ -9,6 +9,7 @@ import PaymentOptions from '../components/PaymentOptions'
 import { PayPalButton } from "react-paypal-button-v2"
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
+import Collapse from 'react-bootstrap/Collapse'
 import { CurrentUserContext } from '../lib/auth'
 import { Mutation } from 'react-apollo'
 import { FaTrash, FaSpinner } from 'react-icons/fa'
@@ -117,7 +118,7 @@ class ProductPage extends React.Component {
                   } else {
                       const subtotal = data.cart.subtotal.toFixed(2)
 
-                      let shippingCost = (this.state.shippingZipIsValid && this.state.shippingCost) || '0.00'
+                      let shippingCost = subtotal > 75 ? '0.00' : ((this.state.shippingZipIsValid && this.state.shippingCost) || '0.00')
 
                       let tax =  this.state.taxIsValid && this.state.tax || '0.00'
                       tax = (Number.parseFloat(shippingCost) + Number.parseFloat(subtotal)) * (Number.parseFloat(tax) / 100.0)
@@ -226,14 +227,12 @@ class ProductPage extends React.Component {
                           <div align="left" style={{ padding: '16px' }}>
                             <h1>Checkout</h1>
                             <div align="left">
-                            <Form>
+                            <Form onSubmit={() => { event.preventDefault() }}>
                               <Form.Group controlId="shippingZip">
-                                <Form.Label>Enter your zipcode to start</Form.Label>
+                                <Form.Label>Enter your zipcode</Form.Label>
                                 <Form.Control type="number" value={this.state.shippingZip} onChange={() => this.setState({ shippingZip: event.target.value, shippingZipIsValid: isZipValid(event.target.value) })}/>
                               </Form.Group>
-                              {this.state.shippingZipIsValid
-                                && (this.state.shippingZip.startsWith('27') || this.state.shippingZip.startsWith('28'))
-                                &&
+                              <Collapse in={this.state.shippingZipIsValid && (this.state.shippingZip.startsWith('27') || this.state.shippingZip.startsWith('28'))}>
                                 <Form.Group controlId="shippingZipCounty">
                                   <Form.Label>
                                     Enter the county you reside in
@@ -241,14 +240,12 @@ class ProductPage extends React.Component {
                                   <Form.Control as="select" onChange={() => this.setState({ taxIsValid: true, tax: taxes[event.target.value] || 0 })}>
                                     {[...counties.map((c) => <option>{c}</option>)]}
                                   </Form.Control>
-                                </Form.Group>}
-                              {this.state.shippingZip
-                                &&
-                                this.state.shippingZipIsValid
-                                &&
-                                <Form.Group>
+                                </Form.Group>
+                              </Collapse>
+                              <Form.Group>
                                 <fieldset>
-                                  <Form.Check
+                                  {subtotal < 75 ? <>
+                                    <Form.Check
                                     type="radio"
                                     name="shippingMethod"
                                     label="First Class Mail: $3.99"
@@ -262,33 +259,59 @@ class ProductPage extends React.Component {
                                     checked={this.state.shippingCost == '7.99'}
                                     onClick={() => this.setState({ shippingCost: '7.99' })}
                                   />
+                                  <Form.Check
+                                      type="radio"
+                                      name="shippingMethod"
+                                      label="Free Shipping Over $75"
+                                      checked={false}
+                                      disabled={true}
+                                      />
+                                  </>
+                                  : <>
+                                  <Form.Check
+                                  type="radio"
+                                  name="shippingMethod"
+                                  label="First Class Mail: $3.99"
+                                  checked={false}
+                                  disabled={true}
+                                />
+                                <Form.Check
+                                  type="radio"
+                                  name="shippingMethod"
+                                  label="Priority Mail: $7.99"
+                                  checked={false}
+                                  disabled={true}
+                                />
+                                  <Form.Check
+                                      type="radio"
+                                      name="shippingMethod"
+                                      label="Free Shipping Over $75"
+                                      checked={true}
+                                      disabled={true}
+                                      /></>
+                                    }
+
                                 </fieldset>
                               </Form.Group>
-                              }
-                              {this.state.shippingZip
-                                &&
-                                this.state.shippingZipIsValid
-                                &&
-                                <Form.Group>
-                                <p>By placing an order you agree to the <Link href="/ShippingInfo/shipping">
-                                <a target="_blank">
-                                shipping terms/order processing</a>
-                                </Link> and
-                                <Link href="/Policies/Policies">
-                                  <a style={{ paddingLeft: '5px' }} target="_blank">
-                                  policies
-                                  </a>
-                                  </Link>
-                                  </p>
-                                  <Form.Check
-                                    name="shippingMethod"
-                                    label="I agree"
-                                    checked={this.state.agreeToPolicies}
-                                    onClick={() => this.setState({ agreeToPolicies: event.target.checked})}
-                                  >
-                                  </Form.Check>
-                                </Form.Group>
-                              }
+                              <Form.Group>
+                              <p>By placing an order you agree to the <Link href="/ShippingInfo/shipping">
+                              <a target="_blank">
+                              shipping terms/order processing</a>
+                              </Link> and
+                              <Link href="/Policies/Policies">
+                                <a style={{ paddingLeft: '5px' }} target="_blank">
+                                policies
+                                </a>
+                                </Link>
+                                </p>
+                                <Form.Check
+                                  name="shippingMethod"
+                                  label="I agree"
+                                  checked={this.state.agreeToPolicies}
+                                  onClick={() => this.setState({ agreeToPolicies: event.target.checked})}
+                                >
+                                </Form.Check>
+                              </Form.Group>
                             </Form>
                             {this.state.shippingZipIsValid && this.state.agreeToPolicies && <PayPalButton
                                 amount={total}

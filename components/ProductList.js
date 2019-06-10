@@ -2,11 +2,9 @@ import React from "react"
 import { Query } from 'react-apollo'
 
 import gql from 'graphql-tag'
-
 import ProductTeaser from './ProductTeaser'
 import Loader from './Loader'
 import { SearchLink } from './Links'
-
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'

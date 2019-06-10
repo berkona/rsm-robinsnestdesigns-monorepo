@@ -10,7 +10,7 @@ import Cookies from 'nookies'
 import { CurrentUserProvider } from '../lib/auth'
 
 const USER_TOKEN = 'USER_TOKEN'
-const USER_CART = 'CUSTOMER_ID'
+const USER_CART = 'CUSTOMERID'
 
 NProgress.configure({
   showSpinner: false,
@@ -56,7 +56,10 @@ class MyApp extends App {
     let cartId = this.state.currentUserCartId
     const CurrentUser = {
       login: (newToken) => {
-        Cookies.set(null, USER_TOKEN, newToken)
+        Cookies.set(null, USER_TOKEN, newToken, {
+          maxAge:  30 * 24 * 60 * 60,
+          path: '/',
+        })
         this.setState({
           currentUserToken: newToken
         })
@@ -68,8 +71,8 @@ class MyApp extends App {
         return token
       },
       logout: () => {
-        Cookies.delete(null, USER_TOKEN)
-        Cookies.delete(null, USER_CART)
+        Cookies.destroy(null, USER_TOKEN)
+        Cookies.destroy(null, USER_CART)
         this.setState({
           currentUserToken: null,
           currentUserCartId: null,
@@ -79,7 +82,10 @@ class MyApp extends App {
         return cartId
       },
       setCartId: (newCartId) => {
-        Cookies.set(null, USER_CART, newCartId)
+        Cookies.set(null, USER_CART, newCartId, {
+          maxAge:  30 * 24 * 60 * 60,
+          path: '/',
+        })
         this.setState({
           currentUserCartId: newCartId,
         })
