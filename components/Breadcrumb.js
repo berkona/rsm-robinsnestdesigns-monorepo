@@ -40,7 +40,7 @@ const MyBreadcrumb = (props) => {
     return (
       <Breadcrumb>
         {
-          MakeBreadcrumbItem(SearchLinkStr({ onSaleOnly, newOnly }), 'All categories', !categoryId && !subcategoryId && !searchPhrase)
+          MakeBreadcrumbItem('/', 'All categories', !categoryId && !subcategoryId && !searchPhrase)
         }
         {
           categoryId

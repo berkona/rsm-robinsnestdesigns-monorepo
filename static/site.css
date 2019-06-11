@@ -183,7 +183,7 @@ p {
 }
 
 #homeContent {
-    margin-right: 30px;
+    /* margin-right: 30px; */
 }
 
 #homeContent h2 {
@@ -350,7 +350,7 @@ nav.navbar {
 
 /************** #categories styles **************/
 #categories {
-    padding: 5px 10px 5px 10px;
+    /* padding: 5px 10px 5px 10px; */
     margin-bottom: 10px;
     border-bottom: 1px solid #cccccc;
     color: #006699;
@@ -584,6 +584,8 @@ TR.even,
 .product-teaser-price {
     font-size: 16px;
     color: #222;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .product-teaser-price .on-sale {

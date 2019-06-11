@@ -71,8 +71,12 @@ class MyApp extends App {
         return token
       },
       logout: () => {
-        Cookies.destroy(null, USER_TOKEN)
-        Cookies.destroy(null, USER_CART)
+        Cookies.destroy(null, USER_TOKEN, {
+          path: '/',
+        })
+        Cookies.destroy(null, USER_CART, {
+          path: '/',
+        })
         this.setState({
           currentUserToken: null,
           currentUserCartId: null,
@@ -88,6 +92,14 @@ class MyApp extends App {
         })
         this.setState({
           currentUserCartId: newCartId,
+        })
+      },
+      deleteCartId: () => {
+        Cookies.destroy(null, USER_CART, {
+          path: '/',
+        })
+        this.setState({
+          currentUserCartId: null,
         })
       },
     }

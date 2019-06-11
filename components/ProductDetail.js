@@ -69,7 +69,7 @@ const ProductDetail = (props) => (
             <div className="product-large-image">
               {
                 (data.product.hyperlinkedImage || data.product.thumbnail || data.product.image)
-                ? <img src={data.product.hyperlinkedImage || `https://www.robinsnestdesigns.com/ahpimages/${data.product.thumbnail || data.product.image}`}></img>
+                ? <img src={data.product.hyperlinkedImage || `https://www.robinsnestdesigns.com/ahpimages/${data.product.image || data.product.thumbnail}`}></img>
                 : <img src="/static/no-image.png"/>
               }
             </div>

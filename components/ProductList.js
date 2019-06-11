@@ -138,7 +138,7 @@ const ProductList = (props) => {
                         {[...pageLinks]}
                       </div>
                     </>
-                  : makePageLink(1, 'See more...')
+                  : <div align="CENTER">{makePageLink(1, 'See more...')}</div>
               }
             </div>
           )

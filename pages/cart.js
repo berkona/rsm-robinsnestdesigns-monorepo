@@ -14,12 +14,17 @@ import { CurrentUserContext } from '../lib/auth'
 import { Mutation } from 'react-apollo'
 import { FaTrash, FaSpinner } from 'react-icons/fa'
 import Router from 'next/router'
+import fetch from 'isomorphic-unfetch'
 
 const query = gql`
-  query($orderId: ID!) {
-    cart(orderId: $orderId) {
+  query($orderId: ID!, $shipping: Float, $zipcode: Int, $county: String) {
+    cart(orderId: $orderId, shipping: $shipping, zipcode: $zipcode, county: $county) {
       id
+      placed
       subtotal
+      shipping
+      tax
+      total
       items {
         id
         qty
@@ -28,10 +33,19 @@ const query = gql`
           sku
           name
           price
+          description
         }
       }
     }
   }
+`
+
+const placeCartOrder = gql`
+mutation($orderId: ID!, $paypalOrderId: ID!, $shipping: Float!, $zipcode: Int!, $county: String) {
+  placeOrder(orderId: $orderId, paypalOrderId: $paypalOrderId, shipping: $shipping, zipcode: $zipcode, county: $county) {
+    id
+  }
+}
 `
 
 const deleteCartItem = gql`
@@ -47,6 +61,7 @@ const deleteCartItem = gql`
           sku
           name
           price
+          description
         }
       }
     }
@@ -61,6 +76,13 @@ const taxes = {
 
 const isZipValid = (zip) => {
   return zip && zip.length == 5
+}
+
+const makeAmount = (value) => {
+  return {
+    currency_code: 'USD',
+    value,
+  }
 }
 
 class ProductPage extends React.Component {
@@ -81,7 +103,7 @@ class ProductPage extends React.Component {
             <Col>
               <div id="addToCart" style={{ padding: '24px' }}>
                 <h1>My Shopping Cart</h1>
-                <div class="msg" align="center"> <h3>Your Shopping Cart Is Empty</h3> </div>
+                <div className="msg" align="center"> <h3>Your Shopping Cart Is Empty</h3> </div>
                 <div align="center">
                   <Link href="/">
                     <button>Continue Shopping</button>
@@ -96,18 +118,29 @@ class ProductPage extends React.Component {
           return (
             <Col>
             <div style={{padding: '24px'}}>
-            <Query query={query} variables={{ orderId: cartId }}>
+            <Query query={query} variables={{
+              orderId: cartId,
+              shipping: Number.parseFloat(this.state.shippingCost || '3.99'),
+              zipcode: Number.parseInt(this.state.shippingZipIsValid && this.state.shippingZip),
+              county: this.state.county,
+            }}
+            fetchPolicy="cache-and-network"
+            >
               {
                 ({ loading, error, data }) => {
-                  if (loading) return <Loader />
                   if (error) return <div>Error fetching data: <span>{error.message}</span></div>
-                  if (!data.cart || data.cart.items.length == 0) {
+                  const cart = data.cart;
+                  if (cart && cart.placed) {
+                    currentUser.deleteCartId()
+                    return <p>Order already placed</p>
+                  }
+                  if (!cart || cart.items.length == 0) {
                     return (
                       <div id="addToCart">
                         <h1>My Shopping Cart</h1>
                         <div class="msg" align="center"> <h3>Your Shopping Cart Is Empty</h3> </div>
                         <div align="center">
-                          <Link href="/search">
+                          <Link href="/">
                             <button>Continue Shopping</button>
                           </Link>
                         </div>
@@ -116,16 +149,10 @@ class ProductPage extends React.Component {
                       </div>
                     )
                   } else {
-                      const subtotal = data.cart.subtotal.toFixed(2)
-
-                      let shippingCost = subtotal > 75 ? '0.00' : ((this.state.shippingZipIsValid && this.state.shippingCost) || '0.00')
-
-                      let tax =  this.state.taxIsValid && this.state.tax || '0.00'
-                      tax = (Number.parseFloat(shippingCost) + Number.parseFloat(subtotal)) * (Number.parseFloat(tax) / 100.0)
-                      tax = tax.toFixed(2)
-
-                      let total = Number.parseFloat(subtotal) + Number.parseFloat(shippingCost) + Number.parseFloat(tax)
-                      total = total.toFixed(2)
+                      let subtotal = cart.subtotal.toFixed(2)
+                      let shippingCost = cart.shipping.toFixed(2)
+                      let tax =  cart.tax.toFixed(2)
+                      let total = cart.total.toFixed(2)
 
                       return (
 
@@ -145,7 +172,7 @@ class ProductPage extends React.Component {
                 <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Delete </div></b></font></td>
               </tr>
 
-                              {data.cart.items.map(({ id, product, qty }, idx) => {
+                              {cart.items.map(({ id, product, qty }, idx) => {
                                 return <tr key={idx} className="odd" bgcolor="#E4EDF4">
                                   <td style={{borderTop: "#CCCCCC solid 1px"}}>
                                     <div align="center">
@@ -237,8 +264,8 @@ class ProductPage extends React.Component {
                                   <Form.Label>
                                     Enter the county you reside in
                                   </Form.Label>
-                                  <Form.Control as="select" onChange={() => this.setState({ taxIsValid: true, tax: taxes[event.target.value] || 0 })}>
-                                    {[...counties.map((c) => <option>{c}</option>)]}
+                                  <Form.Control as="select" onChange={() => this.setState({ taxIsValid: true, tax: taxes[event.target.value] || 0, county: event.target.value })}>
+                                    {[...counties.map((c) => <option selected={this.state.county == c}>{c}</option>)]}
                                   </Form.Control>
                                 </Form.Group>
                               </Collapse>
@@ -313,20 +340,64 @@ class ProductPage extends React.Component {
                                 </Form.Check>
                               </Form.Group>
                             </Form>
-                            {this.state.shippingZipIsValid && this.state.agreeToPolicies && <PayPalButton
-                                amount={total}
-                                onSuccess={(details, data) => {
-                                  alert("Transaction completed by " + details.payer.name.given_name);
-
-                                  // OPTIONAL: Call your server to save the transaction
-                                  return fetch("/paypal-transaction-complete", {
-                                    method: "post",
-                                    body: JSON.stringify({
-                                      orderID: data.orderID
-                                    })
-                                  });
-                                }}
-                                />}
+                            {this.state.shippingZipIsValid && this.state.agreeToPolicies &&
+                              <Mutation mutation={placeCartOrder} variables={{ orderId: cartId, shipping: Number.parseFloat(this.state.shippingCost), zipcode: Number.parseInt(this.state.shippingZip), county: this.state.county }}>
+                                {(mutationFn, { loading, error, data }) =>
+                                  error
+                                  ? <p>Network error: {error.toString()}</p>
+                                  : !data
+                                    ? <PayPalButton
+                                       options={{ clientId: 'AfRXnOb4Weq93kfQLyPKfaW3e8bYvRbkDBoeTZwCPLcxdottjyLo5t00XxZteN6Up6bmYIKn-GRSUMg2' }}
+                                       amount={total}
+                                       createOrder={(data, actions) => {
+                                         return actions.order.create({
+                                           purchase_units: [{
+                                             amount: {
+                                               currency: 'USD',
+                                               value: total,
+                                               breakdown: {
+                                                 item_total: makeAmount(subtotal),
+                                                 shipping: makeAmount(shippingCost),
+                                                 tax_total: makeAmount(tax),
+                                               }
+                                             },
+                                             description: 'Your order with Robin\'s Nest Designs',
+                                             invoice_id: cartId,
+                                             soft_descriptor: 'RobinsNestDesigns',
+                                             items: cart.items.map(({ product, qty }) => {
+                                               return {
+                                                 sku: product.sku,
+                                                 name: product.name,
+                                                 unit_amount: makeAmount(product.price),
+                                                 quantity: qty,
+                                                 description: product.description && product.description.slice(127) || '',
+                                                 category: 'PHYSICAL_GOODS',
+                                               }
+                                             })
+                                           }]
+                                         })
+                                       }}
+                                       onSuccess={(details, data) => {
+                                         console.log('Paypal payment received', details, data)
+                                         const paypalOrderId = data && data.orderID;
+                                         if (!paypalOrderId) {
+                                           console.log('invalid paypal order id')
+                                           return Promise.reject(new Error('invalid order id returned'))
+                                         } else {
+                                           return mutationFn({ variables: { paypalOrderId }}).then(
+                                             () => {
+                                               currentUser.deleteCartId()
+                                               Router.push('/order/' + cartId)
+                                             },
+                                             (err) => console.log('backend place order error', err)
+                                           )
+                                         }
+                                       }}
+                                       />
+                                    : <p>Order placed</p>
+                                  }
+                              </Mutation>
+                            }
                           </div>
                           </div>
                           </Col>
