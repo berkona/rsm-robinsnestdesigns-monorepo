@@ -91,7 +91,7 @@ const ProductDetail = (props) => (
               }
             </div>
 
-            <AddToCart productId={data.product.id} />
+            <AddToCart productId={data.product.id} maxQuantity={data.product.qtyInStock || undefined }/>
 
             <hr style={{ color: '#888' }} />
             <h2>Shipping</h2>

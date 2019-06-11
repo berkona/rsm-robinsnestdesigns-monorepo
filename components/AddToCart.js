@@ -3,7 +3,7 @@ import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Collapse from 'react-bootstrap/Collapse'
 import gql from 'graphql-tag'
-import { Mutation } from 'react-apollo'
+import { Query, Mutation } from 'react-apollo'
 import Router from 'next/router'
 import {FaSpinner} from 'react-icons/fa'
 import { CurrentUserContext } from '../lib/auth'
@@ -25,6 +25,25 @@ const ADD_TO_CART = gql`
       }
     }
   }
+`
+
+const UPDATE_CART = gql`
+mutation updateCartItem($cartItemId: ID!, $qty: Int!) {
+  updateCartItem(cartItemId: $cartItemId, qty: $qty) {
+    id
+    subtotal
+    items {
+      id
+      qty
+      product {
+        id
+        sku
+        name
+        price
+      }
+    }
+  }
+}
 `
 
 const CART_QUERY = gql`
@@ -51,7 +70,7 @@ class AddToCart extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      quanityToAdd: '1'
+      quanityToAdd: null
     }
     this.onChange = this.onChange.bind(this)
   }
@@ -63,13 +82,62 @@ class AddToCart extends React.Component {
   }
 
   render() {
+    const productId = this.props.productId
+    const maxQuantity = this.props.maxQuantity
     return (
       <CurrentUserContext.Consumer>
       { currentUser => {
-        return <Mutation
+        const cartForm = (changeText) => (mutationFn, { loading, error, data }) => {
+          if (error) {
+            return <p>Error: {error.toString()}</p>
+          }
+          return (
+            <Form onSubmit={() => {
+              event.preventDefault();
+              if (loading) {
+                return
+              }
+
+              if (!data) {
+                mutationFn();
+              } else {
+                Router.push('/cart')
+              }
+            }}>
+              {maxQuantity && <Form.Group>
+                <Form.Label>Quantity in Stock</Form.Label>
+                <Form.Control
+                  value={maxQuantity}
+                  type="number"
+                  disabled
+                />
+                </Form.Group>}
+              <Collapse in={!data}>
+                <Form.Group controlId="cartQuantity">
+                  <Form.Label>Quantity</Form.Label>
+                  <Form.Control
+                    value={this.state.quanityToAdd}
+                    type="number"
+                    min={1}
+                    max={maxQuantity}
+                    onChange={this.onChange}
+                  />
+                </Form.Group>
+              </Collapse>
+              {!data && <Button variant="dark" type="submit" block disabled={loading}>
+                {loading
+                  && <><FaSpinner style={{ marginRight: '5px' }}/>Working...</>
+                  || <>{changeText}</>
+                }
+              </Button>}
+              {data && <Button variant="dark" type="submit" block>View Cart</Button>}
+            </Form>
+          )
+        }
+        const addToCart = () => <Mutation
           mutation={ADD_TO_CART}
           variables={{
-            productId: this.props.productId,
+            productId: productId,
             orderId: currentUser.getCartId(),
             qty: Number.parseInt(this.state.quanityToAdd),
           }}
@@ -87,45 +155,64 @@ class AddToCart extends React.Component {
             })
           }}
           >
-        {(addToCart, { loading, error, data }) => {
-          if (error) {
-            return <p>Error: {error.toString()}</p>
-          }
-          return (
-            <Form onSubmit={() => {
-              event.preventDefault();
-              if (loading) {
-                return
-              }
-
-              if (!data) {
-                addToCart();
-              } else {
-                Router.push('/cart')
-              }
-            }}>
-              <Collapse in={!data}>
-                <Form.Group controlId="cartQuantity">
-                  <Form.Label>Quantity</Form.Label>
-                  <Form.Control
-                    value={this.state.quanityToAdd}
-                    type="number"
-                    min={1}
-                    onChange={this.onChange}
-                  />
-                </Form.Group>
-              </Collapse>
-              {!data && <Button variant="dark" type="submit" block disabled={loading}>
-                {loading
-                  && <><FaSpinner style={{ marginRight: '5px' }}/>Working...</>
-                  || <>Add To Cart</>
-                }
-              </Button>}
-              {data && <Button variant="dark" type="submit" block>View Cart</Button>}
-            </Form>
-          )
-        }}
+        {cartForm('Add To Cart')}
         </Mutation>
+
+        if (!currentUser.getCartId()) {
+          if (!this.state.quanityToAdd) {
+            this.setState({ quanityToAdd: '1' })
+          }
+          return addToCart()
+        } else {
+          return <Query query={CART_QUERY} variables={{ orderId: currentUser.getCartId() }}>
+            {({ loading, error, data }) => {
+              if (error) {
+                return <p>Error: {error.toString()}</p>
+              }
+              else if (loading) {
+                return <p><FaSpinner />Loading..</p>
+              }
+              else {
+                const matchingItems = (data
+                                   && data.cart
+                                   && data.cart.items
+                                   && data.cart.items.filter((x) => x.product.id ==  productId)
+                                   || [])
+
+                if (matchingItems.length > 0) {
+                  const firstMatchingItem = matchingItems[0]
+                  if (!this.state.quanityToAdd) {
+                    this.setState({
+                      quanityToAdd: firstMatchingItem.qty
+                    })
+                  }
+
+                  return <Mutation
+                    mutation={UPDATE_CART}
+                    variables={{
+                      cartItemId: firstMatchingItem.id,
+                      qty: Number.parseInt(this.state.quanityToAdd),
+                    }}
+                    update={(cache, { data }) => {
+                      cache.writeQuery({
+                        query: CART_QUERY,
+                        variables: { orderId: data && data.updateCartItem && data.updateCartItem.id },
+                        data: { cart: data && data.updateCartItem }
+                      })
+                    }}
+                    >
+                    {cartForm('Update Cart')}
+                    </Mutation>
+                } else {
+                  if (!this.state.quanityToAdd) {
+                    this.setState({ quanityToAdd: '1' })
+                  }
+                  return addToCart()
+                }
+              }
+            }}
+          </Query>
+        }
       }}
       </CurrentUserContext.Consumer>
     )
