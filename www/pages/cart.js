@@ -87,6 +87,7 @@ const deleteCartItem = gql`
 const CURRENT_USER = gql`
 query($token: String!) {
   user(token: $token) {
+    id
     firstName
     lastName
     address
