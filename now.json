@@ -7,7 +7,8 @@
     "SQL_PWD": "@pegweb-sql-password",
     "SQL_DB": "robins-nest-designs",
     "PAYPAL_CLIENTID": "AfRXnOb4Weq93kfQLyPKfaW3e8bYvRbkDBoeTZwCPLcxdottjyLo5t00XxZteN6Up6bmYIKn-GRSUMg2",
-    "PAYPAL_CLIENTSECRET": "@paypal-client-secret-sandbox"
+    "PAYPAL_CLIENTSECRET": "@paypal-client-secret-sandbox",
+    "API_URL": "https://robins-nest-designs.berkona.now.sh/graphql"
   },
   "builds": [
     { "src": "www/next.config.js", "use": "@now/next" },
@@ -18,6 +19,10 @@
       "src": "/graphql",
       "dest": "api/handler.js"
     },
+    { "src": "/googlea7696e4bbcfecd2f.html", "dest": "/www/static/googlea7696e4bbcfecd2f.html" },
+    { "src": "/product/(?<productId>[^/]+).*$", "dest": "/www/product?productId=$productId" },
+    { "src": "/category/(?<categoryId>[^/]+).*$", "dest": "/www/category?categoryId=$categoryId" },
+    { "src": "/order/(?<orderId>[^/]+).*$", "dest": "/www/order?orderId=$orderId" },
     {
       "src": "/(.*)",
       "dest": "/www/$1",
@@ -25,10 +30,6 @@
         "x-request-path": "$1"
       }
     },
-    { "src": "/googlea7696e4bbcfecd2f.html", "dest": "/www/static/googlea7696e4bbcfecd2f.html" },
-    { "src": "/_next/static/(?:[^/]+/pages|chunks|runtime)/.+", "headers": { "cache-control": "immutable" } },
-    { "src": "/product/(?<productId>[^/]+).*$", "dest": "/www/product?productId=$productId" },
-    { "src": "/category/(?<categoryId>[^/]+).*$", "dest": "/www/category?categoryId=$categoryId" },
-    { "src": "/order/(?<orderId>[^/]+).*$", "dest": "/www/order?orderId=$orderId" }
+    { "src": "/_next/static/(?:[^/]+/pages|chunks|runtime)/.+", "headers": { "cache-control": "immutable" } }
   ]
 }
