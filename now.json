@@ -1,6 +1,7 @@
 {
   "version": 2,
   "name": "robins-nest-designs",
+  "alias": ["robins-nest-designs.berkona.now.sh"],
   "env": {
     "SQL_HOST": "vm2.pegweb.com",
     "SQL_USER": "robins-nest-designs",
