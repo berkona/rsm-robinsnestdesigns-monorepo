@@ -34,11 +34,11 @@ const query = gql`
       items {
         id
         qty
+        price
         product {
           id
           sku
           name
-          price
         }
       }
     }
@@ -58,14 +58,9 @@ const OrderPage = withRouter(
       <Row>
         <Col md={6}>
           <p>Order No: {props.router.query.orderId}</p>
-          <p>Billing</p>
-          <p>{data.cart.customerInfo.BFirstName} {data.cart.customerInfo.BLastName}</p>
-          <p>{data.cart.customerInfo.BAddress}</p>
-          <p>{data.cart.customerInfo.BCity}, {data.cart.customerInfo.BState} {data.cart.customerInfo.BZip}</p>
-        </Col>
-        <Col md={6}>
-          <p><br /></p>
-          <p>Shipping</p>
+          <p></p>
+          <p>Ship To</p>
+          <p></p>
           <p>{data.cart.customerInfo.FirstName} {data.cart.customerInfo.LastName}</p>
           <p>{data.cart.customerInfo.Address}</p>
           <p>{data.cart.customerInfo.City}, {data.cart.customerInfo.State} {data.cart.customerInfo.Zip}</p>
@@ -84,7 +79,7 @@ const OrderPage = withRouter(
 <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Subtotal </div></b></font></td>
 </tr>
 
-              {data.cart.items.map(({ id, product, qty }) => {
+              {data.cart.items.map(({ id, product, qty, price }) => {
                 return <tr key={id} className="odd" bgcolor="#E4EDF4">
                   <td style={{borderTop: "#CCCCCC solid 1px"}}>
                     <div align="center">
@@ -103,8 +98,8 @@ const OrderPage = withRouter(
                       <font size="-1">{qty}</font>
                     </div>
                   </td>
-                  <td style={{borderTop: "#CCCCCC solid 1px"}}><div align="right">${product.price.toFixed(2)}</div></td>
-                  <td style={{borderTop: "#CCCCCC solid 1px"}}><div align="right">${(qty * product.price).toFixed(2)}</div></td>
+                  <td style={{borderTop: "#CCCCCC solid 1px"}}><div align="right">${price.toFixed(2)}</div></td>
+                  <td style={{borderTop: "#CCCCCC solid 1px"}}><div align="right">${(qty * price).toFixed(2)}</div></td>
                 </tr>
               })}
  <tr>

@@ -84,6 +84,20 @@ const deleteCartItem = gql`
   }
 `
 
+const CURRENT_USER = gql`
+query($token: String!) {
+  user(token: $token) {
+    firstName
+    lastName
+    address
+    city
+    state
+    zip
+    country
+    phone
+  }
+}
+`
 const counties = "Alamance | Alexander | Alleghany | Anson | Ashe | Avery | Beaufort | Bertie | Bladen | Brunswick | Buncombe | Burke | Cabarrus | Caldwell | Camden | Carteret | Caswell | Catawba | Chatham | Cherokee | Chowan | Clay | Cleveland | Columbus | Craven | Cumberland | Currituck | Dare | Davidson | Davie | Duplin | Durham | Edgecombe | Forsyth | Franklin | Gaston | Gates | Graham | Granville | Greene | Guilford | Halifax | Harnett | Haywood | Henderson | Hertford | Hoke | Hyde | Iredell | Jackson | Johnston | Jones | Lee | Lenoir | Lincoln | McDowell | Macon | Madison | Martin | Mecklenburg | Mitchell | Montgomery | Moore | Nash | New Hanover | Northampton | Onslow | Orange | Pamlico | Pasquotank | Pender | Perquimans | Person | Pitt | Polk | Randolph | Richmond | Robeson | Rockingham | Rowan | Rutherford | Sampson | Scotland | Stanly | Stokes | Surry | Swain | Transylvania | Tyrrell | Union | Vance | Wake | Warren | Washington | Watauga | Wayne | Wilkes | Wilson | Yadkin | Yancey".split(' | ')
 
 const taxes = {
@@ -100,6 +114,8 @@ const makeAmount = (value) => {
     value,
   }
 }
+
+const needsTax = (zip) => isZipValid(zip) && (zip.startsWith('27') || zip.startsWith('28'))
 
 class ProductPage extends React.Component {
   constructor(props) {
@@ -137,7 +153,7 @@ class ProductPage extends React.Component {
             <Query query={query} variables={{
               orderId: cartId,
               shipping: Number.parseFloat(this.state.shippingCost || '3.99'),
-              zipcode: Number.parseInt(this.state.shippingZipIsValid && this.state.shippingZip),
+              zipcode: Number.parseInt(isZipValid(this.state.shippingZip) && this.state.shippingZip),
               county: this.state.county,
             }}
             fetchPolicy="cache-and-network"
@@ -154,7 +170,7 @@ class ProductPage extends React.Component {
                     return (
                       <div id="addToCart">
                         <h1>My Shopping Cart</h1>
-                        <div class="msg" align="center"> <h3>Your Shopping Cart Is Empty</h3> </div>
+                        <div className="msg" align="center"> <h3>Your Shopping Cart Is Empty</h3> </div>
                         <div align="center">
                           <Link href="/">
                             <button>Continue Shopping</button>
@@ -268,151 +284,159 @@ class ProductPage extends React.Component {
                           <div align="left" style={{ padding: '0px 16px' }}>
                             <h1>Checkout</h1>
                             <div align="left">
-                            <Form onSubmit={() => { event.preventDefault() }}>
-                              <Form.Group controlId="shippingZip">
-                                <Form.Label>Enter your zipcode</Form.Label>
-                                <Form.Control type="number" value={this.state.shippingZip} onChange={() => this.setState({ shippingZip: event.target.value, shippingZipIsValid: isZipValid(event.target.value) })}/>
-                              </Form.Group>
-                              <Collapse in={this.state.shippingZipIsValid && (this.state.shippingZip.startsWith('27') || this.state.shippingZip.startsWith('28'))}>
-                                <Form.Group controlId="shippingZipCounty">
-                                  <Form.Label>
-                                    Enter the county you reside in
-                                  </Form.Label>
-                                  <Form.Control as="select" onChange={() => this.setState({ taxIsValid: true, tax: taxes[event.target.value] || 0, county: event.target.value })} value={this.state.county}>
-                                    { !this.state.county && <option key="null"></option> }
-                                    {[...counties.map((c) => <option key={c} value={c}>{c}</option>)]}
-                                  </Form.Control>
-                                </Form.Group>
-                              </Collapse>
-                              <Form.Group>
-                                <fieldset>
-                                  {subtotal < 75 ? <>
-                                    <Form.Check
-                                    type="radio"
-                                    name="shippingMethod"
-                                    label="First Class Mail: $3.99"
-                                    checked={this.state.shippingCost == '3.99'}
-                                    onClick={() => this.setState({ shippingCost: '3.99'})}
-                                  />
-                                  <Form.Check
-                                    type="radio"
-                                    name="shippingMethod"
-                                    label="Priority Mail: $7.99"
-                                    checked={this.state.shippingCost == '7.99'}
-                                    onClick={() => this.setState({ shippingCost: '7.99' })}
-                                  />
-                                  <Form.Check
-                                      type="radio"
-                                      name="shippingMethod"
-                                      label="Free Shipping Over $75"
-                                      checked={false}
-                                      disabled={true}
+                            <Query query={CURRENT_USER} variables={{ token: currentUser.getToken() }}  fetchPolicy={"cache-and-network"} onCompleted={(data) => { console.log('onCompleted', data); this.setState({ shippingZip: data.user.zip }); }}>
+                              {({ loading, error, data }) => {
+                                if (error) return <p>Error: {error.toString()}</p>
+                                const { user } = data
+                                return <>
+                                  <Form onSubmit={() => { event.preventDefault() }}>
+                                    <Form.Group controlId="shippingZip">
+                                      <Form.Label>Enter your zipcode</Form.Label>
+                                      <Form.Control type="number" value={this.state.shippingZip} onChange={() => this.setState({ shippingZip: event.target.value, shippingZipIsValid: isZipValid(event.target.value) })}/>
+                                    </Form.Group>
+                                    <Collapse in={needsTax(this.state.shippingZip)}>
+                                      <Form.Group controlId="shippingZipCounty">
+                                        <Form.Label>
+                                          Enter the county you reside in
+                                        </Form.Label>
+                                        <Form.Control as="select" onChange={() => this.setState({ taxIsValid: true, tax: taxes[event.target.value] || 0, county: event.target.value })} value={this.state.county}>
+                                          { !this.state.county && <option key="null"></option> }
+                                          {[...counties.map((c) => <option key={c} value={c}>{c}</option>)]}
+                                        </Form.Control>
+                                      </Form.Group>
+                                    </Collapse>
+                                    <Form.Group>
+                                      <fieldset>
+                                        {subtotal < 75 ? <>
+                                          <Form.Check
+                                          type="radio"
+                                          name="shippingMethod"
+                                          label="First Class Mail: $3.99"
+                                          checked={this.state.shippingCost == '3.99'}
+                                          onClick={() => this.setState({ shippingCost: '3.99'})}
+                                        />
+                                        <Form.Check
+                                          type="radio"
+                                          name="shippingMethod"
+                                          label="Priority Mail: $7.99"
+                                          checked={this.state.shippingCost == '7.99'}
+                                          onClick={() => this.setState({ shippingCost: '7.99' })}
+                                        />
+                                        <Form.Check
+                                            type="radio"
+                                            name="shippingMethod"
+                                            label="Free Shipping Over $75"
+                                            checked={false}
+                                            disabled={true}
+                                            />
+                                        </>
+                                        : <>
+                                        <Form.Check
+                                        type="radio"
+                                        name="shippingMethod"
+                                        label="First Class Mail: $3.99"
+                                        checked={false}
+                                        disabled={true}
                                       />
-                                  </>
-                                  : <>
-                                  <Form.Check
-                                  type="radio"
-                                  name="shippingMethod"
-                                  label="First Class Mail: $3.99"
-                                  checked={false}
-                                  disabled={true}
-                                />
-                                <Form.Check
-                                  type="radio"
-                                  name="shippingMethod"
-                                  label="Priority Mail: $7.99"
-                                  checked={false}
-                                  disabled={true}
-                                />
-                                  <Form.Check
-                                      type="radio"
-                                      name="shippingMethod"
-                                      label="Free Shipping Over $75"
-                                      checked={true}
-                                      disabled={true}
-                                      /></>
-                                    }
+                                      <Form.Check
+                                        type="radio"
+                                        name="shippingMethod"
+                                        label="Priority Mail: $7.99"
+                                        checked={false}
+                                        disabled={true}
+                                      />
+                                        <Form.Check
+                                            type="radio"
+                                            name="shippingMethod"
+                                            label="Free Shipping Over $75"
+                                            checked={true}
+                                            disabled={true}
+                                            /></>
+                                          }
 
-                                </fieldset>
-                              </Form.Group>
-                              <Form.Group>
-                              <p>By placing an order you agree to the <Link href="/ShippingInfo/shipping">
-                              <a target="_blank">
-                              shipping terms/order processing</a>
-                              </Link> and
-                              <Link href="/Policies/Policies">
-                                <a style={{ paddingLeft: '5px' }} target="_blank">
-                                policies
-                                </a>
-                                </Link>
-                                </p>
-                                <Form.Check
-                                  name="shippingMethod"
-                                  label="I agree"
-                                  checked={this.state.agreeToPolicies}
-                                  onClick={() => this.setState({ agreeToPolicies: event.target.checked})}
-                                >
-                                </Form.Check>
-                              </Form.Group>
-                            </Form>
-                            {this.state.shippingZipIsValid && this.state.agreeToPolicies &&
-                              <Mutation mutation={placeCartOrder} variables={{ orderId: cartId, shipping: Number.parseFloat(this.state.shippingCost), zipcode: Number.parseInt(this.state.shippingZip), county: this.state.county }}>
-                                {(mutationFn, { loading, error, data }) =>
-                                  error
-                                  ? <p>Network error: {error.toString()}</p>
-                                  : !data
-                                    ? <PayPalButton
-                                       options={{ clientId: 'AfRXnOb4Weq93kfQLyPKfaW3e8bYvRbkDBoeTZwCPLcxdottjyLo5t00XxZteN6Up6bmYIKn-GRSUMg2' }}
-                                       amount={total}
-                                       createOrder={(data, actions) => {
-                                         return actions.order.create({
-                                           purchase_units: [{
-                                             amount: {
-                                               currency: 'USD',
-                                               value: total,
-                                               breakdown: {
-                                                 item_total: makeAmount(subtotal),
-                                                 shipping: makeAmount(shippingCost),
-                                                 tax_total: makeAmount(tax),
+                                      </fieldset>
+                                    </Form.Group>
+                                    <Form.Group>
+                                    <p>By placing an order you agree to the <Link href="/ShippingInfo/shipping">
+                                    <a target="_blank">
+                                    shipping terms/order processing</a>
+                                    </Link> and
+                                    <Link href="/Policies/Policies">
+                                      <a style={{ paddingLeft: '5px' }} target="_blank">
+                                      policies
+                                      </a>
+                                      </Link>
+                                      </p>
+                                      <Form.Check
+                                        name="shippingMethod"
+                                        label="I agree"
+                                        checked={this.state.agreeToPolicies}
+                                        onClick={() => this.setState({ agreeToPolicies: event.target.checked})}
+                                      >
+                                      </Form.Check>
+                                    </Form.Group>
+                                  </Form>
+                                  {isZipValid(this.state.shippingZip) && this.state.agreeToPolicies && ( !needsTax(this.state.shippingZip) || this.state.taxIsValid ) &&
+                                    <Mutation mutation={placeCartOrder} variables={{ orderId: cartId, shipping: Number.parseFloat(this.state.shippingCost), zipcode: Number.parseInt(this.state.shippingZip), county: this.state.county }}>
+                                      {(mutationFn, { loading, error, data }) =>
+                                        error
+                                        ? <p>Network error: {error.toString()}</p>
+                                        : !data
+                                          ? <PayPalButton
+                                             options={{ clientId: 'AfRXnOb4Weq93kfQLyPKfaW3e8bYvRbkDBoeTZwCPLcxdottjyLo5t00XxZteN6Up6bmYIKn-GRSUMg2' }}
+                                             amount={total}
+                                             createOrder={(data, actions) => {
+                                               return actions.order.create({
+                                                 purchase_units: [{
+                                                   amount: {
+                                                     currency: 'USD',
+                                                     value: total,
+                                                     breakdown: {
+                                                       item_total: makeAmount(subtotal),
+                                                       shipping: makeAmount(shippingCost),
+                                                       tax_total: makeAmount(tax),
+                                                     }
+                                                   },
+                                                   description: 'Your order with Robin\'s Nest Designs',
+                                                   invoice_id: cartId,
+                                                   soft_descriptor: 'RobinsNestDesigns',
+                                                   items: cart.items.map(({ product, qty, price }) => {
+                                                     return {
+                                                       sku: product.sku,
+                                                       name: product.name,
+                                                       unit_amount: makeAmount(price),
+                                                       quantity: qty,
+                                                       description: product.description && product.description.slice(127) || '',
+                                                       category: 'PHYSICAL_GOODS',
+                                                     }
+                                                   })
+                                                 }]
+                                               })
+                                             }}
+                                             onSuccess={(details, data) => {
+                                               console.log('Paypal payment received', details, data)
+                                               const paypalOrderId = data && data.orderID;
+                                               if (!paypalOrderId) {
+                                                 console.log('invalid paypal order id')
+                                                 return Promise.reject(new Error('invalid order id returned'))
+                                               } else {
+                                                 return mutationFn({ variables: { paypalOrderId }}).then(
+                                                   () => {
+                                                     currentUser.deleteCartId()
+                                                     Router.push('/order/' + cartId)
+                                                   },
+                                                   (err) => console.log('backend place order error', err)
+                                                 )
                                                }
-                                             },
-                                             description: 'Your order with Robin\'s Nest Designs',
-                                             invoice_id: cartId,
-                                             soft_descriptor: 'RobinsNestDesigns',
-                                             items: cart.items.map(({ product, qty }) => {
-                                               return {
-                                                 sku: product.sku,
-                                                 name: product.name,
-                                                 unit_amount: makeAmount(product.price),
-                                                 quantity: qty,
-                                                 description: product.description && product.description.slice(127) || '',
-                                                 category: 'PHYSICAL_GOODS',
-                                               }
-                                             })
-                                           }]
-                                         })
-                                       }}
-                                       onSuccess={(details, data) => {
-                                         console.log('Paypal payment received', details, data)
-                                         const paypalOrderId = data && data.orderID;
-                                         if (!paypalOrderId) {
-                                           console.log('invalid paypal order id')
-                                           return Promise.reject(new Error('invalid order id returned'))
-                                         } else {
-                                           return mutationFn({ variables: { paypalOrderId }}).then(
-                                             () => {
-                                               currentUser.deleteCartId()
-                                               Router.push('/order/' + cartId)
-                                             },
-                                             (err) => console.log('backend place order error', err)
-                                           )
-                                         }
-                                       }}
-                                       />
-                                    : <p>Order placed</p>
+                                             }}
+                                             />
+                                          : <p>Order placed</p>
+                                        }
+                                    </Mutation>
                                   }
-                              </Mutation>
-                            }
+                                </>
+                              }}
+                            </Query>
                           </div>
                           </div>
                           </Col>
