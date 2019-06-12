@@ -1,4 +1,8 @@
+import React from 'react'
+import Col from 'react-bootstrap/Col'
+
 const PoliciesPage = (props) => (
+  <Col>
   <div id="content" class="twoColumns">
 <h1>Policies</h1>
 <p>Please let us know if you are have a problem with your order within 30 days after purchase. We will work with you to make it right. However, because some people have tried to take advantage of us, we have implemented the following policies:</p>
@@ -34,6 +38,7 @@ const PoliciesPage = (props) => (
 <p>All personal information you submit is encrypted and secure and for internal use only. For your protection, credit card information is not stored. </p>
 <p>&nbsp;</p>
 </div>
+</Col>
 )
 
 export default PoliciesPage
