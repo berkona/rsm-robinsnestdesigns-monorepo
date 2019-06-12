@@ -3,13 +3,16 @@
   "name": "robins-nest-designs",
   "alias": ["robins-nest-designs.berkona.now.sh"],
   "env": {
-    "SQL_HOST": "vm2.pegweb.com",
-    "SQL_USER": "robins-nest-designs",
+    "SQL_HOST": "@sql-host",
+    "SQL_USER": "@sql-user",
     "SQL_PWD": "@db-password",
-    "SQL_DB": "robins-nest-designs",
-    "PAYPAL_CLIENTID": "AfRXnOb4Weq93kfQLyPKfaW3e8bYvRbkDBoeTZwCPLcxdottjyLo5t00XxZteN6Up6bmYIKn-GRSUMg2",
+    "SQL_DB": "@sql-db",
+    "PAYPAL_CLIENTID": "@paypal-client-id",
     "PAYPAL_CLIENTSECRET": "@paypal-client-secret-sandbox",
-    "API_URL": "https://robins-nest-designs.berkona.now.sh/graphql"
+    "API_URL": "@api-url",
+    "JWT_SECRET": "@jwt-secret",
+    "JWT_ISSUER": "@jwt-issuer",
+    "JWT_MAX_AGE": "@jwt-max-age"
   },
   "builds": [
     { "src": "www/next.config.js", "use": "@now/next" },
