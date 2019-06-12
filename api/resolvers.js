@@ -110,16 +110,12 @@ const calcPromo = (promo, subtotal) => {
   return 0
 }
 
-const reduceOrder = (orderId, rows, shipping, zipcode, county, promo) => {
+const reduceOrder = (orderId, rows, shipping, zipcode, county) => {
   const items = rows.map(reduceCartItem)
 
   let subtotal = items.map((ci) => ci.price * ci.qty).reduce((a, b) => a + b, 0)
   subtotal = subtotal.toFixed(2)
 
-  let discounted = subtotal
-  if (promo && canApplyPromo(promo, items, subtotal)) {
-    discounted = calcPromo(promo, subtotal)
-  }
   shipping = Number.parseFloat(subtotal) < 75 ? (shipping || '3.99') : '0.00'
 
   let tax = '0.00'
@@ -347,7 +343,7 @@ async function placeOrder(obj, { orderId, paypalOrderId, shipping, zipcode, coun
 
 async function getOrder(db, orderId, shipping, zipcode, county, coupon_code) {
   const rows = await db.listCartItems(orderId)
-  const order = reduceOrder(orderId, rows, shipping, zipcode, county, promo)
+  const order = reduceOrder(orderId, rows, shipping, zipcode, county)
   const cInfo = await db.getCustomerInfo(orderId)
   if (cInfo) {
     order.placed = true
