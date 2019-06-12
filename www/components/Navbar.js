@@ -2,6 +2,7 @@ import React from 'react'
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
 import Form from 'react-bootstrap/Form'
+import NavDropdown from 'react-bootstrap/NavDropdown'
 import FormControl from 'react-bootstrap/FormControl'
 import Button from 'react-bootstrap/Button'
 import Link from 'next/link'
@@ -71,16 +72,12 @@ class MyNavbar extends React.Component {
             {isLoggedIn
               ?
               <>
-              <Nav.Item>
-                <Link href="/myaccount" passHref>
-                  <Nav.Link>My Account</Nav.Link>
-                </Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Link href="/wishlist" passHref>
-                  <Nav.Link>My Wish List</Nav.Link>
-                </Link>
-              </Nav.Item>
+              <NavDropdown title="My Account" id="basic-nav-dropdown">
+                <NavDropdown.Item href="/myaccount">Profile</NavDropdown.Item>
+                <NavDropdown.Item href="/wishlist">Wish List</NavDropdown.Item>
+                <NavDropdown.Divider />
+                <NavDropdown.Item href="/logout">Log out</NavDropdown.Item>
+              </NavDropdown>
               </>
               :
               <>
