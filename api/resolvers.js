@@ -353,6 +353,7 @@ const resolvers = {
     allCategories: (obj, args, context) => context.dataSources.db.listCategories().then(reduceAllCategories),
     allSubcategories: (obj, args, context) => context.dataSources.db.listSubcategories(args.categoryId).then(reduceAllCategories),
     product: (obj, args, context) => context.dataSources.db.getProduct(args.productId).then(x => {
+      if (!x || x.length == 0) return Promise.reject(new Error('Product does not exist'))
       return reduceProduct(x[0])
     }),
     allProducts: (obj, args, context) => context.dataSources.db.listProducts(args).then(results => {
