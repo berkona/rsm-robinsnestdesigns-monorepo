@@ -42,6 +42,10 @@ query(
       image
       thumbnail
       hyperlinkedImage
+      productVariants {
+        id
+        price
+      }
     }
   }
 }
@@ -134,11 +138,11 @@ const ProductList = (props) => {
                 !isTeaser
                   ? <>
                       <hr align="CENTER" size="3" width="400" color="Black"></hr>
-                      <div align="CENTER">
+                      <div align="CENTER" style={{ marginBottom: '10px' }}>
                         {[...pageLinks]}
                       </div>
                     </>
-                  : <div align="CENTER">{makePageLink(1, 'See more...')}</div>
+                  : <div align="left" style={{ marginLeft: '15px', marginTop: '10px', marginBottom: '10px' }}>{makePageLink(1, 'See more...')}</div>
               }
             </div>
           )

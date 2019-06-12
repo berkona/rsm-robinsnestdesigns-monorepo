@@ -31,6 +31,7 @@ const cartItemFields = [
   'Cart.ID as CartItemId',
   'CustomerID as OrderNo',
   'Quantity',
+  'Option',
 ]
 
 const effectivePriceCase = knex.raw(`(CASE
@@ -144,6 +145,16 @@ class MyDB extends SQLDataSource {
     this.knex = knex
   }
 
+  async getPromo(coupon_code) {
+    if (!coupon_code)
+      throw new Error('coupon_code required')
+    else
+      return await this.db.select('*').from('Promotions')
+        .where('Coupon', coupon_code)
+        .where('Starts', '<=', new Date())
+        .where('Ends', '>=', new Date())
+  }
+
   getCategory(categoryId) {
     if (!categoryId) return Promise.reject(`categoryId is required`)
 
@@ -253,9 +264,17 @@ class MyDB extends SQLDataSource {
       if (result) {
         return Promise.reject(new Error('User already exists'))
       } else {
-        return this.db.insert(user)
+        return this.db('CustomerAccounts').insert(user)
       }
     })
+  }
+
+  findUserById(uid) {
+    if (!uid) throw new Error('uid is required')
+    return this.db.select('*')
+      .from('CustomerAccounts')
+      .where('ID', uid)
+      .first()
   }
 
   findUser(email) {
@@ -263,6 +282,13 @@ class MyDB extends SQLDataSource {
       .from('CustomerAccounts')
       .where('Email', email)
       .first()
+  }
+
+  updateUser(uid, patch) {
+    if (!uid) throw new Error('uid is required')
+    return this.db('CustomerAccounts')
+      .where('ID', uid)
+      .update(patch)
   }
 
   nextCartNumber() {
@@ -280,7 +306,14 @@ class MyDB extends SQLDataSource {
       .where('CustomerID', cartId)
   }
 
-  insertCartItem(cartId, qty, productId) {
+  async getCartItem(cartItemId) {
+    if (!cartItemId) {
+      throw new Error('cartItemId not set')
+    }
+    return await this.db.select('*').from('Cart').where('ID', cartItemId).first()
+  }
+
+  insertCartItem(cartId, qty, productId, variant) {
     const self = this
     return self.getProduct(productId).then((product) => {
       if (!product || product.length == 0) {
@@ -296,10 +329,9 @@ class MyDB extends SQLDataSource {
           ItemName: product.ItemName,
           ItemPrice: product.ItemPrice,
           Subtotal: product.ItemPrice,
-          Option: '',
+          Option: variant || '',
           Handling_Charge: 0,
         })
-        console.log(q.toString());
         return q.then(() => {
           return self.listCartItems(cartId)
         })
@@ -307,16 +339,16 @@ class MyDB extends SQLDataSource {
     })
   }
 
-  updateCartItem(cartItemId, qty) {
+  updateCartItem(cartItemId, qty, variant) {
     if (cartItemId) {
-      return this.db.select('ID', 'CustomerID').from('Cart').where('ID', cartItemId).first().then((result) => {
+      return this.getCartItem(cartItemId).then((result) => {
         if (!result) {
           return Promise.reject(new Error('Invalid cart item id'))
         } else if (result.ID != cartItemId) {
           return Promise.reject(new Error('Cart item did not match ID'))
         }
         else {
-          return this.db('Cart').where('ID', result.ID).update({ Quantity: qty }).then(() => result.CustomerID)
+          return this.db('Cart').where('ID', result.ID).update({ Quantity: qty, Option: variant || '' }).then(() => result.CustomerID)
         }
       })
     } else {
@@ -326,7 +358,7 @@ class MyDB extends SQLDataSource {
 
   deleteCartItem(cartItemId) {
     if (cartItemId) {
-      return this.db.select('ID', 'CustomerID').from('Cart').where('ID', cartItemId).first().then((result) => {
+      return this.getCartItem(cartItemId).then((result) => {
         if (!result) {
           return Promise.reject(new Error('Invalid cart item id'))
         }

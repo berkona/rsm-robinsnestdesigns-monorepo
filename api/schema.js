@@ -19,6 +19,7 @@ const typeDefs = gql`
       sort: ProductSortType
     ): ProductList!
     cart(orderId: ID!, shipping: Float, zipcode: Int, county: String): Order
+    user(token: String!): User
   }
 
   input PriceRange {
@@ -29,11 +30,10 @@ const typeDefs = gql`
   type Mutation {
     register(
       email: String!,
-      password: String!,
-      firstName: String!,
-      lastName: String!
-    ): AuthPayload
-    signin(email: String!, password: String!): AuthPayload
+      password: String!
+    ): AuthPayload!
+    signin(email: String!, password: String!): AuthPayload!
+    updateUser(token: String!, user: UserPatchInput!) : User!
     addToCart(productId: ID!, qty: Int!, orderId: ID, variant: ID): Order!
     updateCartItem(cartItemId: ID!, qty: Int!, variant: ID): Order!
     removeFromCart(cartItemId: ID!): Order!
@@ -83,29 +83,32 @@ const typeDefs = gql`
     id: ID!
     product: Product!
     qty: ID!
+    price: Float!
     variant: ID
   }
 
   type User {
     id: ID!
     email: String!
-    firstName: String!
-    lastName: String!
+    firstName: String
+    lastName: String
     address: String
     city: String
     state: String
     zip: String
     country: String
     phone: String
-    businessEmail: String
-    businessFirstName: String
-    businessLastName: String
-    businessAddress: String
-    businessCity: String
-    businessState: String
-    businessZip: String
-    businessCountry: String
-    businessPhone: String
+  }
+
+  input UserPatchInput {
+    firstName: String
+    lastName: String
+    address: String
+    city: String
+    state: String
+    zip: String
+    country: String
+    phone: String
   }
 
   enum ProductSortType {
@@ -142,6 +145,7 @@ const typeDefs = gql`
     name: String!
     price: Float!
     qtyInStock: Int!
+    isOnSale: Boolean!
     salePrice: Float
     saleStart: String
     saleEnd: String
@@ -157,6 +161,7 @@ const typeDefs = gql`
   }
 
   type ProductVariant {
+    id: ID!
     price: Float!
     text: String!
   }

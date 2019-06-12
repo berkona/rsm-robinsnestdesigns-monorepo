@@ -10,6 +10,7 @@ import Form from 'react-bootstrap/Form'
 import Link from 'next/link'
 import ProductList from './ProductList'
 import AddToCart from './AddToCart'
+import PriceDisplay from './PriceDisplay'
 
 export const pageQuery = gql`
 query($id: ID!) {
@@ -30,6 +31,10 @@ query($id: ID!) {
     thumbnail
     hyperlinkedImage
     description
+    productVariants {
+      price
+      text
+    }
   }
 }
 `
@@ -78,19 +83,9 @@ const ProductDetail = (props) => (
         <Col xs={12} md={5}>
           <div style={{  padding: '0px 24px' }}>
             <h3 className="product-title">{data.product.name}</h3>
-            <div className="product-price" style={{ marginBottom: '5px' }}>
-              {
-                isOnSale
-                ? <span className="large-price on-sale">${data.product.salePrice.toFixed(2)}</span>
-                : <span className="large-price">${data.product.price.toFixed(2)}</span>
-              }
-              {
-                isOnSale
-                ? <div className="promo-details"><span className="small-price">${data.product.price.toFixed(2)}</span><span> ({ ((1.0 - (data.product.salePrice / data.product.price)) * 100.0).toFixed(0) }% off)</span></div>
-                : <span></span>
-              }
+            <div style={{ margin: '.5em 0' }}>
+              <PriceDisplay product={data.product} isOnSale={isOnSale} />
             </div>
-
             <AddToCart productId={data.product.id} maxQuantity={data.product.qtyInStock || undefined }/>
 
             <hr style={{ color: '#888' }} />

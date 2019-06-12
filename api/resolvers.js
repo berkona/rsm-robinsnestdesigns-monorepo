@@ -8,28 +8,20 @@ function reduceAllCategories(rows) {
   return rows.map(reduceCategory)
 }
 
-function conditionalPush(row, arr, id, priceField, optionField) {
-  if (row[priceField]) {
-    arr.push({
-      id,
-      price: Number.parseFloat(row[priceField]),
-      text: row[optionField],
-    })
-  }
-}
 function reduceProduct(row) {
-  const productVariants = []
-
-  conditionalPush(row, productVariants, 1, 'Price1', 'Option1')
-  conditionalPush(row, productVariants, 2, 'Price2', 'Option2')
-  conditionalPush(row, productVariants, 3, 'Price3', 'Option3')
-  conditionalPush(row, productVariants, 4, 'Price4', 'Option4')
-  conditionalPush(row, productVariants, 5, 'Price5', 'Option5')
-  conditionalPush(row, productVariants, 6, 'Price6', 'Option6')
-  conditionalPush(row, productVariants, 7, 'Price7', 'Option7')
-  conditionalPush(row, productVariants, 8, 'Price8', 'Option8')
-  conditionalPush(row, productVariants, 9, 'Price9', 'Option9')
-  conditionalPush(row, productVariants, 10, 'Price10', 'Option10')
+  const productVariants = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ].reduce((arr, nVariant) => {
+    const priceField = 'Price' + nVariant
+    const optionField = 'Option' + nVariant
+    const id = Number.parseInt(('' + row.ProductID) + '' + (nVariant-1))
+    if (row[priceField]) {
+      arr.push({
+        id,
+        price: Number.parseFloat(row[priceField]),
+        text: row[optionField],
+      })
+    }
+    return arr
+  }, [])
 
   return {
     id: row.ProductID,
@@ -72,24 +64,35 @@ const reduceUser = (row) => {
     zip: row.Zip,
     country: row.Country,
     phone: row.Phone,
-    businessEmail: row.BEmail,
-    businessFirstName: row.BFirstName,
-    businessLastName: row.BLastName,
-    businessAddress: row.BAddress,
-    businessCity: row.BCity,
-    businessState: row.BState,
-    businessZip: row.BZip,
-    businessCountry: row.BCOuntry,
-    businessPhone: row.BPhone,
   }
 }
 
+const isOnSale = (obj) => obj.salePrice && obj.saleStart && obj.saleEnd && obj.salePrice > 0 && IsWithinDateRange(Date.now(), ParseDate(obj.saleStart), ParseDate(obj.saleEnd))
+
 const reduceCartItem = (cartItem) => {
+  const product = reduceProduct(cartItem)
+  const variant = !cartItem.Option ? null
+    : product.productVariants
+      .filter(x => x.text == cartItem.Option)
+      .map(x => x.id)[0]
+
+  let price
+  if (variant) {
+    const variantObj = product.productVariants.filter(x => x.id == variant)[0]
+    if (!variantObj) throw new Error('Invalid CartItem.variant in DB, did product change?')
+    price =  variantObj.price
+  } else if (isOnSale(product)) {
+    price = product.salePrice
+  } else {
+    price = product.price
+  }
+
   return {
     id: cartItem.CartItemId,
-    product: reduceProduct(cartItem),
     qty: cartItem.Quantity,
-    variant: null,
+    price,
+    product,
+    variant,
   }
 }
 
@@ -99,12 +102,24 @@ const TAXS_TMP = {
 }
 const DEFAULT_TAX_RATE = 7.0
 
-const reduceOrder = (orderId, rows, shipping, zipcode, county) => {
+const canApplyPromo = (promo, items, subtotal) => {
+  return false
+}
+
+const calcPromo = (promo, subtotal) => {
+  return 0
+}
+
+const reduceOrder = (orderId, rows, shipping, zipcode, county, promo) => {
   const items = rows.map(reduceCartItem)
 
-  let subtotal = items.map((ci) => ci.product.price * ci.qty).reduce((a, b) => a + b, 0)
+  let subtotal = items.map((ci) => ci.price * ci.qty).reduce((a, b) => a + b, 0)
   subtotal = subtotal.toFixed(2)
 
+  let discounted = subtotal
+  if (promo && canApplyPromo(promo, items, subtotal)) {
+    discounted = calcPromo(promo, subtotal)
+  }
   shipping = Number.parseFloat(subtotal) < 75 ? (shipping || '3.99') : '0.00'
 
   let tax = '0.00'
@@ -144,7 +159,7 @@ const verifyAuthToken = (token) => {
 }
 
 const register = (obj, args, context) => {
-  return context.dataSources.db.tryUpsertUser(args.email, args).then(() => login(obj, args, context))
+  return context.dataSources.db.tryUpsertUser(args.email, { Email: args.email, Password: args.password }).then(() => signin(obj, args, context))
 }
 
 const signin = (obj, args, context) => {
@@ -154,9 +169,11 @@ const signin = (obj, args, context) => {
     } else {
       // TODO upgrade password storage...
       if (args.password === user.Password) {
+        user = reduceUser(user)
+        const token = generateAuthToken(user.id)
         return {
-          token: generateAuthToken(),
-          user: reduceUser(user),
+          token,
+          user,
         }
       } else {
         return Promise.reject(new Error('Username or password does not match'));
@@ -182,19 +199,40 @@ const addToCart = async (obj, args, context) => {
   if (order.placed)
     throw new Error('Order is not modifiable')
 
-  const rows = await context.dataSources.db.insertCartItem(cartId, qty, productId)
+  let [ product ] = await context.dataSources.db.getProduct(productId)
+  if (!product) throw new Error('Product does not exist')
+  product = reduceProduct(product)
+
+  let variant = args.variant
+  if (variant) {
+    variant = product.productVariants.filter((x) => x.id == variant)[0]
+    if (!variant) throw new Error('Invalid variant id')
+    variant = variant.text
+  }
+  const rows = await context.dataSources.db.insertCartItem(cartId, qty, productId, variant)
   order = await reduceOrder(cartId, rows)
   return order
 }
 
-const updateCartItem = (obj, { cartItemId, qty }, context) => {
+async function updateCartItem(obj, { cartItemId, qty, variant }, context) {
     if (!cartItemId || !qty || qty < 1) {
-      return Promise.reject(new Error('Invalid arguments'));
+      throw new Error('Invalid arguments');
     } else {
-      return context.dataSources.db.updateCartItem(cartItemId, qty).then((cartId) => {
-        return context.dataSources.db.listCartItems(cartId)
-          .then((rows) => reduceOrder(cartId, rows))
-      })
+      const cartItem = await context.dataSources.db.getCartItem(cartItemId)
+      if (!cartItem) throw new Error('Cart item not found')
+      const cartId = cartItem.CustomerID
+      if (variant) {
+        const productId = cartItem.ProductID
+        let [ product ] = await context.dataSources.db.getProduct(productId)
+        if (!product) throw new Error('Product does not exist')
+        product = reduceProduct(product)
+        let variantId = variant
+        variant = product.productVariants.filter(x => x.id == variantId).map(x => x.text)[0]
+        if (!variant) throw new Error('Invalid variant id')
+      }
+      await context.dataSources.db.updateCartItem(cartItemId, qty, variant)
+      const rows = await context.dataSources.db.listCartItems(cartId)
+      return reduceOrder(cartId, rows)
     }
 }
 
@@ -307,9 +345,9 @@ async function placeOrder(obj, { orderId, paypalOrderId, shipping, zipcode, coun
   return await getOrder(context.dataSources.db, orderId)
 }
 
-async function getOrder(db, orderId, shipping, zipcode, county) {
+async function getOrder(db, orderId, shipping, zipcode, county, coupon_code) {
   const rows = await db.listCartItems(orderId)
-  const order = reduceOrder(orderId, rows, shipping, zipcode, county)
+  const order = reduceOrder(orderId, rows, shipping, zipcode, county, promo)
   const cInfo = await db.getCustomerInfo(orderId)
   if (cInfo) {
     order.placed = true
@@ -347,6 +385,15 @@ async function getPaypalOrder(paypalOrderId) {
   })
 }
 
+const IsWithinDateRange = (timestamp, rangeStart, rangeEnd) => {
+  return timestamp > rangeStart && timestamp < rangeEnd
+}
+
+const ParseDate = (dateStr) => {
+  const retVal = Number.parseInt(dateStr)
+  return Number.isNaN(retVal) ? Date.parse(dateStr) : retVal
+}
+
 const resolvers = {
   Query: {
     category: (obj, args, context) => context.dataSources.db.getCategory(args.categoryId).then(x => reduceCategory(x[0])),
@@ -366,7 +413,15 @@ const resolvers = {
       }
     }),
     saleCategories: (obj, args, context) => context.dataSources.db.listSaleCategories().then(reduceAllCategories),
-    cart: (obj, args, context) => getOrder(context.dataSources.db, args.orderId, args.shipping, args.zipcode, args.county)
+    cart: (obj, args, context) => getOrder(context.dataSources.db, args.orderId, args.shipping, args.zipcode, args.county),
+    user: async (obj, { token }, context) => {
+      const payload = verifyAuthToken(token)
+      const uid = payload.uid
+      const userRow = await context.dataSources.db.findUserById(uid)
+      if (!userRow) throw new Error('user does not exist')
+      const user = reduceUser(userRow)
+      return user
+    },
   },
   Mutation: {
     signin,
@@ -375,7 +430,28 @@ const resolvers = {
     updateCartItem,
     removeFromCart,
     placeOrder,
-  }
+    updateUser: async (obj, { token, user }, context) => {
+      const payload = verifyAuthToken(token)
+      const uid = payload.uid
+      await context.dataSources.db.updateUser(uid, {
+        FirstName: user.firstName,
+        LastName: user.lastName,
+        Address: user.address,
+        City: user.city,
+        State: user.state,
+        Zip: user.zip,
+        Country: user.country,
+        Phone: user.phone,
+      })
+      const userRow = await context.dataSources.db.findUserById(uid)
+      if (!userRow) throw new Error('user does not exist')
+      const output = reduceUser(userRow)
+      return output
+    },
+  },
+  Product: {
+    isOnSale: (obj, args, context) => isOnSale(obj),
+  },
 }
 
 exports.verifyAuthToken = verifyAuthToken

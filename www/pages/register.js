@@ -6,6 +6,7 @@ import gql from 'graphql-tag'
 import { Mutation } from 'react-apollo'
 import Router from 'next/router'
 import { FaSpinner } from 'react-icons/fa'
+import { CurrentUserContext } from '../lib/auth'
 
 const REGISTER = gql`
 mutation register($email: String!, $password: String!) {
@@ -31,8 +32,8 @@ const signin = (props) =>
                 {
                   (register, { loading, error, data }) => {
 
-                    if (data && data.signin && data.signin.token) {
-                      currentUser.login(data.signin.token)
+                    if (data && data.register && data.register.token) {
+                      currentUser.login(data.register.token)
                       Router.push('/')
                       return <></>
                     }
@@ -56,10 +57,10 @@ const signin = (props) =>
                           }} type="password" />
                         </Form.Group>
                         <Button variant="primary" type="submit" disabled={loading}>
-                          {loading && <><FaSpinner />Working...</>}
+                          {loading && <><FaSpinner /> Working...</>}
                           {!loading && <>Create Account</>}
                         </Button>
-                        { error && <p style={{ color: 'red' }}>Username or password is invalid</p>}
+                        { error && <p style={{ color: 'red' }}>{error.graphQLErrors && error.graphQLErrors[0] && error.graphQLErrors[0].message || 'Registration encountered unknown issue'}</p>}
                       </Form>
                     )
                   }

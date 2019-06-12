@@ -27,13 +27,19 @@ const query = gql`
       total
       items {
         id
+        price
         qty
+        variant
         product {
           id
           sku
           name
           price
           description
+          productVariants {
+            id
+            text
+          }
         }
       }
     }
@@ -52,16 +58,26 @@ const deleteCartItem = gql`
   mutation($cartItemId: ID!) {
     removeFromCart(cartItemId: $cartItemId) {
       id
+      placed
       subtotal
+      shipping
+      tax
+      total
       items {
         id
+        price
         qty
+        variant
         product {
           id
           sku
           name
           price
           description
+          productVariants {
+            id
+            text
+          }
         }
       }
     }
@@ -168,11 +184,11 @@ class ProductPage extends React.Component {
                 <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Quantity </div></b></font></td>
                 <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Price </div></b></font></td>
                 <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Subtotal </div></b></font></td>
-                <td  bgcolor="#587E98"></td>
                 <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Delete </div></b></font></td>
               </tr>
 
-                              {cart.items.map(({ id, product, qty }, idx) => {
+                              {cart.items.map(({ id, price, qty, product, variant }, idx) => {
+                                variant = product.productVariants.filter(x => x.id == variant).map(x => x.text)[0] || ''
                                 return <tr key={idx} className="odd" bgcolor="#E4EDF4">
                                   <td style={{borderTop: "#CCCCCC solid 1px"}}>
                                     <div align="center">
@@ -183,17 +199,16 @@ class ProductPage extends React.Component {
                                   </td>
                                   <td style={{borderTop: "#CCCCCC solid 1px"}}>
                                     <div align="left">
-                                      <font size="-1">{product.name}</font>
+                                      <font size="-1">{product.name} {variant}</font>
                                     </div>
                                   </td>
                                   <td style={{borderTop: "#CCCCCC solid 1px"}}>
                                     <div align="center">
-                                      <input type="text" name="Quantity" value={qty} size="3" maxLength="6" />
+                                      <input type="text" name="Quantity" value={qty} size="3" maxLength="6" disabled />
                                     </div>
                                   </td>
-                                  <td style={{borderTop: "#CCCCCC solid 1px"}}><div align="right">${product.price.toFixed(2)}</div></td>
-                                  <td style={{borderTop: "#CCCCCC solid 1px"}}><div align="right">${product.price.toFixed(2)}</div></td>
-                                  <td style={{borderTop: "#CCCCCC solid 1px"}}></td>
+                                  <td style={{borderTop: "#CCCCCC solid 1px"}}><div align="right">${price.toFixed(2)}</div></td>
+                                  <td style={{borderTop: "#CCCCCC solid 1px"}}><div align="right">${(price * qty).toFixed(2)}</div></td>
                                   <td style={{borderTop: "#CCCCCC solid 1px"}}>
                                     <div align="center">
                                       <Mutation mutation={deleteCartItem} update={(cache, { data }) => {
@@ -228,30 +243,29 @@ class ProductPage extends React.Component {
                       <td colSpan="4" align="right" style={{borderTop: "#CCCCCC solid 1px"}}><strong>Subtotal:</strong></td>
                       <td style={{borderTop: "#CCCCCC solid 1px"}} align="right"><strong>${subtotal}</strong></td>
                         <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
-                        <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
+
                   </tr>
                   <tr>
                      <td colSpan="4" align="right" style={{borderTop: "#CCCCCC solid 1px"}}><strong>Shipping:</strong></td>
                      <td style={{borderTop: "#CCCCCC solid 1px"}} align="right"><strong>${shippingCost}</strong></td>
                        <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
-                       <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
+
                    </tr>
                    <tr>
                       <td colSpan="4" align="right" style={{borderTop: "#CCCCCC solid 1px"}}><strong>Tax:</strong></td>
                       <td style={{borderTop: "#CCCCCC solid 1px"}} align="right"><strong>${tax}</strong></td>
                         <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
-                        <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
+
                     </tr>
                     <tr>
                        <td colSpan="4" align="right" style={{borderTop: "#CCCCCC solid 1px"}}><strong>Total:</strong></td>
                        <td style={{borderTop: "#CCCCCC solid 1px"}} align="right"><strong>${total}</strong></td>
                          <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
-                         <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
                      </tr>
                   </tbody></table>
                   </Col>
                   <Col md={4}>
-                          <div align="left" style={{ padding: '16px' }}>
+                          <div align="left" style={{ padding: '0px 16px' }}>
                             <h1>Checkout</h1>
                             <div align="left">
                             <Form onSubmit={() => { event.preventDefault() }}>
@@ -264,8 +278,9 @@ class ProductPage extends React.Component {
                                   <Form.Label>
                                     Enter the county you reside in
                                   </Form.Label>
-                                  <Form.Control as="select" onChange={() => this.setState({ taxIsValid: true, tax: taxes[event.target.value] || 0, county: event.target.value })}>
-                                    {[...counties.map((c) => <option selected={this.state.county == c}>{c}</option>)]}
+                                  <Form.Control as="select" onChange={() => this.setState({ taxIsValid: true, tax: taxes[event.target.value] || 0, county: event.target.value })} value={this.state.county}>
+                                    { !this.state.county && <option key="null"></option> }
+                                    {[...counties.map((c) => <option key={c} value={c}>{c}</option>)]}
                                   </Form.Control>
                                 </Form.Group>
                               </Collapse>
