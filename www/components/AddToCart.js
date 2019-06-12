@@ -107,7 +107,7 @@ class AddToCart extends React.Component {
               {maxQuantity && <Form.Group>
                 <Form.Label>Quantity in Stock</Form.Label>
                 <Form.Control
-                  value={maxQuantity}
+                  value={maxQuantity || ''}
                   type="number"
                   disabled
                 />
@@ -116,10 +116,10 @@ class AddToCart extends React.Component {
                 <Form.Group controlId="cartQuantity">
                   <Form.Label>Quantity</Form.Label>
                   <Form.Control
-                    value={this.state.quanityToAdd}
+                    value={this.state.quanityToAdd || ''}
                     type="number"
                     min={1}
-                    max={maxQuantity}
+                    max={maxQuantity || undefined}
                     onChange={this.onChange}
                   />
                 </Form.Group>
