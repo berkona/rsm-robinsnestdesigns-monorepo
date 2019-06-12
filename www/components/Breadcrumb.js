@@ -1,8 +1,9 @@
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
-
 import { SearchLinkStr } from './Links'
+import { withRouter } from 'next/router'
+import Link from 'next/link'
 
 const findCategory = gql `
 query {
@@ -22,11 +23,7 @@ query($categoryId: ID!) {
 }
 `
 
-const MakeBreadcrumbItem = (linkHref, linkText, isActive) => (
-    isActive
-    ? <Breadcrumb.Item active>{linkText}</Breadcrumb.Item>
-    : <Breadcrumb.Item href={linkHref}>{linkText}</Breadcrumb.Item>
-)
+const BreadcrumbItem = Breadcrumb.Item
 
 const MyBreadcrumb = (props) => {
     const {
@@ -39,9 +36,7 @@ const MyBreadcrumb = (props) => {
     } = props.query;
     return (
       <Breadcrumb>
-        {
-          MakeBreadcrumbItem('/', 'All categories', !categoryId && !subcategoryId && !searchPhrase)
-        }
+        <BreadcrumbItem href="/" active={!categoryId && !subcategoryId && !searchPhrase}>All categories</BreadcrumbItem>
         {
           categoryId
           ?
@@ -50,27 +45,27 @@ const MyBreadcrumb = (props) => {
                const category = (loading || error)
                 ? { title: '' + categoryId }
                 : data.allCategories.reduce((accum, next) => next.id == categoryId ? next : accum, { title: '' + categoryId })
-               return MakeBreadcrumbItem(SearchLinkStr({ categoryId, onSaleOnly, newOnly }), category.title, !subcategoryId && !searchPhrase)
+               return <BreadcrumbItem href={SearchLinkStr({ categoryId, onSaleOnly, newOnly })} active={!subcategoryId && !searchPhrase}>{category.title}</BreadcrumbItem>
              }}
            </Query>
           : <></>
         }
         {
-         (categoryId && subcategoryId) ?
-         <Query query={findSubcategory} variables={{ categoryId }}>
-          {
-            ({ loading, error, data }) => {
-              const subcategory = (loading || error)
-                ? { title: '' + subcategoryId }
-                : data.allSubcategories.reduce((accum, next) => next.id == subcategoryId ? next : accum, { title: '' + subcategoryId })
-              return MakeBreadcrumbItem(SearchLinkStr({ categoryId, subcategoryId, onSaleOnly, newOnly }), subcategory.title, !searchPhrase && !product)
+         (categoryId && subcategoryId)
+         ? <Query query={findSubcategory} variables={{ categoryId }}>
+            {
+              ({ loading, error, data }) => {
+                const subcategory = (loading || error)
+                  ? { title: '' + subcategoryId }
+                  : data.allSubcategories.reduce((accum, next) => next.id == subcategoryId ? next : accum, { title: '' + subcategoryId })
+                return <BreadcrumbItem href={SearchLinkStr({ categoryId, subcategoryId, onSaleOnly, newOnly })} active={!searchPhrase && !product}>{subcategory.title}</BreadcrumbItem>
+              }
             }
-          }
-         </Query>
+          </Query>
          : <></>
-         }
-         { searchPhrase ? <Breadcrumb.Item active>"{searchPhrase}"</Breadcrumb.Item> : <></> }
-         { product ? <Breadcrumb.Item active>{product.name}</Breadcrumb.Item> : <></> }
+        }
+        { searchPhrase ? <Breadcrumb.Item active>"{searchPhrase}"</Breadcrumb.Item> : <></> }
+        { product ? <Breadcrumb.Item active>{product.name}</Breadcrumb.Item> : <></> }
       </Breadcrumb>
     )
 }
