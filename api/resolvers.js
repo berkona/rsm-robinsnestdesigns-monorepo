@@ -36,7 +36,7 @@ function reduceProduct(row) {
     sku: row.ItemID,
     qtyInStock: row.Qty || 0,
     name: row.ItemName,
-    price: row.ItemPrice,
+    price: row.ItemPrice || 0.00,
     salePrice: row.SalePrice,
     saleStart: row.Sale_Start,
     saleEnd: row.Sale_Stop,
