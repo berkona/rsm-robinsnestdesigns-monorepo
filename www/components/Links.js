@@ -3,13 +3,13 @@ import Link from 'next/link'
 import slugify from 'slugify'
 
 export const ProductLink = (props) => (
-  <Link href={`/product/${props.productId}/${slugify('' + props.category)}/${slugify('' + props.subcategory)}/${slugify('' + props.title)}`}>
+  <Link href={`/product?productId=${props.productId}`} as={`/product/${props.productId}/${slugify('' + props.category)}/${slugify('' + props.subcategory)}/${slugify('' + props.title)}`} prefetch>
     {props.children}
   </Link>
 )
 
 export const CategoryLink = (props) => (
-  <Link href={`/category?categoryId=${props.categoryId}`}>
+  <Link href={`/category?categoryId=${props.categoryId}`} prefetch>
     {props.children}
   </Link>
 )
@@ -24,7 +24,7 @@ export const SearchLink = ({ categoryId, subcategoryId, searchPhrase, pageNo, on
   // TODO: can we alias this to a clean url?
   const link = SearchLinkStr({ categoryId, subcategoryId, searchPhrase, pageNo, onSaleOnly, newOnly, sortOrder })
   return (
-    <Link href={link}>
+    <Link href={link} prefetch>
       {children}
     </Link>
   )
