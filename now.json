@@ -4,7 +4,7 @@
   "env": {
     "SQL_HOST": "vm2.pegweb.com",
     "SQL_USER": "robins-nest-designs",
-    "SQL_PWD": "@pegweb-sql-password",
+    "SQL_PWD": "@db-password",
     "SQL_DB": "robins-nest-designs",
     "PAYPAL_CLIENTID": "AfRXnOb4Weq93kfQLyPKfaW3e8bYvRbkDBoeTZwCPLcxdottjyLo5t00XxZteN6Up6bmYIKn-GRSUMg2",
     "PAYPAL_CLIENTSECRET": "@paypal-client-secret-sandbox",
@@ -15,10 +15,7 @@
     { "src": "api/handler.js", "use": "@now/node" }
   ],
   "routes": [
-    {
-      "src": "/graphql",
-      "dest": "api/handler.js"
-    },
+    { "src": "/graphql", "dest": "api/handler.js" },
     { "src": "/googlea7696e4bbcfecd2f.html", "dest": "/www/static/googlea7696e4bbcfecd2f.html" },
     { "src": "/product/(?<productId>[^/]+).*$", "dest": "/www/product?productId=$productId" },
     { "src": "/category/(?<categoryId>[^/]+).*$", "dest": "/www/category?categoryId=$categoryId" },
@@ -30,6 +27,9 @@
         "x-request-path": "$1"
       }
     },
-    { "src": "/_next/static/(?:[^/]+/pages|chunks|runtime)/.+", "headers": { "cache-control": "immutable" } }
+    {
+      "src": "/_next/static/(?:[^/]+/pages|chunks|runtime)/.+",
+      "headers": { "cache-control": "immutable" }
+    }
   ]
 }
