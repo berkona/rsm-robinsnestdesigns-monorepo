@@ -5,3 +5,4 @@
 */.sonarlint/*
 */node_modules/*
 *secrets.yml
+*.env

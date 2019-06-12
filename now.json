@@ -1,6 +1,14 @@
 {
   "version": 2,
   "name": "robins-nest-designs",
+  "env": {
+    "SQL_HOST": "vm2.pegweb.com",
+    "SQL_USER": "robins-nest-designs",
+    "SQL_PWD": "@pegweb-sql-password",
+    "SQL_DB": "robins-nest-designs",
+    "PAYPAL_CLIENTID": "AfRXnOb4Weq93kfQLyPKfaW3e8bYvRbkDBoeTZwCPLcxdottjyLo5t00XxZteN6Up6bmYIKn-GRSUMg2",
+    "PAYPAL_CLIENTSECRET": "@paypal-client-secret-sandbox"
+  },
   "builds": [
     { "src": "www/next.config.js", "use": "@now/next" },
     { "src": "api/handler.js", "use": "@now/node" }

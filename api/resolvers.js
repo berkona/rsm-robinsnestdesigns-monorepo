@@ -9,10 +9,10 @@ function reduceAllCategories(rows) {
 }
 
 function conditionalPush(row, arr, id, priceField, optionField) {
-  if (row[field]) {
+  if (row[priceField]) {
     arr.push({
       id,
-      price: Number.parseFloat(row[field]),
+      price: Number.parseFloat(row[priceField]),
       text: row[optionField],
     })
   }
@@ -20,16 +20,16 @@ function conditionalPush(row, arr, id, priceField, optionField) {
 function reduceProduct(row) {
   const productVariants = []
 
-  conditionalPush(row, variants, 1, 'Price1', 'Option1')
-  conditionalPush(row, variants, 2, 'Price2', 'Option2')
-  conditionalPush(row, variants, 3, 'Price3', 'Option3')
-  conditionalPush(row, variants, 4, 'Price4', 'Option4')
-  conditionalPush(row, variants, 5, 'Price5', 'Option5')
-  conditionalPush(row, variants, 6, 'Price6', 'Option6')
-  conditionalPush(row, variants, 7, 'Price7', 'Option7')
-  conditionalPush(row, variants, 8, 'Price8', 'Option8')
-  conditionalPush(row, variants, 9, 'Price9', 'Option9')
-  conditionalPush(row, variants, 10, 'Price10', 'Option10')
+  conditionalPush(row, productVariants, 1, 'Price1', 'Option1')
+  conditionalPush(row, productVariants, 2, 'Price2', 'Option2')
+  conditionalPush(row, productVariants, 3, 'Price3', 'Option3')
+  conditionalPush(row, productVariants, 4, 'Price4', 'Option4')
+  conditionalPush(row, productVariants, 5, 'Price5', 'Option5')
+  conditionalPush(row, productVariants, 6, 'Price6', 'Option6')
+  conditionalPush(row, productVariants, 7, 'Price7', 'Option7')
+  conditionalPush(row, productVariants, 8, 'Price8', 'Option8')
+  conditionalPush(row, productVariants, 9, 'Price9', 'Option9')
+  conditionalPush(row, productVariants, 10, 'Price10', 'Option10')
 
   return {
     id: row.ProductID,
