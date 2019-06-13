@@ -6,7 +6,7 @@ import { AddImpressionEvent } from '../lib/react-ga'
 const ProductTeaser = (props) => {
     const isOnSale = props.product.isOnSale
     return (
-      <ProductLink productId={props.product.id} category={props.product.category} subcategory={props.product.subcategory} title={props.product.name}>
+      <ProductLink productId={props.product.id} category={props.product.category} subcategory={props.product.subcategory} title={props.product.name} listName={props.listName} position={props.position}>
         <AddImpressionEvent id={props.product.id} category={props.product.category} subcategory={props.product.subcategory} name={props.product.name} listName={props.listName} position={props.position} />
         <div className="product-teaser">
           <div className="product-thumbnail">
