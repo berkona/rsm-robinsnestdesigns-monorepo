@@ -2,8 +2,9 @@ import React from 'react'
 import Router from 'next/router'
 import { CurrentUserContext } from '../lib/auth'
 import Col from 'react-bootstrap/Col'
+import { PageViewEvent } from '../lib/react-ga'
 
-const LogoutPage = () => <CurrentUserContext.Consumer>
+const LogoutPage = () => <><PageViewEvent /><CurrentUserContext.Consumer>
   {currentUser => {
     if (process.browser) {
       if (currentUser.isLoggedIn()) {
@@ -18,6 +19,6 @@ const LogoutPage = () => <CurrentUserContext.Consumer>
       return <Col><p>Wait while we log you out...</p></Col>
     }
   }}
-</CurrentUserContext.Consumer>
+</CurrentUserContext.Consumer></>
 
 export default LogoutPage

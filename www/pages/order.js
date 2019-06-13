@@ -7,6 +7,7 @@ import Table from 'react-bootstrap/Table'
 import { withRouter } from 'next/router'
 import Loader from '../components/Loader'
 import Link from 'next/link'
+import { PageViewEvent } from '../lib/react-ga'
 
 const query = gql`
   query($orderId: ID!) {
@@ -46,7 +47,7 @@ const query = gql`
 `
 
 const OrderPage = withRouter(
-  (props) => <Col><div style={{ paddingLeft: '10px', paddingRight: '10px' }}><Query query={query} variables={{ orderId: props.router.query.orderId }}>
+  (props) => <Col><PageViewEvent /><div style={{ paddingLeft: '10px', paddingRight: '10px' }}><Query query={query} variables={{ orderId: props.router.query.orderId }}>
   {({ loading, error, data}) => {
     if (loading) return <Loader />
     if (error) return <p>Error: {error.toString()}</p>

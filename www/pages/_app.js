@@ -8,6 +8,7 @@ import Router from 'next/router'
 import withGA from "next-ga"
 import Cookies from 'nookies'
 import { CurrentUserProvider } from '../lib/auth'
+import { initGA } from '../lib/react-ga'
 
 const USER_TOKEN = 'USER_TOKEN'
 const USER_CART = 'CUSTOMERID'
@@ -40,6 +41,7 @@ class MyApp extends App {
       currentUserToken: cookies && cookies[USER_TOKEN],
       currentUserCartId: cookies && cookies[USER_CART],
     }
+    initGA("UA-4561227-5")
   }
 
   componentDidMount() {
@@ -117,4 +119,4 @@ class MyApp extends App {
   }
 }
 
-export default withGA("UA-4561227-5", Router)(withApolloClient(MyApp))
+export default withApolloClient(MyApp)

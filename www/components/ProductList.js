@@ -127,10 +127,10 @@ const ProductList = (props) => {
               <Container>
                 <Row>
                   {
-                    data.allProducts.records.map((item) => (
+                    data.allProducts.records.map((item, idx) => (
                       props.colSize
-                      ? <Col xs={props.colSize} key={item.id}><ProductTeaser product={item} /></Col>
-                      : <Col xs={6} md={4} lg={3} key={item.id}><ProductTeaser key={item.id} product={item} /></Col>
+                      ? <Col xs={props.colSize} key={item.id}><ProductTeaser product={item} position={idx} listName={props.listName || 'ProductList'} /></Col>
+                      : <Col xs={6} md={4} lg={3} key={item.id}><ProductTeaser key={item.id} product={item} position={idx} listName={props.listName || 'ProductList'} /></Col>
                     ))
                   }
                 </Row>

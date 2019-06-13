@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar'
 import CategoryLinks from '../components/CategoryLinks'
 import ProductList from '../components/ProductList'
 import { SearchLink } from '../components/Links'
+import { PageViewEvent } from '../lib/react-ga'
 
 const Index = (props) => (
   <>
@@ -20,17 +21,18 @@ const Index = (props) => (
           <SearchLink onSaleOnly={true} sortOrder="mostRecent">
             <a><h2>On Sale</h2></a>
           </SearchLink>
-          <ProductList isTeaser={true} onSaleOnly={true} sortOrder="random" limit={8} />
+          <ProductList isTeaser={true} onSaleOnly={true} sortOrder="random" limit={8} listName={'Index - On Sale'} />
 
           <SearchLink newOnly={true} sortOrder="mostRecent">
             <a><h2>What's New</h2></a>
           </SearchLink>
-          <ProductList isTeaser={true} newOnly={true} sortOrder="random" limit={8} />
+          <ProductList isTeaser={true} newOnly={true} sortOrder="random" limit={8} listName={'Index - Whats New'} />
 
           <SearchLink categoryId={215} sortOrder="mostRecent">
             <a><h2>New in the Bargin Bin</h2></a>
           </SearchLink>
-          <ProductList isTeaser={true} sortOrder="random" categoryId={215} limit={8} />
+          <ProductList isTeaser={true} sortOrder="random" categoryId={215} limit={8} listName={'Index - New in Bargin Bin'} />
+          <PageViewEvent />
         </div>
       </div>
     </Col>

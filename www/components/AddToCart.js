@@ -7,12 +7,16 @@ import { Query, Mutation } from 'react-apollo'
 import Router from 'next/router'
 import {FaSpinner} from 'react-icons/fa'
 import { CurrentUserContext } from '../lib/auth'
+import { addToCartEvent } from '../lib/react-ga'
 
 const PRODUCT_QUERY = gql`
 query($productId: ID!) {
   product(productId: $productId) {
     id
     qtyInStock
+    isOnSale
+    price
+    salePrice
     productVariants {
       id
       price
@@ -21,6 +25,10 @@ query($productId: ID!) {
   }
 }
 `
+
+const getProductPrice = (product, variant) => variant
+  ? product.productVariants.filter(x => x.id == variant)[0].price
+  : product.isOnSale ? product.salePrice : product.price
 
 const ADD_TO_CART = gql`
   mutation addToCart($productId: ID!, $qty: Int!, $orderId: ID, $variant: ID) {
@@ -113,6 +121,7 @@ class AddToCart extends React.Component {
 
             const product = data.product
             const maxQuantity = product.qtyInStock || 25
+            const price = getProductPrice(product, this.state.variant || product.productVariants.length > 0 && product.productVariants.map(x => x.id)[0])
 
             const cartForm = (changeText, defaultQty, defaultVariant) => (mutationFn, { loading, error, data }) => {
               if (error) {
@@ -185,6 +194,7 @@ class AddToCart extends React.Component {
                   variables: { orderId: data && data.addToCart && data.addToCart.id },
                   data: { cart: data && data.addToCart }
                 })
+                addToCartEvent(product, this.state.quanityToAdd || 1, this.state.variant, price)
               }}
               >
             {cartForm('Add To Cart')}

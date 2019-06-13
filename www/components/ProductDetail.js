@@ -12,6 +12,7 @@ import ProductList from './ProductList'
 import AddToCart from './AddToCart'
 import AddToWishList from './AddToWishList'
 import PriceDisplay from './PriceDisplay'
+import { ProductDetailEvent } from '../lib/react-ga'
 
 export const pageQuery = gql`
 query($id: ID!) {
@@ -61,6 +62,7 @@ const ProductDetail = (props) => (
     const shippingTime = data.product.qtyInStock > 0 ? 'Ships in 1-2 business days' : 'Order by Tuesday at 12 PM EST'
     return (
       <div className="product-detail">
+      <ProductDetailEvent product={data.product} />
       <SEO
         title={data.product.name + ' | ' + data.product.category + ' | ' + data.product.subcategory}
         description={'Buy ' + data.product.name + ' now. ' + data.product.description}
@@ -113,7 +115,7 @@ const ProductDetail = (props) => (
             <p dangerouslySetInnerHTML={{__html: data.product.description }}></p>
             <hr style={{ color: '#888' }} />
             <h1>Related Items</h1>
-            <ProductList isTeaser={true} limit={8} categoryId={data.product.categoryId} subcategoryId={data.product.subcategoryId} sortOrder="random" />
+            <ProductList isTeaser={true} limit={8} categoryId={data.product.categoryId} subcategoryId={data.product.subcategoryId} sortOrder="random" listName={'ProductDetail - Related Items'}/>
           </div>
         </Col>
       </Row>

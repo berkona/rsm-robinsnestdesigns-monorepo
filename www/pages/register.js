@@ -7,6 +7,7 @@ import { Mutation } from 'react-apollo'
 import Router from 'next/router'
 import { FaSpinner } from 'react-icons/fa'
 import { CurrentUserContext } from '../lib/auth'
+import { PageViewEvent } from '../lib/react-ga'
 
 const REGISTER = gql`
 mutation register($email: String!, $password: String!) {
@@ -24,6 +25,7 @@ const signin = (props) =>
       } else {
         return (
           <Col>
+            <PageViewEvent />
             <div style={{ padding: '24px 24px' }}>
               <h1>Register</h1>
               <p>Register an account at Robin's Nest Designs</p>

@@ -1,8 +1,10 @@
 import React from 'react'
 import Link from 'next/link'
+import { PageViewEvent } from '../../lib/react-ga'
 
 const PaymentOptionsPage = (props) => (
   <div style={{ padding: "5px 20px 20px 20px" }} className="twoColumns">
+  <PageViewEvent />
   <h1>Payment Options</h1>
   <p><a href="https://www.paypal.com/us/verified/pal=rsmonroe22@gmail.com" target="_blank"><img src="http://www.paypal.com/en_US/i/icon/verification_seal.gif" alt="Official PayPal Seal" border="0" /></a><img src="/static/horizontal_solution_PPeCheck.gif" width="253" height="80" /></p>
   <p>We are a verified PayPal merchant accepting the above forms of payment. You do not need a PayPal account to pay. We also accept money orders. </p>

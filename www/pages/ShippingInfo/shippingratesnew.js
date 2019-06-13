@@ -1,7 +1,8 @@
+import { PageViewEvent } from '../../lib/react-ga'
 
 const ShippingRatesNewPage = (props) => (
   <div id="content" class="twoColumns">
-
+<PageViewEvent />
 <h1>International Shipping &amp; Handling Rates
 </h1>
 

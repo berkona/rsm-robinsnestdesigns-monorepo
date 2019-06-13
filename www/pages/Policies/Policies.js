@@ -1,7 +1,9 @@
 import React from 'react'
 import Col from 'react-bootstrap/Col'
+import { PageViewEvent } from '../../lib/react-ga'
 
 const PoliciesPage = (props) => (
+  <PageViewEvent />
   <Col>
   <div id="content" class="twoColumns">
 <h1>Policies</h1>

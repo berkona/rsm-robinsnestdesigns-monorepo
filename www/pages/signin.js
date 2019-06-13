@@ -7,6 +7,7 @@ import { Mutation } from 'react-apollo'
 import Router from 'next/router'
 import { CurrentUserContext } from '../lib/auth'
 import { FaSpinner } from 'react-icons/fa'
+import { PageViewEvent } from '../lib/react-ga'
 
 const SIGNIN = gql`
 mutation Signin($email: String!, $password: String!) {
@@ -18,6 +19,7 @@ mutation Signin($email: String!, $password: String!) {
 
 const signin = (props) => {
   return (
+    <><PageViewEvent />
     <CurrentUserContext.Consumer>
       {currentUser => {
         if (currentUser.isLoggedIn()) {
@@ -72,6 +74,7 @@ const signin = (props) => {
         }
       }}
     </CurrentUserContext.Consumer>
+    </>
   )
 }
 

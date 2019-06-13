@@ -172,7 +172,7 @@ class SearchBlock extends React.Component {
 								} else {
 									return <ul>
 										{data.allSubcategories.map(c => (
-											<li><SearchLink key={c.id} categoryId={self.state.categoryId} subcategoryId={c.id} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
+											<li key={c.id}><SearchLink categoryId={self.state.categoryId} subcategoryId={c.id} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
 												<a>{c.title} &gt;</a>
 											</SearchLink></li>
 										))}

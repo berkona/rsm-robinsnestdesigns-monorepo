@@ -1,6 +1,8 @@
+import { PageViewEvent } from '../../lib/react-ga'
 
 const ShippingInfoPage = (props) => (
   <div id="content" class="twoColumns">
+  <PageViewEvent />
 <h1>Shipping Information </h1>
 <p>Unlike some businesses, we don't try to make money on Shipping and Handling costs. We charge what it costs us (including packing materials, time, and gas). We try to do this in a way that makes it easy to determine your costs. All this is explained below. </p>
 <p>As always, if you have questions, just <a href="mailto:robin@robinsnestdesigns.com">contact us</a>! </p>

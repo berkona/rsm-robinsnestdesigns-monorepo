@@ -8,6 +8,7 @@ import { withRouter } from 'next/router'
 import gql from 'graphql-tag'
 import { Query } from 'react-apollo'
 import SEO from '../components/SEO'
+import { PageViewEvent } from '../lib/react-ga'
 
 export const seoQuery = gql`
 query($categoryId: ID!) {
@@ -109,9 +110,11 @@ const SearchPage = withRouter((props) => (
           newOnly={props.router.query.newOnly}
           page={props.router.query.pageNo}
           sortOrder={props.router.query.sortOrder}
+          listName={'Search Results'}
         />
       </div>
     </Col>
+    <PageViewEvent />
   </>
 ))
 

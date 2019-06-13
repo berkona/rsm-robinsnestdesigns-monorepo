@@ -1,9 +1,10 @@
 import React from 'react'
 import Link from 'next/link'
+import { PageViewEvent } from '../../lib/react-ga'
 
 const HowToOrder = (props) => (
   <div style={{ padding: "5px 20px 20px 20px" }} className="twoColumns">
-
+<PageViewEvent />
 <h1>How to Order</h1>
 
 <p>It's so easy to order from <Link href="../"><a><b><i>Robin's

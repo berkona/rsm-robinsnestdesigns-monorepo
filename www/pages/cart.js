@@ -15,6 +15,7 @@ import { Mutation } from 'react-apollo'
 import { FaTrash, FaSpinner } from 'react-icons/fa'
 import Router from 'next/router'
 import fetch from 'isomorphic-unfetch'
+import { CheckoutOpenCartEvent, checkoutOpenPaypalEvent } from '../lib/react-ga'
 
 const query = gql`
   query($orderId: ID!, $shipping: Float, $zipcode: Int, $county: String) {
@@ -36,6 +37,8 @@ const query = gql`
           name
           price
           description
+          category
+          subcategory
           productVariants {
             id
             text
@@ -74,6 +77,8 @@ const deleteCartItem = gql`
           name
           price
           description
+          category
+          subcategory
           productVariants {
             id
             text
@@ -124,6 +129,7 @@ class ProductPage extends React.Component {
       this.state = {
         shippingCost: '3.99',
         taxIsValid: false,
+        needsPageView: true,
       }
   }
 
@@ -188,8 +194,8 @@ class ProductPage extends React.Component {
                       let total = cart.total.toFixed(2)
 
                       return (
-
                         <div id="addToCart">
+                        <CheckoutOpenCartEvent cartItems={cart.items}/>
                         <Row>
                         <Col md={8}>
                           <h1>My Shopping Cart</h1>
@@ -387,6 +393,7 @@ class ProductPage extends React.Component {
                                              options={{ clientId: 'AfRXnOb4Weq93kfQLyPKfaW3e8bYvRbkDBoeTZwCPLcxdottjyLo5t00XxZteN6Up6bmYIKn-GRSUMg2' }}
                                              amount={total}
                                              createOrder={(data, actions) => {
+                                               checkoutOpenPaypalEvent(cart.items)
                                                return actions.order.create({
                                                  purchase_units: [{
                                                    amount: {

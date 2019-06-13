@@ -9,6 +9,7 @@ import Loader from '../components/Loader'
 import { FaSpinner } from 'react-icons/fa'
 import states from '../constants/states'
 import Link from 'next/link'
+import { PageViewEvent } from '../lib/react-ga'
 
 const USER_QUERY = gql`
 query($token: String!) {
@@ -55,6 +56,7 @@ class MyAccount extends React.Component {
   render() {
     const self = this
     return (
+      <><PageViewEvent />
       <CurrentUserContext.Consumer>
         {currentUser => {
           return <Query query={USER_QUERY} variables={{ token: currentUser.getToken() }}>
@@ -188,6 +190,7 @@ class MyAccount extends React.Component {
           </Query>
         }}
       </CurrentUserContext.Consumer>
+      </>
     )
   }
 }
