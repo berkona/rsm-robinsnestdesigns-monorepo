@@ -76,7 +76,7 @@ export class AddImpressionEvent extends React.Component {
 
 export function addSingleImpressionEvent(listName, product, idx) {
   ReactGA.ga('ec:addImpression', {
-    'id': product.id,                   // Product details are provided in an impressionFieldObject.
+    'id': product.sku,                   // Product details are provided in an impressionFieldObject.
     'name': product.name,
     'category': product.category + '/' + product.subcategory,
     'list': listName,
@@ -92,7 +92,7 @@ export function addImpressionsEvent(products, listName) {
 export function productClickEvent(product, idx, listName) {
   console.log('ReactGA.productClickEvent', arguments)
   ReactGA.ga('ec:addProduct', {
-    'id': product.id,
+    'id': product.sku,
     'name': product.name,
     'category': product.category + '/' + product.subcategory,
     'position': idx
@@ -106,7 +106,7 @@ export function productClickEvent(product, idx, listName) {
 function addProduct(product, qty, variant, price, listName) {
   console.log('ReactGA.addProduct', { product, qty, variant, price })
   ReactGA.ga('ec:addProduct', {
-    id: product.id,
+    id: product.sku,
     name: product.name,
     category: product.category + '/' + product.subcategory,
     variant: variant,
@@ -208,11 +208,11 @@ export class CheckoutOpenPaypalEvent extends React.Component {
   }
 }
 
-export function checkoutDoneEvent(cartItems, id, revenue, tax, shipping, coupon) {
+export function checkoutDoneEvent(cartItems, sku, revenue, tax, shipping, coupon) {
   console.log('ReactGA.checkoutDoneEvent', arguments)
   cartItems.forEach(({ product, qty, variant, price }) => addProduct(product, qty, variant, price))
   ReactGA.ga('ec:setAction', 'purchase', {
-    id,
+    sku,
     revenue,
     tax,
     shipping,

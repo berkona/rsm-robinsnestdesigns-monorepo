@@ -31,6 +31,7 @@ query(
     total,
     records {
       id
+      sku
       name
       category
       subcategory

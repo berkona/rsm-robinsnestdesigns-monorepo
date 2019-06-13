@@ -13,6 +13,7 @@ const PRODUCT_QUERY = gql`
 query($productId: ID!) {
   product(productId: $productId) {
     id
+    sku
     qtyInStock
     isOnSale
     price
