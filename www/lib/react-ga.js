@@ -103,7 +103,7 @@ export function productClickEvent(product, idx, listName) {
   ReactGA.event({ category: 'UX', action: 'click', label: 'Results' })
 }
 
-function addProduct(product, qty, variant, price) {
+function addProduct(product, qty, variant, price, listName) {
   console.log('ReactGA.addProduct', { product, qty, variant, price })
   ReactGA.ga('ec:addProduct', {
     id: product.id,
@@ -112,6 +112,7 @@ function addProduct(product, qty, variant, price) {
     variant: variant,
     price: price,
     quantity: qty,
+    list: listName
   })
 }
 
@@ -137,20 +138,20 @@ export class ProductDetailEvent extends React.Component {
   }
 }
 
-function doCartAction(product, qty, variant, price, type) {
-  addProduct(product, qty, variant, price)
+function doCartAction(product, qty, variant, price, type, listName) {
+  addProduct(product, qty, variant, price, listName)
   ReactGA.ga('ec:setAction', type)
   ReactGA.event({ category: 'UX', action: 'click', label: 'Add to cart' })
 }
 
-export function addToCartEvent(product, qty, variant, price) {
+export function addToCartEvent(product, qty, variant, price, listName) {
   console.log('ReactGA.addToCartEvent', arguments)
-  doCartAction(product, qty, variant, price, 'add')
+  doCartAction(product, qty, variant, price, 'add', listName)
 }
 
-export function removeFromCartEvent(product, qty, variant, price) {
+export function removeFromCartEvent(product, qty, variant, price, listName) {
   console.log('ReactGA.removeFromCartEvent', arguments)
-  doCartAction(product, qty, variant, price, 'remove')
+  doCartAction(product, qty, variant, price, 'remove', listName)
 }
 
 export function checkoutOpenCartEvent(cartItems) {

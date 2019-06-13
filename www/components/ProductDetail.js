@@ -91,7 +91,7 @@ const ProductDetail = (props) => (
               <PriceDisplay product={data.product} isOnSale={isOnSale} />
             </div>
 
-            <AddToCart productId={data.product.id} maxQuantity={data.product.qtyInStock || undefined }/>
+            <AddToCart productId={data.product.id} maxQuantity={data.product.qtyInStock || undefined } listref={props.listref} />
             <div style={{ marginTop: '10px' }}>
             <AddToWishList productId={data.product.id} />
             </div>

@@ -194,7 +194,7 @@ class AddToCart extends React.Component {
                   variables: { orderId: data && data.addToCart && data.addToCart.id },
                   data: { cart: data && data.addToCart }
                 })
-                addToCartEvent(product, this.state.quanityToAdd || 1, this.state.variant, price)
+                addToCartEvent(product, this.state.quanityToAdd || 1, this.state.variant, price, self.props.listref)
               }}
               >
             {cartForm('Add To Cart')}
