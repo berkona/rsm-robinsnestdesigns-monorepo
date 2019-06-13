@@ -10,6 +10,7 @@ import Form from 'react-bootstrap/Form'
 import Link from 'next/link'
 import ProductList from './ProductList'
 import AddToCart from './AddToCart'
+import AddToWishList from './AddToWishList'
 import PriceDisplay from './PriceDisplay'
 
 export const pageQuery = gql`
@@ -23,6 +24,7 @@ query($id: ID!) {
     subcategory
     subcategoryId
     sku
+    isOnSale
     price
     salePrice
     saleStart
@@ -86,7 +88,11 @@ const ProductDetail = (props) => (
             <div style={{ margin: '.5em 0' }}>
               <PriceDisplay product={data.product} isOnSale={isOnSale} />
             </div>
+
             <AddToCart productId={data.product.id} maxQuantity={data.product.qtyInStock || undefined }/>
+            <div style={{ marginTop: '10px' }}>
+            <AddToWishList productId={data.product.id} />
+            </div>
 
             <hr style={{ color: '#888' }} />
             <h2>Shipping</h2>

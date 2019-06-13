@@ -20,6 +20,16 @@ const typeDefs = gql`
     ): ProductList!
     cart(orderId: ID!, shipping: Float, zipcode: Int, county: String): Order
     user(token: String!): User
+    wishlist(token: String!): [WishListItem!]!
+    isInWishlist(token: String!, productId: ID!): Boolean
+  }
+
+  scalar Date
+
+  type WishListItem {
+    id: ID!
+    dateAdded: Date!
+    product: Product!
   }
 
   input PriceRange {
@@ -38,6 +48,8 @@ const typeDefs = gql`
     updateCartItem(cartItemId: ID!, qty: Int!, variant: ID): Order!
     removeFromCart(cartItemId: ID!): Order!
     placeOrder(orderId: ID!, paypalOrderId: ID!, shipping: Float!, zipcode: Int!, county: String): Order!
+    addToWishList(token: String!, productId: ID!): Boolean
+    removeFromWishList(token: String!, productId: ID!): Boolean
   }
 
   type Order {

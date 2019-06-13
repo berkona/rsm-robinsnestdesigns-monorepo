@@ -1,3 +1,5 @@
+const { GraphQLScalarType } = require('graphql');
+const { Kind } = require('graphql/language');
 const paypal = require('@paypal/checkout-server-sdk');
 const paypalClient = require('./paypal')
 
@@ -67,7 +69,7 @@ const reduceUser = (row) => {
   }
 }
 
-const isOnSale = (obj) => obj.salePrice && obj.saleStart && obj.saleEnd && obj.salePrice > 0 && IsWithinDateRange(Date.now(), ParseDate(obj.saleStart), ParseDate(obj.saleEnd))
+const isOnSale = (obj) => obj.salePrice && obj.saleStart && obj.saleEnd && obj.salePrice > 0 && IsWithinDateRange(Date.now(), ParseDate(obj.saleStart), ParseDate(obj.saleEnd)) || false
 
 const reduceCartItem = (cartItem) => {
   const product = reduceProduct(cartItem)
@@ -381,6 +383,16 @@ async function getPaypalOrder(paypalOrderId) {
   })
 }
 
+const reduceWishList = (rows) => {
+    return rows.map((row) => {
+      return {
+        id: row.WishListID,
+        dateAdded: row.AddedDate || new Date(),
+        product: reduceProduct(row),
+      }
+    })
+}
+
 const IsWithinDateRange = (timestamp, rangeStart, rangeEnd) => {
   return timestamp > rangeStart && timestamp < rangeEnd
 }
@@ -390,7 +402,31 @@ const ParseDate = (dateStr) => {
   return Number.isNaN(retVal) ? Date.parse(dateStr) : retVal
 }
 
+const getUserFromToken = async (token, db) => {
+  const { uid } = verifyAuthToken(token)
+  const userRow = await db.findUserById(uid)
+  if (!userRow) throw new Error('user does not exist')
+  const user = reduceUser(userRow)
+  return user
+}
+
 const resolvers = {
+  Date: new GraphQLScalarType({
+    name: 'Date',
+    description: 'Date custom scalar type',
+    parseValue: (value) => {
+      return new Date(value); // value from the client
+    },
+    serialize: (value) => {
+      return value.getTime(); // value sent to the client
+    },
+    parseLiteral: (ast) => {
+      if (ast.kind === Kind.INT) {
+        return new Date(ast.value) // ast value is always in string format
+      }
+      return null;
+    },
+  }),
   Query: {
     category: (obj, args, context) => context.dataSources.db.getCategory(args.categoryId).then(x => reduceCategory(x[0])),
     allCategories: (obj, args, context) => context.dataSources.db.listCategories().then(reduceAllCategories),
@@ -411,13 +447,16 @@ const resolvers = {
     saleCategories: (obj, args, context) => context.dataSources.db.listSaleCategories().then(reduceAllCategories),
     cart: (obj, args, context) => getOrder(context.dataSources.db, args.orderId, args.shipping, args.zipcode, args.county),
     user: async (obj, { token }, context) => {
-      const payload = verifyAuthToken(token)
-      const uid = payload.uid
-      const userRow = await context.dataSources.db.findUserById(uid)
-      if (!userRow) throw new Error('user does not exist')
-      const user = reduceUser(userRow)
+      const user = await getUserFromToken(token, context.dataSources.db)
       return user
     },
+    wishlist: async (obj, { token }, context) => {
+      const { uid } = verifyAuthToken(token)
+      const wlRows = await context.dataSources.db.getWishList(uid)
+      const wishList = reduceWishList(wlRows)
+      return wishList
+    },
+    isInWishlist: (obj, { token, productId }, context) => context.dataSources.db.isInWishlist(verifyAuthToken(token).uid, productId),
   },
   Mutation: {
     signin,
@@ -444,6 +483,8 @@ const resolvers = {
       const output = reduceUser(userRow)
       return output
     },
+    addToWishList: (obj, { token, productId }, context) => context.dataSources.db.addToWishList(verifyAuthToken(token).uid, productId),
+    removeFromWishList: (obj, { token, productId }, context) => context.dataSources.db.removeFromWishList(verifyAuthToken(token).uid, productId),
   },
   Product: {
     isOnSale: (obj, args, context) => isOnSale(obj),

@@ -145,6 +145,42 @@ class MyDB extends SQLDataSource {
     this.knex = knex
   }
 
+  async getWishList(uid) {
+    if (!uid) throw new Error('uid is required')
+    return await this.db.select(['WishList.Date as AddedDate', 'WishList.ID as WishListID'].concat(productFields))
+      .from('WishList')
+      .where('AccountID', uid)
+      .innerJoin('Products', 'WishList.ItemID', 'Products.ID')
+      .innerJoin('Category', 'Products.Category', 'Category.ID')
+      .innerJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
+  }
+
+  async isInWishlist(uid, productId) {
+    if (!uid) throw new Error('uid is required')
+    if (!productId) throw new Error('productId is required')
+    const result = await this.db.select('ID')
+      .from('WishList')
+      .where('AccountID', uid)
+      .where('ItemID', productId)
+      .first()
+    return !!result
+  }
+
+  async addToWishList(uid, productId) {
+    if (!uid) throw new Error('uid is required')
+    if (!productId) throw new Error('productId is required')
+    // TODO: fix this race condition
+    const isInWishlist = await this.isInWishlist(uid, productId)
+    if (isInWishlist) return
+    await this.db('WishList').insert({ AccountID: uid, ItemID: productId })
+  }
+
+  async removeFromWishList(uid, productId) {
+    if (!uid) throw new Error('uid is required')
+    if (!productId) throw new Error('productId is required')
+    await this.db('WishList').where({ AccountID: uid, ItemID: productId }).limit(1).del()
+  }
+
   async getPromo(coupon_code) {
     if (!coupon_code)
       throw new Error('coupon_code required')
@@ -288,6 +324,7 @@ class MyDB extends SQLDataSource {
     if (!uid) throw new Error('uid is required')
     return this.db('CustomerAccounts')
       .where('ID', uid)
+      .limit(1)
       .update(patch)
   }
 
@@ -348,7 +385,7 @@ class MyDB extends SQLDataSource {
           return Promise.reject(new Error('Cart item did not match ID'))
         }
         else {
-          return this.db('Cart').where('ID', result.ID).update({ Quantity: qty, Option: variant || '' }).then(() => result.CustomerID)
+          return this.db('Cart').where('ID', result.ID).update({ Quantity: qty, Option: variant || '' }).limit(1).then(() => result.CustomerID)
         }
       })
     } else {
@@ -366,7 +403,7 @@ class MyDB extends SQLDataSource {
           return Promise.reject(new Error('Cart item did not match ID'))
         }
         else {
-          return this.db('Cart').where('ID', result.ID).del().then(() => result.CustomerID)
+          return this.db('Cart').where('ID', result.ID).limit(1).del().then(() => result.CustomerID)
         }
       })
     } else {

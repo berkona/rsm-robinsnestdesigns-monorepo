@@ -34,6 +34,7 @@ query(
       name
       category
       subcategory
+      isOnSale
       price
       salePrice
       saleStart
