@@ -3,8 +3,8 @@ import Col from 'react-bootstrap/Col'
 import { PageViewEvent } from '../../lib/react-ga'
 
 const PoliciesPage = (props) => (
-  <PageViewEvent />
   <Col>
+  <PageViewEvent />
   <div id="content" class="twoColumns">
 <h1>Policies</h1>
 <p>Please let us know if you are have a problem with your order within 30 days after purchase. We will work with you to make it right. However, because some people have tried to take advantage of us, we have implemented the following policies:</p>
