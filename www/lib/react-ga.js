@@ -24,7 +24,6 @@ function pageviewSignalDone() {
 export function pageview() {
   setTimeout(() => {
     console.log('ReactGA.pageview')
-    ReactGA.set({ page: window.location.pathname + window.location.search });
     ReactGA.pageview(window.location.pathname + window.location.search);
   }, 10);
 }
@@ -66,15 +65,7 @@ export class AddImpressionEvent extends React.Component {
 
   componentDidMount() {
     console.log('ReactGA.AddImpressionEvent.componentDidMount', this)
-    if (process.browser) {
-      ReactGA.plugin.execute('ec', 'addImpression', {
-        'id': this.props.id,                   // Product details are provided in an impressionFieldObject.
-        'name': this.props.name,
-        'category': this.props.category + '/' + this.props.subcategory,
-        'list': this.props.listName,
-        'position': this.props.position                    // 'position' indicates the product position in the list.
-      });
-    }
+    addSingleImpressionEvent(this.props.listName, this.props, this.props.position)
     pageviewSignalDone()
   }
 
@@ -84,7 +75,7 @@ export class AddImpressionEvent extends React.Component {
 }
 
 export function addSingleImpressionEvent(listName, product, idx) {
-  ReactGA.plugin.execute('ec', 'addImpression', {
+  ReactGA.ga('ec:addImpression', {
     'id': product.id,                   // Product details are provided in an impressionFieldObject.
     'name': product.name,
     'category': product.category + '/' + product.subcategory,
@@ -100,13 +91,13 @@ export function addImpressionsEvent(products, listName) {
 
 export function productClickEvent(product, idx, listName) {
   console.log('ReactGA.productClickEvent', arguments)
-  ReactGA.plugin.execute('ec', 'addProduct', {
+  ReactGA.ga('ec:addProduct', {
     'id': product.id,
     'name': product.name,
     'category': product.category + '/' + product.subcategory,
     'position': idx
   });
-  ReactGA.plugin.execute('ec', 'setAction', 'click', { list: listName })
+  ReactGA.ga('ec:setAction', 'click', { list: listName })
 
   // Send click with an event, then send user to product page.
   ReactGA.event({ category: 'UX', action: 'click', label: 'Results' })
@@ -114,7 +105,7 @@ export function productClickEvent(product, idx, listName) {
 
 function addProduct(product, qty, variant, price) {
   console.log('ReactGA.addProduct', { product, qty, variant, price })
-  ReactGA.plugin.execute('ec', 'addProduct', {
+  ReactGA.ga('ec:addProduct', {
     id: product.id,
     name: product.name,
     category: product.category + '/' + product.subcategory,
@@ -127,7 +118,7 @@ function addProduct(product, qty, variant, price) {
 export function productDetailEvent(product) {
   console.log('ReactGA.productDetailEvent', arguments)
   addProduct(product)
-  ReactGA.plugin.execute('ec', 'setAction', 'detail')
+  ReactGA.ga('ec:setAction', 'detail')
 }
 
 export class ProductDetailEvent extends React.Component {
@@ -148,7 +139,7 @@ export class ProductDetailEvent extends React.Component {
 
 function doCartAction(product, qty, variant, price, type) {
   addProduct(product, qty, variant, price)
-  ReactGA.plugin.execute('ec', 'setAction', type)
+  ReactGA.ga('ec:setAction', type)
   ReactGA.event({ category: 'UX', action: 'click', label: 'Add to cart' })
 }
 
@@ -165,7 +156,7 @@ export function removeFromCartEvent(product, qty, variant, price) {
 export function checkoutOpenCartEvent(cartItems) {
   console.log('ReactGA.checkoutOpenCartEvent', arguments)
   cartItems.forEach(({ product, qty, variant, price }) => addProduct(product, qty, variant, price))
-  ReactGA.plugin.execute('ec', 'setAction', 'checkout', {
+  ReactGA.ga('ec:setAction', 'checkout', {
     step: 1
   })
   pageview()
@@ -192,7 +183,7 @@ export class CheckoutOpenCartEvent extends React.Component {
 export function checkoutOpenPaypalEvent(cartItems) {
   console.log('ReactGA.checkoutOpenPaypalEvent', arguments)
   cartItems.forEach(({ product, qty, variant, price }) => addProduct(product, qty, variant, price))
-  ReactGA.plugin.execute('ec', 'setAction', 'checkout', {
+  ReactGA.ga('ec:setAction', 'checkout', {
     step: 2
   })
   pageview()
@@ -219,7 +210,7 @@ export class CheckoutOpenPaypalEvent extends React.Component {
 export function checkoutDoneEvent(cartItems, id, revenue, tax, shipping, coupon) {
   console.log('ReactGA.checkoutDoneEvent', arguments)
   cartItems.forEach(({ product, qty, variant, price }) => addProduct(product, qty, variant, price))
-  ReactGA.plugin.execute('ec', 'setAction', 'purchase', {
+  ReactGA.ga('ec:setAction', 'purchase', {
     id,
     revenue,
     tax,
