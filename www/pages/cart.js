@@ -291,10 +291,8 @@ class ProductPage extends React.Component {
                           <div align="left" style={{ padding: '0px 16px' }}>
                             <h1>Checkout</h1>
                             <div align="left">
-                            <Query query={CURRENT_USER} variables={{ token: currentUser.getToken() }}  fetchPolicy={"cache-and-network"} onCompleted={(data) => { console.log('onCompleted', data); this.setState({ shippingZip: data.user.zip }); }}>
+                            <Query query={CURRENT_USER} variables={{ token: currentUser.getToken() }}  fetchPolicy={"cache-and-network"} onCompleted={(data) => { this.setState({ shippingZip: data.user.zip }) }}>
                               {({ loading, error, data }) => {
-                                if (error) return <p>Error: {error.toString()}</p>
-                                const { user } = data
                                 return <>
                                   <Form onSubmit={() => { event.preventDefault() }}>
                                     <Form.Group controlId="shippingZip">

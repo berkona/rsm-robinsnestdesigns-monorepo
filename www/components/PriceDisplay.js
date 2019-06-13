@@ -27,7 +27,7 @@ export default (props) => {
     const lowestPrice = props.product.productVariants.sort((a, b) => a.price - b.price)[0].price.toFixed(2)
     return <div style={ProductTeaserPrice}>
       <>
-        <span>From ${lowestPrice}</span>
+        <span>${lowestPrice}+</span>
         <span></span>
       </>
     </div>
