@@ -4,8 +4,8 @@ import ReactGA from "react-ga";
 const IS_BROWSER = typeof window !== "undefined";
 
 export function initGA(code) {
-  console.log('ReactGA.initGA', code)
   if (IS_BROWSER && !window.GA_INITIALIZED && code) {
+    console.log('ReactGA.initGA', code)
     ReactGA.initialize(code);
     ReactGA.plugin.require('ec');
   }
