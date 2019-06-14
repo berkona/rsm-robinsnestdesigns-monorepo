@@ -7,17 +7,20 @@ import { Query, Mutation } from 'react-apollo'
 import Router from 'next/router'
 import {FaSpinner} from 'react-icons/fa'
 import { CurrentUserContext } from '../lib/auth'
-import { addToCartEvent } from '../lib/react-ga'
+import { Actions } from '../lib/next-ga-ec'
 
 const PRODUCT_QUERY = gql`
 query($productId: ID!) {
   product(productId: $productId) {
     id
     sku
+    name
     qtyInStock
     isOnSale
     price
     salePrice
+    category
+    subcategory
     productVariants {
       id
       price
@@ -195,7 +198,7 @@ class AddToCart extends React.Component {
                   variables: { orderId: data && data.addToCart && data.addToCart.id },
                   data: { cart: data && data.addToCart }
                 })
-                addToCartEvent(product, this.state.quanityToAdd || 1, this.state.variant, price, self.props.listref)
+                Actions.AddToCart({ sku: product.sku, name: product.name, category: product.category + '/' + product.subcategory, variant: this.state.variant, qty: this.state.quanityToAdd || 1, price: price, list: self.props.listref })
               }}
               >
             {cartForm('Add To Cart')}

@@ -9,7 +9,6 @@ import Loader from '../components/Loader'
 import ApolloError from '../components/ApolloError'
 import SEO from '../components/SEO'
 import ProductTeaser from '../components/ProductTeaser'
-import { PageViewEvent } from '../lib/react-ga'
 
 const WISHLIST_QUERY = gql`
 query($token: String!) {
@@ -36,7 +35,6 @@ query($token: String!) {
 `
 const WishListPage = (props) => <Col>
   <SEO title="Wish List" description="See all your favorited items in one place"></SEO>
-  <PageViewEvent />
   <div style={{ padding: '16px'}}>
     <h2>My Wish List</h2>
     <hr />

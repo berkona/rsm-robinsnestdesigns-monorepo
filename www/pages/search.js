@@ -114,7 +114,6 @@ const SearchPage = withRouter((props) => (
         />
       </div>
     </Col>
-    <PageViewEvent />
   </>
 ))
 

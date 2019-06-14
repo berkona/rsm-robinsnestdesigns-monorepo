@@ -25,7 +25,6 @@ const signin = (props) =>
       } else {
         return (
           <Col>
-            <PageViewEvent />
             <div style={{ padding: '24px 24px' }}>
               <h1>Register</h1>
               <p>Register an account at Robin's Nest Designs</p>

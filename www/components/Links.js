@@ -2,10 +2,11 @@ import React from 'react'
 import Link from 'next/link'
 import slugify from 'slugify'
 import { productClickEvent } from '../lib/react-ga'
+import { Actions } from '../lib/next-ga-ec'
 
 export const ProductLink = (props) => (
   <Link href={`/product?productId=${props.productId}&listref=${props.listName}`} as={`/product/${props.productId}/${slugify('' + props.category)}/${slugify('' + props.subcategory)}/${slugify('' + props.title)}?listref=${props.listName}`} prefetch>
-    <a onClick={() => productClickEvent({ id: props.productId, category: props.category, subcategory: props.subcategory, name: props.title }, props.position, props.listName)}>{props.children}</a>
+    <a onClick={() => Actions.ProductClick({ sku: props.sku, category: props.category + '/' + props.subcategory, name: props.title, position: props.position, list: props.listName })}>{props.children}</a>
   </Link>
 )
 

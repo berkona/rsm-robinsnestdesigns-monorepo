@@ -136,7 +136,7 @@ async function main() {
       fs.unlinkSync(file)
 
       console.log('Uploaded to ', CDN_URL + file)
-      //await knex('Products').where('ID', row.ID).update({ Hyperlinked_Image: CDN_URL + file })
+      await knex('Products').where('ID', row.ID).update({ Hyperlinked_Image: CDN_URL + file })
     }
   } while (rows.length > 0)
 

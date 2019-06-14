@@ -1,7 +1,6 @@
 import React from "react"
 import Link from 'next/link'
 import { Query } from 'react-apollo'
-import Loader from '../components/Loader'
 import gql from 'graphql-tag'
 import Col from 'react-bootstrap/Col'
 import Row from 'react-bootstrap/Row'
@@ -15,7 +14,8 @@ import { Mutation } from 'react-apollo'
 import { FaTrash, FaSpinner } from 'react-icons/fa'
 import Router from 'next/router'
 import fetch from 'isomorphic-unfetch'
-import { CheckoutOpenCartEvent, checkoutOpenPaypalEvent } from '../lib/react-ga'
+import { checkoutOpenPaypalEvent, checkoutDoneEvent } from '../lib/react-ga'
+import { Product, CheckoutAction } from '../lib/next-ga-ec'
 
 const query = gql`
   query($orderId: ID!, $shipping: Float, $zipcode: Int, $county: String) {
@@ -195,7 +195,6 @@ class ProductPage extends React.Component {
 
                       return (
                         <div id="addToCart">
-                        <CheckoutOpenCartEvent cartItems={cart.items}/>
                         <Row>
                         <Col md={8}>
                           <h1>My Shopping Cart</h1>
@@ -213,6 +212,14 @@ class ProductPage extends React.Component {
                               {cart.items.map(({ id, price, qty, product, variant }, idx) => {
                                 variant = product.productVariants.filter(x => x.id == variant).map(x => x.text)[0] || ''
                                 return <tr key={idx} className="odd" bgcolor="#E4EDF4">
+                                <Product
+                                  sku={product.sku}
+                                  name={product.name}
+                                  category={product.category + '/' + product.subcategory}
+                                  price={price}
+                                  qty={qty}
+                                  variant={variant}
+                                  />
                                   <td style={{borderTop: "#CCCCCC solid 1px"}}>
                                     <div align="center">
                                       <Link href={`/product?productId=${product.id}`} as={`/product/${product.id}`}>
@@ -290,6 +297,7 @@ class ProductPage extends React.Component {
                   <Col md={4}>
                           <div align="left" style={{ padding: '0px 16px' }}>
                             <h1>Checkout</h1>
+                            <CheckoutAction step={1}/>
                             <div align="left">
                             <Query query={CURRENT_USER} variables={{ token: currentUser.getToken() }}  fetchPolicy={"cache-and-network"} onCompleted={(data) => { this.setState({ shippingZip: data.user.zip }) }}>
                               {({ loading, error, data }) => {
@@ -412,7 +420,7 @@ class ProductPage extends React.Component {
                                                        name: product.name,
                                                        unit_amount: makeAmount(price),
                                                        quantity: qty,
-                                                       description: product.description && product.description.slice(127) || '',
+                                                       description: product.description && product.description.slice(0, 127) || '',
                                                        category: 'PHYSICAL_GOODS',
                                                      }
                                                    })
@@ -428,6 +436,12 @@ class ProductPage extends React.Component {
                                                } else {
                                                  return mutationFn({ variables: { paypalOrderId }}).then(
                                                    () => {
+                                                     // TODO: add coupon
+                                                     checkoutDoneEvent(cart.items, paypalOrderId,
+                                                       details.purchase_units[0].amount.value,
+                                                       details.purchase_units[0].amount.breakdown.tax_total.value,
+                                                       details.purchase_units[0].amount.breakdown.shipping.value
+                                                     )
                                                      currentUser.deleteCartId()
                                                      Router.push('/order/' + cartId)
                                                    },

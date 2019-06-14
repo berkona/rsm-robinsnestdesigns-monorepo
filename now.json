@@ -2,6 +2,7 @@
   "version": 2,
   "name": "robins-nest-designs",
   "alias": ["robins-nest-designs.berkona.now.sh"],
+  "regions": [ "iad1" ],
   "env": {
     "SQL_ENGINE": "mysql",
     "SQL_HOST": "@sql-host",

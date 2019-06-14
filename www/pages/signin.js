@@ -19,7 +19,7 @@ mutation Signin($email: String!, $password: String!) {
 
 const signin = (props) => {
   return (
-    <><PageViewEvent />
+    <>
     <CurrentUserContext.Consumer>
       {currentUser => {
         if (currentUser.isLoggedIn()) {

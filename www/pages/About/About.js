@@ -1,5 +1,4 @@
 import { CategoryLink } from '../../components/Links'
-import { PageViewEvent } from '../../lib/react-ga'
 const AboutStyle =  {
     width: "700px",
     margin: "0 0 0 0px",
@@ -9,7 +8,6 @@ const AboutStyle =  {
 
 export default (props) => (
   <div style={AboutStyle} className="twoColumns">
-  <PageViewEvent />
   <h1>About Us </h1>
   <p><i><font color="#000099">Robin's Nest Designs</font> </i>has been gladly serving the stitchers of the Internet community since 1996 as a <a href="#Proud Member">proud member</a> of various Internet and needlework associations. We started off as a design studio creating our own Robin's Nest Originals and doing custom designs. With so many customers also wanting their special designs as kits, we started providing floss and fabric. We no longer do custom design work, but now Robin's Nest Designs is excited to offer the best selection in needlework supplies!</p>
   <p>Robin Monroe is the chief needlework designer, webmaster, and contact person for orders from <i><font color="#000099">Robin's Nest Designs</font></i><font color="#000000">. </font>She has been interested in some form of arts and crafts ever since she was little. Her mother introduced her to crochet at 10. She taught herself macrame and embroidery in high school. It was in graduate school when a friend first introduced her to cross stitch. It was love at first stitch!</p>

@@ -12,7 +12,7 @@ import ProductList from './ProductList'
 import AddToCart from './AddToCart'
 import AddToWishList from './AddToWishList'
 import PriceDisplay from './PriceDisplay'
-import { ProductDetailEvent } from '../lib/react-ga'
+import { Product, ProductDetailAction } from '../lib/next-ga-ec'
 
 export const pageQuery = gql`
 query($id: ID!) {
@@ -62,7 +62,25 @@ const ProductDetail = (props) => (
     const shippingTime = data.product.qtyInStock > 0 ? 'Ships in 1-2 business days' : 'Order by Tuesday at 12 PM EST'
     return (
       <div className="product-detail">
-      <ProductDetailEvent product={data.product} />
+      <ProductDetailAction />
+      <Product sku={data.product.sku}
+               name={data.product.name}
+               category={data.product.category + '/' + data.product.subcategory}
+               price={
+                 data.product.productVariants.length > 0
+                 ? data.product.productVariants[0].price
+                 : data.product.isOnSale
+                    ? data.product.salePrice
+                    : data.product.price
+                }
+                variant={
+                  data.product.productVariants.length > 0
+                  ? data.product.productVariants[0].text
+                  : undefined
+                }
+                qty={1}
+                list={props.listref}
+               />
       <SEO
         title={data.product.name + ' | ' + data.product.category + ' | ' + data.product.subcategory}
         description={'Buy ' + data.product.name + ' now. ' + data.product.description}

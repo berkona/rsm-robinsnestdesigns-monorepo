@@ -208,14 +208,15 @@ export class CheckoutOpenPaypalEvent extends React.Component {
   }
 }
 
-export function checkoutDoneEvent(cartItems, sku, revenue, tax, shipping, coupon) {
+export function checkoutDoneEvent(cartItems, id, revenue, tax, shipping, coupon) {
   console.log('ReactGA.checkoutDoneEvent', arguments)
   cartItems.forEach(({ product, qty, variant, price }) => addProduct(product, qty, variant, price))
   ReactGA.ga('ec:setAction', 'purchase', {
-    sku,
+    id,
     revenue,
     tax,
     shipping,
     coupon,
   })
+  pageview()
 }

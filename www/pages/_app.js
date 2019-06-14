@@ -8,8 +8,8 @@ import Router from 'next/router'
 import withGA from "next-ga"
 import Cookies from 'nookies'
 import { CurrentUserProvider } from '../lib/auth'
-import { initGA } from '../lib/react-ga'
-
+// import { initGA } from '../lib/react-ga'
+import { initGA, PageView } from '../lib/next-ga-ec'
 const USER_TOKEN = 'USER_TOKEN'
 const USER_CART = 'CUSTOMERID'
 
@@ -109,9 +109,11 @@ class MyApp extends App {
       <Container>
         <ApolloProvider client={apolloClient}>
           <CurrentUserProvider value={CurrentUser}>
-            <Layout>
-              <Component {...pageProps} />
-            </Layout>
+            <PageView>
+              <Layout>
+                <Component {...pageProps} />
+              </Layout>
+            </PageView>
           </CurrentUserProvider>
         </ApolloProvider>
       </Container>

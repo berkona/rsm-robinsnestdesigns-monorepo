@@ -1,5 +1,4 @@
 import { CategoryLink } from '../../components/Links'
-import { PageViewEvent } from '../../lib/react-ga'
 
 const AboutStyle =  {
     width: "700px",
@@ -10,7 +9,6 @@ const AboutStyle =  {
 
 export default (props) => (
   <div style={AboutStyle} class="twoColumns">
-  <PageViewEvent />
 <h1>How to Contact Us </h1>
 <p>We're always happy to help our customers. You can contact us in a variety of ways:</p>
   <table width="500" border="0" align="center" cellPadding="6">

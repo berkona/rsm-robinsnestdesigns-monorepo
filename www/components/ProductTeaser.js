@@ -1,13 +1,18 @@
 import React from "react"
 import { ProductLink } from "./Links"
 import PriceDisplay from './PriceDisplay'
-import { AddImpressionEvent } from '../lib/react-ga'
+import { Impression } from '../lib/next-ga-ec'
 
 const ProductTeaser = (props) => {
     const isOnSale = props.product.isOnSale
     return (
-      <ProductLink productId={props.product.id} category={props.product.category} subcategory={props.product.subcategory} title={props.product.name} listName={props.listName} position={props.position}>
-        <AddImpressionEvent id={props.product.id} category={props.product.category} subcategory={props.product.subcategory} name={props.product.name} listName={props.listName} position={props.position} />
+      <ProductLink productId={props.product.id} sku={props.product.sku} category={props.product.category} subcategory={props.product.subcategory} title={props.product.name} listName={props.listName} position={props.position}>
+        <Impression sku={props.product.sku}
+                    name={props.product.name}
+                    category={`${props.product.category}/${props.product.subcategory}`}
+                    list={props.listName}
+                    position={props.position}
+        />
         <div className="product-teaser">
           <div className="product-thumbnail">
             {

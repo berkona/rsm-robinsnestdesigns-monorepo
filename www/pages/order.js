@@ -7,7 +7,6 @@ import Table from 'react-bootstrap/Table'
 import { withRouter } from 'next/router'
 import Loader from '../components/Loader'
 import Link from 'next/link'
-import { PageViewEvent } from '../lib/react-ga'
 
 const query = gql`
   query($orderId: ID!) {
@@ -47,7 +46,7 @@ const query = gql`
 `
 
 const OrderPage = withRouter(
-  (props) => <Col><PageViewEvent /><div style={{ paddingLeft: '10px', paddingRight: '10px' }}><Query query={query} variables={{ orderId: props.router.query.orderId }}>
+  (props) => <Col><div style={{ paddingLeft: '10px', paddingRight: '10px' }}><Query query={query} variables={{ orderId: props.router.query.orderId }}>
   {({ loading, error, data}) => {
     if (loading) return <Loader />
     if (error) return <p>Error: {error.toString()}</p>
@@ -55,7 +54,7 @@ const OrderPage = withRouter(
       return <p>Order not yet placed.  If you think this is an error contact Support.</p>
     }
     return <>
-      <Row><Col><h1>Your order with Robin Nest Designs</h1></Col></Row>
+      <Row><Col><h1>Your order with Robin's Nest Designs</h1><p>Thank you for ordering with Robin's Nest Designs.  Below are the details are the details of your order.  Please print it for your records.</p></Col></Row>
       <Row>
         <Col md={6}>
           <p>Order No: {props.router.query.orderId}</p>

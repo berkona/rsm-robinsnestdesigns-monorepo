@@ -3,7 +3,6 @@ import Sidebar from '../components/Sidebar'
 import CategoryLinks from '../components/CategoryLinks'
 import ProductList from '../components/ProductList'
 import { SearchLink } from '../components/Links'
-import { PageViewEvent } from '../lib/react-ga'
 
 const Index = (props) => (
   <>
@@ -32,7 +31,6 @@ const Index = (props) => (
             <a><h2>New in the Bargin Bin</h2></a>
           </SearchLink>
           <ProductList isTeaser={true} sortOrder="random" categoryId={215} limit={8} listName={'Index - New in Bargin Bin'} />
-          <PageViewEvent />
         </div>
       </div>
     </Col>
