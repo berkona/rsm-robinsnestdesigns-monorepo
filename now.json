@@ -3,10 +3,10 @@
   "name": "robins-nest-designs",
   "alias": ["robins-nest-designs.berkona.now.sh"],
   "env": {
-    "SQL_ENGINE": "mssql",
+    "SQL_ENGINE": "mysql",
     "SQL_HOST": "@sql-host",
     "SQL_USER": "@sql-user",
-    "SQL_PWD": "@db-password",
+    "SQL_PWD": "@sql-password",
     "SQL_DB": "@sql-db",
     "PAYPAL_CLIENTID": "@paypal-client-id",
     "PAYPAL_CLIENTSECRET": "@paypal-client-secret-sandbox",
