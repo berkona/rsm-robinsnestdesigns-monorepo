@@ -12,7 +12,7 @@ const ProductTeaser = (props) => {
           <div className="product-thumbnail">
             {
               (props.product.hyperlinkedImage || props.product.thumbnail || props.product.image)
-              ? <img src={props.product.hyperlinkedImage || `https://www.robinsnestdesigns.com/ahpimages/${props.product.thumbnail || props.product.image}`}></img>
+              ? <img src={props.product.hyperlinkedImage || `https://www.robinsnestdesigns.com/ahpimages/${props.product.image || props.product.thumbnail}`}></img>
               : <img src="/static/no-image.png"/>
             }
           </div>

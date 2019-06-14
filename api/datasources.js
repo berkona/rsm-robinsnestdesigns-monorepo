@@ -1,11 +1,11 @@
 const { SQLDataSource } = require("datasource-sql")
 
-if (!process.env.SQL_HOST || !process.env.SQL_USER || !process.env.SQL_PWD || !process.env.SQL_DB) {
-  throw new Error('You must set the environmental variables: SQL_HOST, SQL_USER, SQL_PWD, SQL_DB before starting server')
+if (!process.env.SQL_ENGINE || !process.env.SQL_HOST || !process.env.SQL_USER || !process.env.SQL_PWD || !process.env.SQL_DB) {
+  throw new Error('You must set the environmental variables: SQL_ENGINE, SQL_HOST, SQL_USER, SQL_PWD, SQL_DB before starting server')
 }
 
 const knex = require('knex')({
-  client: 'mssql',
+  client: process.env.SQL_ENGINE,
   connection: {
     host: process.env.SQL_HOST,
     user: process.env.SQL_USER,
@@ -281,7 +281,7 @@ class MyDB extends SQLDataSource {
       dataQuery = dataQuery.orderBy('EffectivePrice', 'desc')
     }
     else if (args.sort == 'random') {
-      dataQuery = dataQuery.orderByRaw('NEWID()')
+      dataQuery = dataQuery.orderByRaw(process.env.SQL_ENGINE == 'mssql' ? 'NEWID()' : process.env.SQL_ENGINE == 'mysql' ? 'RAND()' : 'RANDOM()')
     }
     // relevance by default
     else {

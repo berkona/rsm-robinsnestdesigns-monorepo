@@ -3,6 +3,7 @@
 .serverless/*
 .sonarlint/*
 */.sonarlint/*
+node_modules/*
 */node_modules/*
 *secrets.yml
 *.env
