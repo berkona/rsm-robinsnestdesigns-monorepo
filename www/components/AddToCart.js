@@ -5,9 +5,10 @@ import Collapse from 'react-bootstrap/Collapse'
 import gql from 'graphql-tag'
 import { Query, Mutation } from 'react-apollo'
 import Router from 'next/router'
-import {FaSpinner} from 'react-icons/fa'
+import {FaSpinner, FaInfoCircle } from 'react-icons/fa'
 import { CurrentUserContext } from '../lib/auth'
 import { Actions } from '../lib/next-ga-ec'
+import Alert from 'react-bootstrap/Alert'
 
 const PRODUCT_QUERY = gql`
 query($productId: ID!) {
@@ -224,7 +225,12 @@ class AddToCart extends React.Component {
 
                     if (matchingItems.length > 0) {
                       const firstMatchingItem = matchingItems[0]
-                      return <Mutation
+                      return <>
+                      <Alert variant="info">
+                        <span style={{ marginRight: '10px', fontSize: '20px' }}><FaInfoCircle /></span>
+                        <span>Item already in cart</span>
+                      </Alert>
+                      <Mutation
                         mutation={UPDATE_CART}
                         variables={{
                           cartItemId: firstMatchingItem.id,
@@ -241,6 +247,7 @@ class AddToCart extends React.Component {
                         >
                         {cartForm('Update Cart', firstMatchingItem.qty, firstMatchingItem.variant)}
                         </Mutation>
+                        </>
                     } else {
                       return addToCart()
                     }

@@ -55,8 +55,8 @@ class ProductTeaserOverlay extends React.Component {
         <Fade in={this.state.showOverlay}>
           <div style={{ background: 'rgba(0, 0, 0, 0.5)', width: '100%', height: '100%', position: 'absolute', top: '0', left: '0' }}>
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-              <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-around' }}>
-                <Button variant="light">
+              <div style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-around' }}>
+                <Button variant="light" style={{ fontSize: '20px' }}>
                   <FaSearch />
                 </Button>
 
@@ -84,7 +84,11 @@ class ProductTeaserOverlay extends React.Component {
                   }}
                   >
                   {(mutationFn, { loading, error, data }) => {
-                    return <Button disabled={this.props.product.productVariants.length !== 0} variant="light" onClick={() => { event.preventDefault(); mutationFn(); }}>
+                    return <Button
+                      disabled={this.props.product.productVariants.length !== 0}
+                      variant="light"
+                      onClick={() => { event.preventDefault(); mutationFn(); }}
+                      style={{ fontSize: '20px' }}>
                       <FaCartPlus />
                     </Button>
                   }}
@@ -117,7 +121,15 @@ const ProductTeaser = (props) => {
                        position={props.position}
            />
 
-           <div className="product-teaser">
+           <div className="product-teaser"
+            style={{
+              border: '1px solid rgba(0,0,0,.125)',
+              borderRadius: '.25rem',
+              height: '222px',
+              marginBottom: '10px',
+              padding: '10px',
+            }}>
+
              <div className="product-thumbnail">
              <ProductTeaserOverlay product={props.product}
                                    list={props.listName}
