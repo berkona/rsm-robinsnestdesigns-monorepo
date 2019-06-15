@@ -69,6 +69,11 @@ class MyNavbar extends React.Component {
             <Button variant="dark" type="submit">Search</Button>
           </Form>
           <Nav className="ml-auto">
+            <Nav.Item>
+              <Link href="/subscribe" passHref>
+                <Nav.Link>Subscribe</Nav.Link>
+              </Link>
+            </Nav.Item>
             {isLoggedIn
               ?
               <>
