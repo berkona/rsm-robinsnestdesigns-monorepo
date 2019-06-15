@@ -8,6 +8,7 @@ import { CurrentUserContext } from '../lib/auth'
 import gql from 'graphql-tag'
 import { Mutation } from 'react-apollo'
 import Form from 'react-bootstrap/Form'
+import Fade from 'react-bootstrap/Fade'
 
 const ADD_TO_CART = gql`
   mutation addToCart($productId: ID!, $qty: Int!, $orderId: ID, $variant: ID) {
@@ -51,45 +52,47 @@ class ProductTeaserOverlay extends React.Component {
     render() {
       return <div style={{ height: '100%', width: '100%' }} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
         {this.props.children}
-        {this.state.showOverlay && <div style={{ background: 'rgba(0, 0, 0, 0.5)', width: '100%', height: '100%', position: 'absolute', top: '0', left: '0' }}>
-          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-            <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-around' }}>
-              <Button variant="light">
-                <FaSearch />
-              </Button>
+        <Fade in={this.state.showOverlay}>
+          <div style={{ background: 'rgba(0, 0, 0, 0.5)', width: '100%', height: '100%', position: 'absolute', top: '0', left: '0' }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+              <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-around' }}>
+                <Button variant="light">
+                  <FaSearch />
+                </Button>
 
-              <Mutation
-                mutation={ADD_TO_CART}
-                variables={{
-                  productId: this.props.product.id,
-                  orderId: this.props.currentUser.getCartId(),
-                  qty: 1,
-                }}
-                onCompleted={(data) => {
-                  if (!this.props.currentUser.getCartId() && data && data.addToCart && data.addToCart.id) {
-                    console.log('setting cartId to ', data.addToCart.id)
-                    this.props.currentUser.setCartId(data.addToCart.id)
-                  }
-                  Actions.AddToCart({
-                    sku: this.props.product.sku,
-                    name: this.props.product.name,
-                    category: this.props.product.category + '/' + this.props.product.subcategory,
-                    price: this.props.product.isOnSale ? this.props.product.price : this.props.product.salePrice,
+                <Mutation
+                  mutation={ADD_TO_CART}
+                  variables={{
+                    productId: this.props.product.id,
+                    orderId: this.props.currentUser.getCartId(),
                     qty: 1,
-                    list: this.props.list,
-                    position: this.props.position,
-                  })
-                }}
-                >
-                {(mutationFn, { loading, error, data }) => {
-                  return <Button disabled={this.props.product.productVariants.length !== 0} variant="light" onClick={() => { event.preventDefault(); mutationFn(); }}>
-                    <FaCartPlus />
-                  </Button>
-                }}
-              </Mutation>
+                  }}
+                  onCompleted={(data) => {
+                    if (!this.props.currentUser.getCartId() && data && data.addToCart && data.addToCart.id) {
+                      console.log('setting cartId to ', data.addToCart.id)
+                      this.props.currentUser.setCartId(data.addToCart.id)
+                    }
+                    Actions.AddToCart({
+                      sku: this.props.product.sku,
+                      name: this.props.product.name,
+                      category: this.props.product.category + '/' + this.props.product.subcategory,
+                      price: this.props.product.isOnSale ? this.props.product.price : this.props.product.salePrice,
+                      qty: 1,
+                      list: this.props.list,
+                      position: this.props.position,
+                    })
+                  }}
+                  >
+                  {(mutationFn, { loading, error, data }) => {
+                    return <Button disabled={this.props.product.productVariants.length !== 0} variant="light" onClick={() => { event.preventDefault(); mutationFn(); }}>
+                      <FaCartPlus />
+                    </Button>
+                  }}
+                </Mutation>
+              </div>
             </div>
           </div>
-        </div>}
+        </Fade>
       </div>
     }
 }
