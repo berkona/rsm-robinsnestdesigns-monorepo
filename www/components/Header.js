@@ -1,10 +1,13 @@
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
+import Link from 'next/link'
 
 const Header = () => (
   <Row id="header">
     <Col id="logo">
-      <img src="/static/rnd-framed-v3.gif" alt="Robin's Nest Designs Logo" width="520" height="145" id="logo" />
+      <Link href="/">
+        <img src="/static/rnd-framed-v3.gif" alt="Robin's Nest Designs Logo" width="520" height="145" id="logo" />
+      </Link>
     </Col>
     <Col id="siteName">
       <h1> Your Online Shop for Everything Needlework! </h1>

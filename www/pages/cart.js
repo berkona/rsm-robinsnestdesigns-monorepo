@@ -7,15 +7,15 @@ import Row from 'react-bootstrap/Row'
 import PaymentOptions from '../components/PaymentOptions'
 import { PayPalButton } from "react-paypal-button-v2"
 import Form from 'react-bootstrap/Form'
-import Button from 'react-bootstrap/Button'
 import Collapse from 'react-bootstrap/Collapse'
 import { CurrentUserContext } from '../lib/auth'
 import { Mutation } from 'react-apollo'
-import { FaTrash, FaSpinner } from 'react-icons/fa'
 import Router from 'next/router'
 import fetch from 'isomorphic-unfetch'
 import { checkoutOpenPaypalEvent, checkoutDoneEvent } from '../lib/react-ga'
 import { Product, CheckoutAction } from '../lib/next-ga-ec'
+import SEO from '../components/SEO'
+import CartItemTeaser from '../components/CartItemTeaser'
 
 const query = gql`
   query($orderId: ID!, $shipping: Float, $zipcode: Int, $county: String) {
@@ -36,9 +36,14 @@ const query = gql`
           sku
           name
           price
+          salePrice
+          isOnSale
           description
           category
           subcategory
+          hyperlinkedImage
+          image
+          thumbnail
           productVariants {
             id
             text
@@ -55,38 +60,6 @@ mutation($orderId: ID!, $paypalOrderId: ID!, $shipping: Float!, $zipcode: Int!, 
     id
   }
 }
-`
-
-const deleteCartItem = gql`
-  mutation($cartItemId: ID!) {
-    removeFromCart(cartItemId: $cartItemId) {
-      id
-      placed
-      subtotal
-      shipping
-      tax
-      total
-      items {
-        id
-        price
-        qty
-        variant
-        product {
-          id
-          sku
-          name
-          price
-          description
-          category
-          subcategory
-          productVariants {
-            id
-            text
-          }
-        }
-      }
-    }
-  }
 `
 
 const CURRENT_USER = gql`
@@ -123,7 +96,7 @@ const makeAmount = (value) => {
 
 const needsTax = (zip) => isZipValid(zip) && (zip.startsWith('27') || zip.startsWith('28'))
 
-class ProductPage extends React.Component {
+class CartPage extends React.Component {
   constructor(props) {
       super(props)
       this.state = {
@@ -140,8 +113,10 @@ class ProductPage extends React.Component {
         if (!cartId) {
           return (
             <Col>
+              <SEO title="My Cart" description="View the items in your cart at Robin's Nest Designs" />
               <div id="addToCart" style={{ padding: '24px' }}>
                 <h1>My Shopping Cart</h1>
+                <hr />
                 <div className="msg" align="center"> <h3>Your Shopping Cart Is Empty</h3> </div>
                 <div align="center">
                   <Link href="/">
@@ -177,6 +152,7 @@ class ProductPage extends React.Component {
                     return (
                       <div id="addToCart">
                         <h1>My Shopping Cart</h1>
+                        <hr />
                         <div className="msg" align="center"> <h3>Your Shopping Cart Is Empty</h3> </div>
                         <div align="center">
                           <Link href="/">
@@ -198,106 +174,51 @@ class ProductPage extends React.Component {
                         <Row>
                         <Col md={8}>
                           <h1>My Shopping Cart</h1>
-                          <table className="cartItems" width="100%" cellPadding="2" cellSpacing="0" style={{borderTop: "#CCCCCC solid 1px"}}>
-                            <tbody>
-                            <tr className="header" bgcolor="#587E98">
-                <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Item ID </div></b></font></td>
-                <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Item Name </div></b></font></td>
-                <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Quantity </div></b></font></td>
-                <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Price </div></b></font></td>
-                <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Subtotal </div></b></font></td>
-                <td bgcolor="#587E98"><font color="#ffffff"><b><div align="center"> Delete </div></b></font></td>
-              </tr>
-
-                              {cart.items.map(({ id, price, qty, product, variant }, idx) => {
-                                variant = product.productVariants.filter(x => x.id == variant).map(x => x.text)[0] || ''
-                                return <tr key={idx} className="odd" bgcolor="#E4EDF4">
-                                <Product
-                                  sku={product.sku}
-                                  name={product.name}
-                                  category={product.category + '/' + product.subcategory}
-                                  price={price}
-                                  qty={qty}
-                                  variant={variant}
-                                  />
-                                  <td style={{borderTop: "#CCCCCC solid 1px"}}>
-                                    <div align="center">
-                                      <Link href={`/product?productId=${product.id}`} as={`/product/${product.id}`}>
-                                        <a>{product.sku}</a>
-                                      </Link>
-                                    </div>
-                                  </td>
-                                  <td style={{borderTop: "#CCCCCC solid 1px"}}>
-                                    <div align="left">
-                                      <font size="-1">{product.name} {variant}</font>
-                                    </div>
-                                  </td>
-                                  <td style={{borderTop: "#CCCCCC solid 1px"}}>
-                                    <div align="center">
-                                      <input type="text" name="Quantity" value={qty} size="3" maxLength="6" disabled />
-                                    </div>
-                                  </td>
-                                  <td style={{borderTop: "#CCCCCC solid 1px"}}><div align="right">${price.toFixed(2)}</div></td>
-                                  <td style={{borderTop: "#CCCCCC solid 1px"}}><div align="right">${(price * qty).toFixed(2)}</div></td>
-                                  <td style={{borderTop: "#CCCCCC solid 1px"}}>
-                                    <div align="center">
-                                      <Mutation mutation={deleteCartItem} update={(cache, { data }) => {
-                                        cache.writeQuery({
-                                          query: query,
-                                          variables: { orderId: cartId },
-                                          data: { cart: data.removeFromCart }
-                                        })
-                                      }}>
-                                        {(deleteCartItem, { data, error, loading }) => {
-                                          if (error) return <p>Error deleting cart item: {error.toString()}</p>
-                                          return <Form
-                                            style={{ marginBottom: '0' }}
-                                            onSubmit={() => {
-                                              event.preventDefault()
-                                              deleteCartItem({ variables: { cartItemId: id } })
-                                            }}>
-
-                                            <Button type="submit" variant="danger" disabled={loading}>
-                                              {loading && <><FaSpinner style={{ marginRight: '5px' }} /> Working...</> }
-                                              {!loading && <><FaTrash /> Remove</>}
-                                            </Button>
-
-                                          </Form>
-                                        }}
-                                      </Mutation>
-                                    </div>
-                                  </td>
-                                </tr>
-                              })}
-              	 <tr>
-                      <td colSpan="4" align="right" style={{borderTop: "#CCCCCC solid 1px"}}><strong>Subtotal:</strong></td>
-                      <td style={{borderTop: "#CCCCCC solid 1px"}} align="right"><strong>${subtotal}</strong></td>
-                        <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
-
-                  </tr>
-                  <tr>
-                     <td colSpan="4" align="right" style={{borderTop: "#CCCCCC solid 1px"}}><strong>Shipping:</strong></td>
-                     <td style={{borderTop: "#CCCCCC solid 1px"}} align="right"><strong>${shippingCost}</strong></td>
-                       <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
-
-                   </tr>
-                   <tr>
-                      <td colSpan="4" align="right" style={{borderTop: "#CCCCCC solid 1px"}}><strong>Tax:</strong></td>
-                      <td style={{borderTop: "#CCCCCC solid 1px"}} align="right"><strong>${tax}</strong></td>
-                        <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
-
-                    </tr>
-                    <tr>
-                       <td colSpan="4" align="right" style={{borderTop: "#CCCCCC solid 1px"}}><strong>Total:</strong></td>
-                       <td style={{borderTop: "#CCCCCC solid 1px"}} align="right"><strong>${total}</strong></td>
-                         <td style={{borderTop: "#CCCCCC solid 1px"}} align="center"></td>
-                     </tr>
-                  </tbody></table>
-                  </Col>
-                  <Col md={4}>
+                          <hr />
+                          {
+                            cart.items.map(({
+                              id,
+                              price,
+                              qty,
+                              product,
+                              variant
+                            }) => <CartItemTeaser key={id}
+                                                  token={currentUser.getToken()}
+                                                  cartId={cartId}
+                                                  cartItemId={id}
+                                                  product={product}
+                                                  price={price}
+                                                  qty={qty}
+                                                  variant={variant} />)
+                          }
+                        </Col>
+                        <Col md={4}>
                           <div align="left" style={{ padding: '0px 16px' }}>
                             <h1>Checkout</h1>
+                            <hr />
                             <CheckoutAction step={1}/>
+
+                            <table style={{ fontSize: '16px', fontWeight: 'bold', width: '100%', marginBottom: '16px' }}>
+                              <tbody>
+                                <tr>
+                                  <td>Subtotal</td>
+                                  <td style={{ textAlign: 'right' }}>${subtotal}</td>
+                                </tr>
+                                <tr>
+                                  <td>Shipping</td>
+                                  <td style={{ textAlign: 'right' }}>${shippingCost}</td>
+                                </tr>
+                                <tr>
+                                  <td>Tax</td>
+                                  <td style={{ textAlign: 'right' }}>${tax}</td>
+                                </tr>
+                                <tr>
+                                  <td>Grand Total</td>
+                                  <td style={{ textAlign: 'right' }}>${total}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+
                             <div align="left">
                             <Query query={CURRENT_USER} variables={{ token: currentUser.getToken() }}  fetchPolicy={"cache-and-network"} onCompleted={(data) => { this.setState({ shippingZip: data.user.zip }) }}>
                               {({ loading, error, data }) => {
@@ -477,4 +398,4 @@ class ProductPage extends React.Component {
   }
 }
 
-export default ProductPage
+export default CartPage
