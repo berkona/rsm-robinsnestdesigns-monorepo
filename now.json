@@ -26,6 +26,7 @@
     { "src": "/product/(?<productId>[^/]+).*$", "dest": "/www/product?productId=$productId" },
     { "src": "/category/(?<categoryId>[^/]+).*$", "dest": "/www/category?categoryId=$categoryId" },
     { "src": "/order/(?<orderId>[^/]+).*$", "dest": "/www/order?orderId=$orderId" },
+    { "src": "/search.*$", "dest": "/www/search" },
     {
       "src": "/(.*)",
       "dest": "/www/$1",
