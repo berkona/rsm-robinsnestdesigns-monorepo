@@ -7,7 +7,6 @@ import { Mutation } from 'react-apollo'
 import Router from 'next/router'
 import { FaSpinner } from 'react-icons/fa'
 import { CurrentUserContext } from '../lib/auth'
-import { PageViewEvent } from '../lib/react-ga'
 
 const REGISTER = gql`
 mutation register($email: String!, $password: String!) {
@@ -21,22 +20,22 @@ const signin = (props) =>
   <CurrentUserContext.Consumer>
     {currentUser => {
       if (currentUser.isLoggedIn()) {
-        return <span>{Router.push('/')}</span>
+        Router.push('/register-thank-you')
+        return <Col><p>Redirecting you...</p></Col>
       } else {
         return (
           <Col>
             <div style={{ padding: '24px 24px' }}>
               <h1>Register</h1>
-              <p>Register an account at Robin's Nest Designs</p>
-              <hr style={{ color: '#888' }} />
-              <Mutation mutation={REGISTER}>
+              <p>Register for an account at Robin's Nest Designs</p>
+              <hr />
+              <Mutation mutation={REGISTER} onCompleted={() => Router.push('/register-thank-you')}>
                 {
                   (register, { loading, error, data }) => {
 
                     if (data && data.register && data.register.token) {
                       currentUser.login(data.register.token)
-                      Router.push('/')
-                      return <></>
+                      return <p>Account created, redirecting you.</p>
                     }
 
                     let email, password;

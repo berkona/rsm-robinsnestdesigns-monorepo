@@ -7,7 +7,6 @@ import { Mutation } from 'react-apollo'
 import Router from 'next/router'
 import { CurrentUserContext } from '../lib/auth'
 import { FaSpinner } from 'react-icons/fa'
-import { PageViewEvent } from '../lib/react-ga'
 
 const SIGNIN = gql`
 mutation Signin($email: String!, $password: String!) {
@@ -23,7 +22,8 @@ const signin = (props) => {
     <CurrentUserContext.Consumer>
       {currentUser => {
         if (currentUser.isLoggedIn()) {
-          return <span>{Router.push('/')}</span>
+          Router.push('/')
+          return <span>You're already logged in.  Redirecting you.</span>
         } else {
           return (
             <Col>
@@ -59,7 +59,7 @@ const signin = (props) => {
                             }} type="password" />
                           </Form.Group>
                           <Button variant="primary" type="submit">
-                          {loading && <><FaSpinner />Working...</>}
+                          {loading && <><FaSpinner /> Working...</>}
                           {!loading && <>Sign In</>}
                           </Button>
                           { error && <p style={{ color: 'red' }}>Username or password is invalid</p>}
