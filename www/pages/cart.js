@@ -13,7 +13,7 @@ import { Mutation } from 'react-apollo'
 import Router from 'next/router'
 import fetch from 'isomorphic-unfetch'
 import { checkoutOpenPaypalEvent, checkoutDoneEvent } from '../lib/react-ga'
-import { Product, CheckoutAction } from '../lib/next-ga-ec'
+import { CheckoutAction } from '../lib/next-ga-ec'
 import SEO from '../components/SEO'
 import CartItemTeaser from '../components/CartItemTeaser'
 

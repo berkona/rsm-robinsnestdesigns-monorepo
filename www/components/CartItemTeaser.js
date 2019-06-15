@@ -194,7 +194,7 @@ const CartItemTeaser = (props) => (
                          listName={'Cart'}>
               <p>{props.product.name}</p>
               <p>{props.product.sku}</p>
-              { props.variant && <p>{props.product.productVariants.filter(x => x.id == variant).map(x => x.text)[0] || ''}</p>}
+              { props.variant && <p>{props.product.productVariants.filter(x => x.id == props.variant).map(x => x.text)[0] || ''}</p>}
             </ProductLink>
           </div>
           <div style={{display: 'flex', justifyContent: 'space-between' }}>
