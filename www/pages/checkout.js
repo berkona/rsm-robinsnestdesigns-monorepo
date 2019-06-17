@@ -75,7 +75,7 @@ class CheckoutPage extends React.Component {
       <CurrentUserContext.Consumer>
         {currentUser => {
           if (!currentUser.getCartId()) {
-            return <Redirect href="/" message="No shopping cart" />
+            return <p>No shopping cart</p>
           } else {
             return <Query
             query={ORDER_GET}

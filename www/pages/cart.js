@@ -50,7 +50,6 @@ const makeAmount = (value) => {
 const needsTax = (zip) => isZipValid(zip) && (zip.startsWith('27') || zip.startsWith('28'))
 
 const EmptyShoppingCart = props => <Col>
-  <SEO title="My Cart" description="View the items in your cart at Robin's Nest Designs" />
   <div id="addToCart" style={{ padding: '24px' }}>
     <h1>My Shopping Cart</h1>
     <hr />
@@ -76,7 +75,9 @@ class CartPage extends React.Component {
   }
 
   render() {
-    return <CurrentUserContext.Consumer>
+    return <>
+      <SEO title="My Cart" description="View the items in your cart at Robin's Nest Designs" />
+    <CurrentUserContext.Consumer>
       {currentUser => {
         const cartId = currentUser.getCartId()
         if (!cartId) {
@@ -167,6 +168,7 @@ class CartPage extends React.Component {
         }
       }}
     </CurrentUserContext.Consumer>
+    </>
   }
 }
 
