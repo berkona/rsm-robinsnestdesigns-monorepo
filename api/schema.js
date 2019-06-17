@@ -18,7 +18,7 @@ const typeDefs = gql`
       limit: Int,
       sort: ProductSortType
     ): ProductList!
-    cart(orderId: ID!, shipping: Float, zipcode: Int, county: String): Order
+    cart(orderId: ID!, shipping: Float, county: String): Order
     user(token: String!): User
     wishlist(token: String!): [WishListItem!]!
     isInWishlist(token: String!, productId: ID!): Boolean
@@ -47,7 +47,7 @@ const typeDefs = gql`
     addToCart(productId: ID!, qty: Int!, orderId: ID, variant: ID): Order!
     updateCartItem(cartItemId: ID!, qty: Int!, variant: ID): Order!
     removeFromCart(cartItemId: ID!): Order!
-    placeOrder(orderId: ID!, paypalOrderId: ID!, shipping: Float!, zipcode: Int!, county: String): Order!
+    placeOrder(orderId: ID!, paypalOrderId: ID!, shipping: Float!, county: String): Order!
     addToWishList(token: String!, productId: ID!): Boolean
     removeFromWishList(token: String!, productId: ID!): Boolean
   }

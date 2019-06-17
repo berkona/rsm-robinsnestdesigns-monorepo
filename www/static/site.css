@@ -626,3 +626,8 @@ TR.even,
     font-size: 12px;
     margin-top: -2px;
 }
+
+/* Bootstrap theme */
+.btn.btn-primary {
+    color: '#006699;'
+}

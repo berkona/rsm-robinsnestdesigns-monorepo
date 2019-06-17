@@ -54,7 +54,7 @@ const OrderPage = withRouter(
       return <p>Order not yet placed.  If you think this is an error contact Support.</p>
     }
     return <>
-      <Row><Col><h1>Your order with Robin's Nest Designs</h1><p>Thank you for ordering with Robin's Nest Designs.  Below are the details are the details of your order.  Please print it for your records.</p></Col></Row>
+      <Row><Col><h1>Your order with Robin's Nest Designs</h1><p style={{ marginBottom: '16px' }}>Thank you for ordering with Robin's Nest Designs.</p><hr /></Col></Row>
       <Row>
         <Col md={6}>
           <p>Order No: {props.router.query.orderId}</p>

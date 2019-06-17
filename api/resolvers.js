@@ -112,7 +112,7 @@ const calcPromo = (promo, subtotal) => {
   return 0
 }
 
-const reduceOrder = (orderId, rows, shipping, zipcode, county) => {
+const reduceOrder = (orderId, rows, shipping, county) => {
   const items = rows.map(reduceCartItem)
 
   let subtotal = items.map((ci) => ci.price * ci.qty).reduce((a, b) => a + b, 0)
@@ -121,7 +121,7 @@ const reduceOrder = (orderId, rows, shipping, zipcode, county) => {
   shipping = Number.parseFloat(subtotal) < 75 ? (shipping || '3.99') : '0.00'
 
   let tax = '0.00'
-  if (zipcode && TAX_REGEX.test(zipcode)) {
+  if (county) {
     let taxRate = TAXS_TMP[county] || DEFAULT_TAX_RATE
     const taxableTotal = (Number.parseFloat(subtotal) + Number.parseFloat(shipping)).toFixed(2)
     tax = Number.parseFloat(taxableTotal) * (Number.parseFloat(taxRate) / 100.0)
@@ -246,16 +246,12 @@ const removeFromCart = (obj, args, context) => {
   }
 }
 
-async function placeOrder(obj, { orderId, paypalOrderId, shipping, zipcode, county }, context) {
-  if (!orderId || !paypalOrderId || !shipping || !zipcode) {
+async function placeOrder(obj, { orderId, paypalOrderId, shipping, county }, context) {
+  if (!orderId || !paypalOrderId || !shipping) {
     throw new Error('invalid arguments')
   }
 
-  if (('' + zipcode).length != 5) {
-    throw new Error('invalid zipcode')
-  }
-
-  const order = await getOrder(context.dataSources.db, orderId, shipping, zipcode, county)
+  const order = await getOrder(context.dataSources.db, orderId, shipping, county)
 
   let {
     placed,
@@ -343,9 +339,9 @@ async function placeOrder(obj, { orderId, paypalOrderId, shipping, zipcode, coun
   return await getOrder(context.dataSources.db, orderId)
 }
 
-async function getOrder(db, orderId, shipping, zipcode, county, coupon_code) {
+async function getOrder(db, orderId, shipping, county, coupon_code) {
   const rows = await db.listCartItems(orderId)
-  const order = reduceOrder(orderId, rows, shipping, zipcode, county)
+  const order = reduceOrder(orderId, rows, shipping, county)
   const cInfo = await db.getCustomerInfo(orderId)
   if (cInfo) {
     order.placed = true
@@ -445,7 +441,7 @@ const resolvers = {
       }
     }),
     saleCategories: (obj, args, context) => context.dataSources.db.listSaleCategories().then(reduceAllCategories),
-    cart: (obj, args, context) => getOrder(context.dataSources.db, args.orderId, args.shipping, args.zipcode, args.county),
+    cart: (obj, args, context) => getOrder(context.dataSources.db, args.orderId, args.shipping, args.county),
     user: async (obj, { token }, context) => {
       const user = await getUserFromToken(token, context.dataSources.db)
       return user
