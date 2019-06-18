@@ -50,6 +50,13 @@ const typeDefs = gql`
     placeOrder(orderId: ID!, paypalOrderId: ID!, shipping: Float!, county: String): Order!
     addToWishList(token: String!, productId: ID!): Boolean
     removeFromWishList(token: String!, productId: ID!): Boolean
+    requestSignedUrl(token: String!, fileName: String!, fileType: String!): SignedUrlPayload!
+    updateProduct(token: String!, productId: ID!, productData: ProductPatchInput!): Product!
+  }
+
+  type SignedUrlPayload {
+    signedUrl: String!
+    publicUrl: String!
   }
 
   type Order {
@@ -151,6 +158,25 @@ const typeDefs = gql`
     records: [Product!]!
   }
 
+  input ProductPatchInput {
+      sku: String
+      name: String
+      price: Float
+      salePrice: Float
+      qtyInStock: Int
+      saleStart: String
+      saleEnd: String
+      description: String
+      hyperlinkedImage: String
+      categoryId: ID
+      subcategoryId: ID
+      category2: ID
+      subcategory2: ID
+      category3: ID
+      subcategory3: ID
+      keywords: String
+  }
+
   type Product {
     id: Int!
     sku: String!
@@ -170,6 +196,11 @@ const typeDefs = gql`
     subcategory: String!
     subcategoryId: ID!
     productVariants: [ProductVariant!]!
+    category2: ID!
+    subcategory2: ID!
+    category3: ID!
+    subcategory3: ID!
+    keywords: String!
   }
 
   type ProductVariant {

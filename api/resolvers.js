@@ -2,6 +2,40 @@ const { GraphQLScalarType } = require('graphql');
 const { Kind } = require('graphql/language');
 const paypal = require('@paypal/checkout-server-sdk');
 const paypalClient = require('./paypal')
+var aws = require('aws-sdk');
+
+// Configure aws with your accessKeyId and your secretAccessKey
+aws.config.update({
+  region: 'us-east-1', // Put your aws region here
+  accessKeyId: process.env.AWSAccessKeyId,
+  secretAccessKey: process.env.AWSSecretKey
+})
+
+const S3_BUCKET = process.env.AWSUploadBucket
+
+const signS3Url = async (fileName, fileType) => {
+  if (!fileName || !fileType)
+    throw new Error('fileName and fileType both required to sign url')
+
+  const s3 = new aws.S3();  // Create a new instance of S3
+
+// Set up the payload of what we are sending to the S3 api
+  const s3Params = {
+    Bucket: S3_BUCKET,
+    Key: fileName,
+    Expires: 500,
+    ContentType: fileType,
+    ACL: 'public-read'
+  };
+  // Make a request to the S3 API to get a signed URL which we can use to upload our file
+  const data = await s3.getSignedUrl('putObject', s3Params);
+  // Data payload of what we are sending back, the url of the signedRequest and a URL where we can access the content after its saved.
+  const returnData = {
+    signedUrl: data,
+    publicUrl: `https://${S3_BUCKET}/${fileName}`
+  };
+  return returnData
+}
 
 // Provide resolver functions for your schema fields
 module.exports = exports = {}
@@ -41,7 +75,12 @@ function reduceProduct(row) {
     categoryId: row.CategoryId,
     subcategory: row.Subcategory,
     subcategoryId: row.SubcategoryId,
+    category2: row.CategoryB,
+    category3: row.CategoryC,
+    subcategory2: row.SubCategoryB,
+    subcategory3: row.SubCategoryC,
     hyperlinkedImage: row.hyperlinkedImage,
+    keywords: row.Keywords || '',
     productVariants,
   }
 }
@@ -148,8 +187,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'a test jwt secret';
 const JWT_ISSUER = process.env.JWT_ISSUER || 'rsm-graphql-node';
 const JWT_MAX_AGE = process.env.JWT_MAX_AGE || '14d';
 
-const generateAuthToken = (userId) => {
-  return jwt.sign({ uid: userId }, JWT_SECRET, { algorithm: 'HS256', expiresIn: JWT_MAX_AGE, issuer: JWT_ISSUER });
+const generateAuthToken = (userId, isAdmin) => {
+  return jwt.sign({ uid: userId, a: isAdmin === true }, JWT_SECRET, { algorithm: 'HS256', expiresIn: JWT_MAX_AGE, issuer: JWT_ISSUER });
 }
 
 const verifyAuthToken = (token) => {
@@ -160,6 +199,11 @@ const register = (obj, args, context) => {
   return context.dataSources.db.tryUpsertUser(args.email, { Email: args.email, Password: args.password }).then(() => signin(obj, args, context))
 }
 
+const admin_emails = [
+    'jon@solipsisdev.com',
+    'robin@robinsnestdesigns.com',
+]
+
 const signin = (obj, args, context) => {
   return context.dataSources.db.findUser(args.email).then((user) => {
     if (!user) {
@@ -168,7 +212,8 @@ const signin = (obj, args, context) => {
       // TODO upgrade password storage...
       if (args.password === user.Password) {
         user = reduceUser(user)
-        const token = generateAuthToken(user.id)
+        const isAdmin = admin_emails.filter(email => user.email == email).length > 0 || false
+        const token = generateAuthToken(user.id, isAdmin)
         return {
           token,
           user,
@@ -481,6 +526,42 @@ const resolvers = {
     },
     addToWishList: (obj, { token, productId }, context) => context.dataSources.db.addToWishList(verifyAuthToken(token).uid, productId),
     removeFromWishList: (obj, { token, productId }, context) => context.dataSources.db.removeFromWishList(verifyAuthToken(token).uid, productId),
+    requestSignedUrl: async (obj, { token, fileName, fileType }, context) => {
+      const payload = verifyAuthToken(token)
+      // admin only
+      if (!payload.a) throw new Error('Not authorized')
+      const uuidv4 = require('uuid/v4');
+      const parts = fileName.split('.')
+      if (parts.length < 2) throw new Error('no file extension detected')
+      fileName = uuidv4() + '.' + parts[parts.length-1]
+      return await signS3Url(fileName, fileType)
+    },
+    updateProduct: async(obj, { token, productId, productData }, context) => {
+      const payload = verifyAuthToken(token)
+      // admin only
+      if (!payload.a) throw new Error('Not authorized')
+      const patch = {
+        ItemID: productData.sku,
+        ItemName: productData.name,
+        ItemPrice: productData.price,
+        SalePrice: productData.salePrice,
+        Qty: productData.qtyInStock,
+        Sale_Start: productData.saleStart,
+        Sale_Stop: productData.saleEnd,
+        Description: productData.description,
+        Hyperlinked_Image: productData.hyperlinkedImage,
+        Category: productData.categoryId,
+        SubCategory: productData.subcategoryId,
+        CategoryB: productData.category2,
+        SubCategoryB: productData.subcategory2,
+        CategoryC: productData.category3,
+        SubCategoryC: productData.subcategory3,
+        Keywords: productData.keywords,
+      }
+      await context.dataSources.db.updateProduct(productId, patch)
+      const row = await context.dataSources.db.getProduct(productId)
+      return reduceProduct(row)
+    }
   },
   Product: {
     isOnSale: (obj, args, context) => isOnSale(obj),

@@ -82,6 +82,11 @@ const productFields =  [
   'Category.ID as CategoryId',
   'Subcategory.Subcategory as Subcategory',
   'Subcategory.ID as SubcategoryId',
+  'CategoryB',
+  'SubCategoryB',
+  'CategoryC',
+  'SubCategoryC',
+  'Keywords',
 ]
 
 /**
@@ -93,7 +98,7 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
   const makeQuery = (weight) => {
     let q = builder;
 
-    q = q.select(knex.raw(`${weight} as relevance`), 'ID')
+    q = q.select(knex.raw(`${weight} as relevance`), 'Products.ID')
     q = q.from('Products').where('Active', 1).whereNotNull('Products.Category')
 
     if (categoryId) {
@@ -129,12 +134,14 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
   if (!searchPhrase) {
     return makeQuery(1)
   } else {
-    return makeQuery(10).where('ItemName', 'like', `%${searchPhrase}%`)
-      .union(
-        makeQuery(5).where('Keywords', 'like', `%${searchPhrase}%`)
+    return makeQuery(20).where('Products.ItemID', searchPhrase).union(
+        makeQuery(10).where('Products.ItemName', 'like', `%${searchPhrase}%`)
       )
       .union(
-        makeQuery(2).where('Description', 'like', `%${searchPhrase}%`)
+        makeQuery(5).where('Products.Keywords', 'like', `%${searchPhrase}%`)
+      )
+      .union(
+        makeQuery(2).where('Products.Description', 'like', `%${searchPhrase}%`)
       )
   }
 }
@@ -243,6 +250,14 @@ class MyDB extends SQLDataSource {
     if (categoryId)
       query = query.where('Subcategory.Category', '=', categoryId)
     return query
+  }
+
+  updateProduct(productId, productData) {
+    if (!productId || !productData) return Promise.reject(`productId and productData are required`)
+    return this.db('Products')
+      .where('Products.ID', productId)
+      .limit(1)
+      .update(productData)
   }
 
   getProduct(productId) {

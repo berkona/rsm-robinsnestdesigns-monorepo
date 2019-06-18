@@ -14,7 +14,10 @@
     "API_URL": "@api-url",
     "JWT_SECRET": "@jwt-secret",
     "JWT_ISSUER": "@jwt-issuer",
-    "JWT_MAX_AGE": "@jwt-max-age"
+    "JWT_MAX_AGE": "@jwt-max-age",
+    "AWSAccessKeyId": "@AWSAccessKeyId",
+    "AWSSecretKey": "@AWSSecretKey",
+    "AWSUploadBucket": "@AWSUploadBucket"
   },
   "builds": [
     { "src": "www/next.config.js", "use": "@now/next" },

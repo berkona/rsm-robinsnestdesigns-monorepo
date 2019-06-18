@@ -104,7 +104,7 @@ const ProductDetail = (props) => (
         </Col>
         <Col xs={12} md={5}>
           <div style={{  padding: '0px 24px' }}>
-            <h3 className="product-title">{data.product.name}</h3>
+            <h3 className="product-title">{data.product.name} <span style={{ fontColor: '#888', fontSize: '14px' }}>(SKU: {data.product.sku})</span></h3>
             <div style={{ margin: '.5em 0' }}>
               <PriceDisplay product={data.product} isOnSale={isOnSale} />
             </div>

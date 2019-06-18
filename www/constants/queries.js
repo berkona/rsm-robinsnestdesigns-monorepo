@@ -57,6 +57,15 @@ query {
   }
 }
 `
+export const SUBCATEGORY_GET_ONE = gql`
+query($categoryId: ID!) {
+  allSubcategories(categoryId: $categoryId) {
+    id
+    title
+  }
+}
+`
+
 export const PRODUCT_GET_ONE = gql`
 query($productId: ID!) {
   product(productId: $productId) {
@@ -72,6 +81,14 @@ query($productId: ID!) {
     categoryId
     subcategory
     subcategoryId
+    category2
+    subcategory2
+    category3
+    subcategory3
+    keywords
+    hyperlinkedImage
+    image
+    thumbnail
   }
 }
 `
