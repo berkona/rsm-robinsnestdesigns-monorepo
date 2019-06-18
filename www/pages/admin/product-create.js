@@ -11,7 +11,6 @@ import gql from 'graphql-tag'
 import { CurrentUserContext } from '../../lib/auth'
 import Router from 'next/router'
 import Button from 'react-bootstrap/Button'
-import Link from 'next/link'
 
 const MODIFIABLE_FIELDS = [
   'sku',
@@ -33,33 +32,28 @@ const MODIFIABLE_FIELDS = [
   'productVariants',
 ]
 
-const UPDATE_PRODUCT = gql`
-mutation($token: String!, $productId: ID!, $productData: ProductPatchInput!) {
-  updateProduct(token: $token, productId: $productId, productData: $productData) {
+const CREATE_PRODUCT = gql`
+mutation($token: String!, $productData: ProductPatchInput!) {
+  createProduct(token: $token, productData: $productData) {
     id
   }
 }
 `
 
-const DEACTIVATE_PRODUCT = gql`
-mutation($token: String!, $productId: ID!) {
-  removeProduct(token: $token, productId: $productId)
-}
-`
-
 export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
-  <h1>Modify Product</h1>
+  <h1>Create Product</h1>
   <hr />
   <Query query={PRODUCT_GET_ONE} variables={{ productId: props.router.query.productId }}>
     {({ loading, error, data }) => {
       if (loading) return <Loader />
-      if (error) return <ApolloError error={error} />
+      data = data || {}
       const { product } = data
       return <CurrentUserContext.Consumer>
       {currentUser => <>
-        <Mutation mutation={UPDATE_PRODUCT} variables={{ token: currentUser.getToken(), productId: props.router.query.productId  }} refetchQueries={[{ query: PRODUCT_GET_ONE, variables: { productId: props.router.query.productId } }]}>
+        <Mutation mutation={CREATE_PRODUCT} variables={{ token: currentUser.getToken() }}>
           {(mutationFn, {loading, error, data }) => {
             return <ModifyProductForm
+              saveLabel={'Create'}
               product={product}
               onSubmit={newProduct => {
                 event.preventDefault()
@@ -73,18 +67,8 @@ export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
             />
           }}
         </Mutation>
-        <div style={{ marginTop: '48px' }}>
-          <Link href={"/admin/product-create?productId=" + props.router.query.productId}>
-            <Button variant="outline-dark">Duplicate</Button>
-          </Link>
-        </div>
-        <Mutation mutation={DEACTIVATE_PRODUCT} variables={{ token: currentUser.getToken(), productId: props.router.query.productId  }}>
-          {(mutationFn, { loaing, error, data }) => {
-            return <div style={{ marginTop: '48px' }}><Button variant="danger" onClick={() => mutationFn().then(() => Router.push('/admin/products'))}>Deactivate Product</Button></div>
-          }}
-        </Mutation>
         </>}
       </CurrentUserContext.Consumer>
     }}
-  </Query>
+    </Query>
 </div></Col>)

@@ -111,7 +111,8 @@ class ModifyProductForm extends React.Component {
       />
 
       {
-        this.state.product.productVariants.length > 0
+        this.state.product.productVariants
+        && this.state.product.productVariants.length > 0
         ? <ArrayGroup value={this.state.product.productVariants}
                       maxLength={10}
                       onChange={(newValue) => setProductField('productVariants', newValue)}>
@@ -229,7 +230,7 @@ class ModifyProductForm extends React.Component {
 
       <div style={{ marginTop: '16px' }}>
         <Button variant="primary" type="submit">
-          <>{ this.state.product.id ? 'Save' : 'Create' }</>
+          <>{ this.props.saveLabel || 'Save' }</>
         </Button>
       </div>
     </Form>

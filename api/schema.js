@@ -51,7 +51,9 @@ const typeDefs = gql`
     addToWishList(token: String!, productId: ID!): Boolean
     removeFromWishList(token: String!, productId: ID!): Boolean
     requestSignedUrl(token: String!, fileName: String!, fileType: String!): SignedUrlPayload!
+    createProduct(token: String!, productData: ProductPatchInput!): Product!
     updateProduct(token: String!, productId: ID!, productData: ProductPatchInput!): Product!
+    removeProduct(token: String!, productId: ID!): Boolean
   }
 
   type SignedUrlPayload {

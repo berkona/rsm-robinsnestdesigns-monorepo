@@ -252,6 +252,11 @@ class MyDB extends SQLDataSource {
     return query
   }
 
+  insertProduct(productData) {
+    if (!productData) return Promise.reject(`productData is required`)
+    return this.db('Products').insert(productData)
+  }
+
   updateProduct(productId, productData) {
     if (!productId || !productData) return Promise.reject(`productId and productData are required`)
     return this.db('Products')

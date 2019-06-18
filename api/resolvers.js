@@ -536,6 +536,51 @@ const resolvers = {
       fileName = uuidv4() + '.' + parts[parts.length-1]
       return await signS3Url(fileName, fileType)
     },
+    createProduct: async(obj, { token, productData }, context) => {
+      const payload = verifyAuthToken(token)
+      // admin only
+      if (!payload.a) throw new Error('Not authorized')
+
+      const patch = {
+        ItemID: productData.sku,
+        ItemName: productData.name,
+        ItemPrice: productData.price,
+        SalePrice: productData.salePrice,
+        Qty: productData.qtyInStock,
+        Sale_Start: new Date(Number.parseInt(productData.saleStart)).toISOString(),
+        Sale_Stop: new Date(Number.parseInt(productData.saleEnd)).toISOString(),
+        Description: productData.description,
+        Hyperlinked_Image: productData.hyperlinkedImage,
+        Category: productData.categoryId,
+        SubCategory: productData.subcategoryId,
+        CategoryB: productData.category2,
+        SubCategoryB: productData.subcategory2,
+        CategoryC: productData.category3,
+        SubCategoryC: productData.subcategory3,
+        Keywords: productData.keywords,
+      }
+
+      const fields = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+      fields.forEach(pos => {
+        const priceFieldName = 'Price' + pos
+        const textFieldName = 'Option' + pos
+        let variant = {
+          price: 0.00,
+          text: '',
+        }
+        if (productData.productVariants) {
+          variant = productData.productVariants[pos-1] || variant
+        }
+        patch[priceFieldName] = variant.price
+        patch[textFieldName] = variant.text
+      })
+
+      console.log('insertProduct', patch)
+      const result = await context.dataSources.db.insertProduct(patch)
+      console.log(result)
+      const [ row ] = await context.dataSources.db.getProduct(result.ID)
+      return reduceProduct(row)
+    },
     updateProduct: async(obj, { token, productId, productData }, context) => {
       const payload = verifyAuthToken(token)
       // admin only
@@ -579,7 +624,15 @@ const resolvers = {
       await context.dataSources.db.updateProduct(productId, patch)
       const [ row ] = await context.dataSources.db.getProduct(productId)
       return reduceProduct(row)
-    }
+    },
+    removeProduct: async (obj, { token, productId }, context) => {
+      const payload = verifyAuthToken(token)
+      // admin only
+      if (!payload.a) throw new Error('Not authorized')
+      const [ row ] = await context.dataSources.db.getProduct(productId)
+      if (!row) throw new Error('product does not exist')
+      await context.dataSources.db.updateProduct(productId, { Active: 0 })
+    },
   },
   Product: {
     isOnSale: (obj, args, context) => isOnSale(obj),
