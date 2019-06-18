@@ -39,3 +39,39 @@ export const ORDER_GET = gql`
     }
   }
 `
+
+export const CATEGORY_GET = gql`
+  query {
+    allCategories {
+      id
+      title
+    }
+  }
+`
+
+export const SUBCATEGORY_GET_ALL = gql`
+query {
+  allSubcategories {
+    id
+    title
+  }
+}
+`
+export const PRODUCT_GET_ONE = gql`
+query($productId: ID!) {
+  product(productId: $productId) {
+    id
+    sku
+    name
+    description
+    price
+    salePrice
+    saleStart
+    saleEnd
+    category
+    categoryId
+    subcategory
+    subcategoryId
+  }
+}
+`

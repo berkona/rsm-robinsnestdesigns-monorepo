@@ -28,6 +28,10 @@
     { "src": "/order/(?<orderId>[^/]+).*$", "dest": "/www/order?orderId=$orderId" },
     { "src": "/search.*$", "dest": "/www/search" },
     {
+      "src": "/admin/product-details/(?<productId>[^/]+).*$",
+      "dest": "/www/admin/product-details?productId=$productId"
+    },
+    {
       "src": "/(.*)",
       "dest": "/www/$1",
       "headers": {

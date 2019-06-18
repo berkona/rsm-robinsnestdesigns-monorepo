@@ -6,7 +6,7 @@ const typeDefs = gql`
     category(categoryId: ID!): Category!
     saleCategories: [Category!]!
     allCategories: [Category!]!
-    allSubcategories(categoryId: ID!): [SubCategory!]!
+    allSubcategories(categoryId: ID): [SubCategory!]!
     product(productId: ID!): Product
     allProducts(
       categoryId: ID,
