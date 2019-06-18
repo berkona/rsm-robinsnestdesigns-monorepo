@@ -175,6 +175,12 @@ const typeDefs = gql`
       category3: ID
       subcategory3: ID
       keywords: String
+      productVariants: [ProductVariantInput!]!
+  }
+
+  input ProductVariantInput {
+    price: Float!
+    text: String!
   }
 
   type Product {

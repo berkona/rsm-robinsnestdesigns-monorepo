@@ -89,6 +89,11 @@ query($productId: ID!) {
     hyperlinkedImage
     image
     thumbnail
+    productVariants {
+      id
+      price
+      text
+    }
   }
 }
 `

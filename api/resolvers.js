@@ -540,6 +540,7 @@ const resolvers = {
       const payload = verifyAuthToken(token)
       // admin only
       if (!payload.a) throw new Error('Not authorized')
+
       const patch = {
         ItemID: productData.sku,
         ItemName: productData.name,
@@ -558,6 +559,22 @@ const resolvers = {
         SubCategoryC: productData.subcategory3,
         Keywords: productData.keywords,
       }
+
+      const fields = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+      fields.forEach(pos => {
+        const priceFieldName = 'Price' + pos
+        const textFieldName = 'Option' + pos
+        let variant = {
+          price: 0.00,
+          text: '',
+        }
+        if (productData.productVariants) {
+          variant = productData.productVariants[pos-1] || variant
+        }
+        patch[priceFieldName] = variant.price
+        patch[textFieldName] = variant.text
+      })
+
       console.log('updateProduct', productId, patch)
       await context.dataSources.db.updateProduct(productId, patch)
       const [ row ] = await context.dataSources.db.getProduct(productId)

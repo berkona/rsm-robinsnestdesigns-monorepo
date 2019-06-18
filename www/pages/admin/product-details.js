@@ -28,6 +28,7 @@ const MODIFIABLE_FIELDS = [
   'category3',
   'subcategory3',
   'keywords',
+  'productVariants',
 ]
 
 const UPDATE_PRODUCT = gql`
@@ -57,6 +58,7 @@ export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
               Object.keys(newProduct)
                 .filter(field => MODIFIABLE_FIELDS.indexOf(field) !== -1)
                 .forEach(field => productData[field] = newProduct[field])
+              productData.productVariants = (productData.productVariants || []).map(x => { return { price: x.price, text: x.text } })
               mutationFn({ variables: { productData, } }).then(() => Router.push('/admin/products'))
             }}
              />
