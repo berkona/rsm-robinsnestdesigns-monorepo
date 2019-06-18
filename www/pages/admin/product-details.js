@@ -9,6 +9,7 @@ import Loader from '../../components/Loader'
 import ApolloError from '../../components/ApolloError'
 import gql from 'graphql-tag'
 import { CurrentUserContext } from '../../lib/auth'
+import Router from 'next/router'
 
 const MODIFIABLE_FIELDS = [
   'sku',
@@ -46,7 +47,7 @@ export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
       if (error) return <ApolloError error={error} />
       const { product } = data
       return <CurrentUserContext.Consumer>
-      {currentUser => <Mutation mutation={UPDATE_PRODUCT} variables={{ token: currentUser.getToken(), productId: props.router.query.productId  }}>
+      {currentUser => <Mutation mutation={UPDATE_PRODUCT} variables={{ token: currentUser.getToken(), productId: props.router.query.productId  }} refetchQueries={[{ query: PRODUCT_GET_ONE, variables: { productId: props.router.query.productId } }]}>
         {(mutationFn, {loading, error, data }) => {
           return <ModifyProductForm
             product={product}
@@ -56,7 +57,7 @@ export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
               Object.keys(newProduct)
                 .filter(field => MODIFIABLE_FIELDS.indexOf(field) !== -1)
                 .forEach(field => productData[field] = newProduct[field])
-              mutationFn({ variables: { productData, } })
+              mutationFn({ variables: { productData, } }).then(() => Router.push('/admin/products'))
             }}
              />
         }}

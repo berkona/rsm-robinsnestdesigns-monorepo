@@ -32,6 +32,7 @@ const Layout = props => (
       <link rel='stylesheet' type='text/css' href='/static/site.css' />
       <link  rel="stylesheet" type="text/css" href='/static/ToggleSlider.css' />
       <link href="/static/droplinetabs.css" rel="stylesheet" type="text/css" />
+      <link href="/static/react-datepicker.min.css" rel="stylesheet" type="text/css" />
     </Head>
 
     <Row id="masthead" className="d-none d-sm-block">

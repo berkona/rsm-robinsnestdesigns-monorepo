@@ -3,9 +3,9 @@ import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import { Query } from 'react-apollo'
 import { CATEGORY_GET, SUBCATEGORY_GET_ONE } from '../constants/queries'
-import Loader from './Loader'
 import ApolloError from './ApolloError'
 import UploadFileToAWS from './UploadFileToAWS'
+import DatePicker from "react-datepicker";
 
 const MakeMoneyGroup = (props) => <Form.Group controlId={props.controlId}>
   <Form.Label>{props.label}</Form.Label>
@@ -60,6 +60,7 @@ class ModifyProductForm extends React.Component {
       newState.product[field] = value
       this.setState(newState);
     }
+    //console.log(new Date(Number.parseInt(this.state.product.saleStart)))
 
     return <Form onSubmit={() => { event.preventDefault(); if (this.props.onSubmit) this.props.onSubmit(this.state.product) }}>
       <MakeGroup
@@ -76,6 +77,26 @@ class ModifyProductForm extends React.Component {
         value={this.state.product.price || 0}
         onChange={() => setProductField('price', Number.parseFloat((Number.parseFloat(event.target.value) || 0).toFixed(2))) }
        />
+       <MakeMoneyGroup controlId="ModifyProductForm-salePrice" label="Sale Price" field="salePrice"
+         value={this.state.product.salePrice || 0}
+         onChange={() => setProductField('salePrice', Number.parseFloat((Number.parseFloat(event.target.value) || 0).toFixed(2))) }
+        />
+        <Form.Group>
+          <Form.Label>Sale Start</Form.Label>
+          <Form.Control as="div">
+            <DatePicker
+              selected={new Date(Number.parseInt(this.state.product.saleStart))}
+              onSelect={date => setProductField('saleStart', '' + date.getTime()) } />
+          </Form.Control>
+        </Form.Group>
+        <Form.Group>
+          <Form.Label>Sale End</Form.Label>
+          <Form.Control as="div">
+            <DatePicker
+              selected={new Date(Number.parseInt(this.state.product.saleEnd))}
+              onSelect={date => setProductField('saleEnd', '' + date.getTime()) } />
+          </Form.Control>
+        </Form.Group>
       <CategoryGroup controlId="ModifyProductForm-category1" label="Category 1" field="categoryId"
       value={this.state.product.categoryId}
       onChange={() => setProductField('categoryId', event.target.value) }

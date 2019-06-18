@@ -546,8 +546,8 @@ const resolvers = {
         ItemPrice: productData.price,
         SalePrice: productData.salePrice,
         Qty: productData.qtyInStock,
-        Sale_Start: productData.saleStart,
-        Sale_Stop: productData.saleEnd,
+        Sale_Start: new Date(Number.parseInt(productData.saleStart)).toISOString(),
+        Sale_Stop: new Date(Number.parseInt(productData.saleEnd)).toISOString(),
         Description: productData.description,
         Hyperlinked_Image: productData.hyperlinkedImage,
         Category: productData.categoryId,
@@ -558,8 +558,9 @@ const resolvers = {
         SubCategoryC: productData.subcategory3,
         Keywords: productData.keywords,
       }
+      console.log('updateProduct', productId, patch)
       await context.dataSources.db.updateProduct(productId, patch)
-      const row = await context.dataSources.db.getProduct(productId)
+      const [ row ] = await context.dataSources.db.getProduct(productId)
       return reduceProduct(row)
     }
   },
