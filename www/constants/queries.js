@@ -97,3 +97,65 @@ query($productId: ID!) {
   }
 }
 `
+
+export const CART_GET = gql`
+query($orderId: ID!) {
+  cart(orderId: $orderId) {
+    id
+    subtotal
+    items {
+      id
+      qty
+      variant
+      product {
+        id
+        sku
+        name
+        price
+      }
+    }
+  }
+}
+`
+
+export const WISHLIST_QUERY_ALL = gql`
+query($token: String!) {
+  wishlist(token: $token) {
+    id
+    dateAdded
+    product {
+      id
+      name
+      isOnSale
+      price
+      salePrice
+      category
+      subcategory
+      hyperlinkedImage
+      thumbnail
+      image
+      productVariants {
+        price
+      }
+    }
+  }
+}
+`
+
+export const WISHLIST_QUERY = gql`
+query($token: String!, $productId: ID!) {
+  isInWishlist(token: $token, productId: $productId)
+}
+`
+
+export const ADD_TO_WISHLIST = gql`
+mutation($token: String!, $productId: ID!) {
+  addToWishList(token: $token, productId: $productId)
+}
+`
+
+export const REMOVE_FROM_WISHLIST = gql`
+mutation($token: String!, $productId: ID!) {
+  removeFromWishList(token: $token, productId: $productId)
+}
+`

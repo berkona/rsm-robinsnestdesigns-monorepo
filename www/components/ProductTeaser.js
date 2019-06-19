@@ -2,13 +2,15 @@ import React from "react"
 import { ProductLink } from "./Links"
 import PriceDisplay from './PriceDisplay'
 import { Impression, Actions } from '../lib/next-ga-ec'
-import { FaSearch, FaCartPlus } from 'react-icons/fa'
+import { FaCartPlus, FaSpinner, FaCheckCircle, FaTimesCircle, FaHeart, FaHeartBroken } from 'react-icons/fa'
 import Button from 'react-bootstrap/Button'
 import { CurrentUserContext } from '../lib/auth'
 import gql from 'graphql-tag'
-import { Mutation } from 'react-apollo'
+import { Query, Mutation } from 'react-apollo'
 import Form from 'react-bootstrap/Form'
 import Fade from 'react-bootstrap/Fade'
+import Router from 'next/router'
+import { CART_GET, WISHLIST_QUERY_ALL, WISHLIST_QUERY, REMOVE_FROM_WISHLIST, ADD_TO_WISHLIST } from '../constants/queries'
 
 const ADD_TO_CART = gql`
   mutation addToCart($productId: ID!, $qty: Int!, $orderId: ID, $variant: ID) {
@@ -30,6 +32,7 @@ const ADD_TO_CART = gql`
   }
 `
 
+
 class ProductTeaserOverlay extends React.Component {
 
     constructor(props) {
@@ -50,49 +53,162 @@ class ProductTeaserOverlay extends React.Component {
     }
 
     render() {
+      const wishListVars = { token: this.props.currentUser.getToken(), productId: this.props.product.id }
       return <div style={{ height: '100%', width: '100%' }} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
         {this.props.children}
         <Fade in={this.state.showOverlay}>
           <div style={{ background: 'rgba(0, 0, 0, 0.5)', width: '100%', height: '100%', position: 'absolute', top: '0', left: '0' }}>
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
               <div style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-around' }}>
-                <Button variant="light" style={{ fontSize: '20px' }}>
-                  <FaSearch />
-                </Button>
+                {
+                  this.props.currentUser.isLoggedIn()
+                  ? <Query query={WISHLIST_QUERY} variables={wishListVars}>
+                    {({ loading, error, data }) => {
+                      if (loading) {
+                        return <Button disabled variant="light">
+                          <FaSpinner />
+                        </Button>
+                      }
 
-                <Mutation
-                  mutation={ADD_TO_CART}
-                  variables={{
-                    productId: this.props.product.id,
-                    orderId: this.props.currentUser.getCartId(),
-                    qty: 1,
-                  }}
-                  onCompleted={(data) => {
-                    if (!this.props.currentUser.getCartId() && data && data.addToCart && data.addToCart.id) {
-                      console.log('setting cartId to ', data.addToCart.id)
-                      this.props.currentUser.setCartId(data.addToCart.id)
+                      if (error) {
+                        console.error('could not get wishlist', error);
+                        return <Button disabled variant="danger">
+                          <FaTimesCircle />
+                        </Button>
+                      }
+
+                      const { isInWishlist } = data
+                      if (isInWishlist) {
+                        return <Mutation mutation={REMOVE_FROM_WISHLIST} variables={wishListVars} refetchQueries={() => [{ query: WISHLIST_QUERY, variables: wishListVars }, { query: WISHLIST_QUERY_ALL, variables: { token: this.props.currentUser.getToken() }}]}>
+                        {(mutationFn, { loading, error, data }) => {
+                          if (loading) {
+                            return <Button disabled variant="light">
+                              <FaSpinner />
+                            </Button>
+                          }
+
+                          if (error) {
+                            console.error('could not add to wishlist', error);
+                            return <Button disabled variant="danger">
+                              <FaTimesCircle />
+                            </Button>
+                          }
+
+                          return <Button variant="light" onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}>
+                            <FaHeartBroken />
+                          </Button>
+                        }}
+                        </Mutation>
+                      } else {
+                        return <Mutation mutation={ADD_TO_WISHLIST} variables={wishListVars} refetchQueries={() => [{ query: WISHLIST_QUERY, variables: wishListVars }, { query: WISHLIST_QUERY_ALL, variables: { token: this.props.currentUser.getToken() }}]}>
+                        {(mutationFn, { loading, error, data }) => {
+                          if (loading) {
+                            return <Button disabled variant="light">
+                              <FaSpinner />
+                            </Button>
+                          }
+
+                          if (error) {
+                            console.error('could not add to wishlist', error);
+                            return <Button disabled variant="danger">
+                              <FaTimesCircle />
+                            </Button>
+                          }
+
+                          return <Button variant="light" onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}>
+                            <FaHeart />
+                          </Button>
+                        }}
+                        </Mutation>
+                      }
+                    }}
+                  </Query>
+                  : <Button disabled variant="light">
+                    <FaHeart />
+                  </Button>
+                }
+
+                <Query query={CART_GET} variables={{ orderId: this.props.currentUser.getCartId() }}>
+                  {({ loading, error, data }) => {
+                    const AddToCartBtn = () => {
+                      return <Mutation
+                        mutation={ADD_TO_CART}
+                        variables={{
+                          productId: this.props.product.id,
+                          orderId: this.props.currentUser.getCartId(),
+                          qty: 1,
+                        }}
+                        refetchQueries={() => [{ query: CART_GET, variables: { orderId: this.props.currentUser.getCartId() }}]}
+                        onCompleted={(data) => {
+                          if (!this.props.currentUser.getCartId() && data && data.addToCart && data.addToCart.id) {
+                            console.log('setting cartId to ', data.addToCart.id)
+                            this.props.currentUser.setCartId(data.addToCart.id)
+                          }
+                          Actions.AddToCart({
+                            sku: this.props.product.sku,
+                            name: this.props.product.name,
+                            category: this.props.product.category + '/' + this.props.product.subcategory,
+                            price: this.props.product.isOnSale ? this.props.product.price : this.props.product.salePrice,
+                            qty: 1,
+                            list: this.props.list,
+                            position: this.props.position,
+                          })
+                        }}
+                        >
+                        {(mutationFn, { loading, error, data }) => {
+                          if (loading) {
+                            return <Button disabled variant="light">
+                              <FaSpinner />
+                            </Button>
+                          }
+                          if (error) {
+                            console.error('could not add to cart', error);
+                            return <Button disabled variant="danger">
+                              <FaTimesCircle />
+                            </Button>
+                          }
+                          if (data) {
+                            return <Button variant="success" onClick={(e) => { e.preventDefault(); e.stopPropagation(); Router.push('/cart'); }}>
+                              <FaCheckCircle />
+                            </Button>
+                          }
+                          return <Button
+                            disabled={this.props.product.productVariants.length !== 0}
+                            variant="light"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}
+                            style={{ fontSize: '20px' }}>
+                            <FaCartPlus />
+                          </Button>
+                        }}
+                      </Mutation>
                     }
-                    Actions.AddToCart({
-                      sku: this.props.product.sku,
-                      name: this.props.product.name,
-                      category: this.props.product.category + '/' + this.props.product.subcategory,
-                      price: this.props.product.isOnSale ? this.props.product.price : this.props.product.salePrice,
-                      qty: 1,
-                      list: this.props.list,
-                      position: this.props.position,
-                    })
+
+                    if (loading) {
+                      return <Button disabled variant="light">
+                        <FaSpinner />
+                      </Button>
+                    }
+
+                    if (error) {
+                      // prolly just no cart
+                      return AddToCartBtn()
+                    }
+
+                    const [ firstMatchingItem ] = (data
+                                       && data.cart
+                                       && data.cart.items
+                                       && data.cart.items.filter((x) => x.product.id ==  this.props.product.id)
+                                       || [])
+                    const isInCart = !!firstMatchingItem
+                    if (isInCart) {
+                      return <Button variant="success" onClick={(e) => { e.preventDefault(); e.stopPropagation(); Router.push('/cart'); }}>
+                        <FaCheckCircle />
+                      </Button>
+                    } else {
+                      return AddToCartBtn()
+                    }
                   }}
-                  >
-                  {(mutationFn, { loading, error, data }) => {
-                    return <Button
-                      disabled={this.props.product.productVariants.length !== 0}
-                      variant="light"
-                      onClick={() => { event.preventDefault(); mutationFn(); }}
-                      style={{ fontSize: '20px' }}>
-                      <FaCartPlus />
-                    </Button>
-                  }}
-                </Mutation>
+                </Query>
               </div>
             </div>
           </div>

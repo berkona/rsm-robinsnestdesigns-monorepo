@@ -5,24 +5,7 @@ import { FaSpinner, FaHeartBroken, FaHeart } from 'react-icons/fa'
 import { CurrentUserContext } from '../lib/auth'
 import Button from 'react-bootstrap/Button'
 import ApolloError from './ApolloError'
-
-const WISHLIST_QUERY = gql`
-query($token: String!, $productId: ID!) {
-  isInWishlist(token: $token, productId: $productId)
-}
-`
-
-const ADD_TO_WISHLIST = gql`
-mutation($token: String!, $productId: ID!) {
-  addToWishList(token: $token, productId: $productId)
-}
-`
-
-const REMOVE_FROM_WISHLIST = gql`
-mutation($token: String!, $productId: ID!) {
-  removeFromWishList(token: $token, productId: $productId)
-}
-`
+import { WISHLIST_QUERY, REMOVE_FROM_WISHLIST, ADD_TO_WISHLIST } from '../constants/queries'
 
 class AddToWishList extends React.Component {
   constructor(props) {
