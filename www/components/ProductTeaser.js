@@ -44,7 +44,7 @@ const LoadingButton = (props) => <OverlayTrigger
 
 const ErrorButton = (props) => <OverlayTrigger
    delay={{ show: 250, hide: 400 }}
-   overlay={<Tooltip>A network error occurred: {this.props.error.toString()}</Tooltip>}
+   overlay={<Tooltip>A network error occurred: {props.error.toString()}</Tooltip>}
  >
    <Button disabled variant="danger">
     <FaTimesCircle />
@@ -190,17 +190,29 @@ class ProductTeaserOverlay extends React.Component {
                             </Button>
                             </OverlayTrigger>
                           }
-                          return <OverlayTrigger
-                             delay={{ show: 250, hide: 400 }}
-                             overlay={<Tooltip>Add item to your cart</Tooltip>}>
-                          <Button
-                            disabled={this.props.product.productVariants.length !== 0}
-                            variant="light"
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}
-                            style={{ fontSize: '20px' }}>
-                            <FaCartPlus />
-                          </Button>
-                          </OverlayTrigger>
+
+                          if (this.props.product.productVariants.length !== 0) {
+                            return <OverlayTrigger
+                               delay={{ show: 250, hide: 400 }}
+                               overlay={<Tooltip>Click to add to cart from detail page</Tooltip>}>
+                            <Button
+                              variant="light"
+                              style={{ fontSize: '20px' }}>
+                              <FaCartPlus />
+                            </Button>
+                            </OverlayTrigger>
+                          } else {
+                            return <OverlayTrigger
+                               delay={{ show: 250, hide: 400 }}
+                               overlay={<Tooltip>Add item to your cart</Tooltip>}>
+                            <Button
+                              variant="light"
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}
+                              style={{ fontSize: '20px' }}>
+                              <FaCartPlus />
+                            </Button>
+                            </OverlayTrigger>
+                          }
                         }}
                       </Mutation>
                     }

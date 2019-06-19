@@ -17,6 +17,11 @@ const Index = (props) => (
       <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>
         <h1>Welcome to the finest selection of needlework supplies in our 40,000+ item online catalog!</h1>
         <div id="homeContent">
+          <SearchLink categoryId={220}>
+            <a><h2>Featured Items</h2></a>
+          </SearchLink>
+          <ProductList isTeaser={true} categoryId={220} sortOrder="random" limit={8} listName={'Index - Featured Items'} />
+
           <SearchLink onSaleOnly={true} sortOrder="mostRecent">
             <a><h2>On Sale</h2></a>
           </SearchLink>

@@ -194,7 +194,6 @@ const CartItemTeaser = (props) => (
                          listName={'Cart'}>
               <p>{props.product.name}</p>
               <p>{props.product.sku}</p>
-              { props.variant && <p>{props.product.productVariants.filter(x => x.id == props.variant).map(x => x.text)[0] || ''}</p>}
             </ProductLink>
           </div>
           <div style={{display: 'flex', justifyContent: 'space-between' }}>
@@ -257,7 +256,7 @@ const CartItemTeaser = (props) => (
           </Col>
           <Col md={6}>
             <Row>
-              <Col md={5}>
+              <Col md={8}>
                 <Mutation mutation={updateCartItem} variables={{ cartItemId: props.cartItemId, variant: props.variant }} update={(cache, { data }) => {
                   cache.writeQuery({
                     query: query,
@@ -271,18 +270,33 @@ const CartItemTeaser = (props) => (
                         <Form.Control as="select"
                                       onChange={() => mutationFn({
                                         variables: {
-                                          qty: Number.parseInt(event.target.value)
+                                          qty: Number.parseInt(event.target.value),
+                                          variant: props.variant,
                                         }
                                       })}
                                       value={props.qty}>
                           {[...range(1, props.product.qtyInStock || 25).map((qty) => <option key={qty} value={qty}>{qty}</option>)]}
                         </Form.Control>
                       </Form.Group>
+                      { props.variant &&
+                        <Form.Group controlId="cart-option-select">
+                          <Form.Control as="select"
+                                        onChange={() => mutationFn({
+                                          variables: {
+                                            qty: Number.parseInt(props.qty),
+                                            variant: Number.parseInt(event.target.value)
+                                          }
+                                        })}
+                                        value={props.variant}>
+                            {props.product.productVariants.map(x => <option value={x.id}>{x.text}</option>)}
+                          </Form.Control>
+                        </Form.Group>
+                      }
                     </Form>
                   }}
                 </Mutation>
               </Col>
-              <Col md={7}>
+              <Col md={4}>
                 <p style={{ fontSize: '16px', fontWeight: 'bold', textAlign: 'right' }}>
                   ${(props.qty * props.price).toFixed(2)}
                 </p>
