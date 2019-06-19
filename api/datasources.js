@@ -89,6 +89,15 @@ const productFields =  [
   'Keywords',
 ]
 
+const sw = require ('stopword');
+
+const SearchTokens = (searchPhrase) => {
+  // todo support ""?
+  const withStopwords = (searchPhrase || '').split(' ')
+  const noStopwords = sw.removeStopwords(withStopwords)
+  return noStopwords
+}
+
 /**
   Creates a query s.t. it SELECT's productFields + relevance (semantic meaning) based on searchPhrase and filters
  */
@@ -130,19 +139,26 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
     return q
   }
 
+  const SearchAllFields = (searchPhrase) => {
+    return [
+        makeQuery(20).where('Products.ItemID', searchPhrase),
+        makeQuery(10).where('Products.ItemName', 'like', `%${searchPhrase}%`),
+        makeQuery(5).where('Products.Keywords', 'like', `%${searchPhrase}%`),
+        makeQuery(2).where('Products.Description', 'like', `%${searchPhrase}%`),
+    ]
+  }
+
   // save work b/c we don't need to do a regex
-  if (!searchPhrase) {
+  const tokens = SearchTokens(searchPhrase)
+  if (!searchPhrase || tokens.length == 0) {
     return makeQuery(1)
   } else {
-    return makeQuery(20).where('Products.ItemID', searchPhrase).union(
-        makeQuery(10).where('Products.ItemName', 'like', `%${searchPhrase}%`)
-      )
-      .union(
-        makeQuery(5).where('Products.Keywords', 'like', `%${searchPhrase}%`)
-      )
-      .union(
-        makeQuery(2).where('Products.Description', 'like', `%${searchPhrase}%`)
-      )
+    const queries = tokens.map(SearchAllFields).reduce((a, b) => a.concat(b), [])
+    let unionQ = queries.reduce((a, b) => a.unionAll(b)).as('Search_inner')
+    return builder.select('ID')
+                  .sum('relevance as relevance')
+                  .from(unionQ)
+                  .groupBy('ID')
   }
 }
 
@@ -279,6 +295,7 @@ class MyDB extends SQLDataSource {
     args = validateArgs(args)
 
     const searchQuery = buildSearchQuery(this.db, args).as('Search')
+    console.log('listProducts', searchQuery.toString())
 
     let dataQuery =  this.db.select(productFields)
       .from(searchQuery.clone())
