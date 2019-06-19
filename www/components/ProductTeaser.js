@@ -11,6 +11,8 @@ import Form from 'react-bootstrap/Form'
 import Fade from 'react-bootstrap/Fade'
 import Router from 'next/router'
 import { CART_GET, WISHLIST_QUERY_ALL, WISHLIST_QUERY, REMOVE_FROM_WISHLIST, ADD_TO_WISHLIST } from '../constants/queries'
+import Tooltip from 'react-bootstrap/Tooltip'
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 
 const ADD_TO_CART = gql`
   mutation addToCart($productId: ID!, $qty: Int!, $orderId: ID, $variant: ID) {
@@ -32,6 +34,22 @@ const ADD_TO_CART = gql`
   }
 `
 
+const LoadingButton = (props) => <OverlayTrigger
+   delay={{ show: 250, hide: 400 }}
+   overlay={<Tooltip>A network request is happening</Tooltip>}>
+  <Button disabled variant="light">
+    <FaSpinner />
+  </Button>
+</OverlayTrigger>
+
+const ErrorButton = (props) => <OverlayTrigger
+   delay={{ show: 250, hide: 400 }}
+   overlay={<Tooltip>A network error occurred: {this.props.error.toString()}</Tooltip>}
+ >
+   <Button disabled variant="danger">
+    <FaTimesCircle />
+  </Button>
+</OverlayTrigger>
 
 class ProductTeaserOverlay extends React.Component {
 
@@ -65,16 +83,12 @@ class ProductTeaserOverlay extends React.Component {
                   ? <Query query={WISHLIST_QUERY} variables={wishListVars}>
                     {({ loading, error, data }) => {
                       if (loading) {
-                        return <Button disabled variant="light">
-                          <FaSpinner />
-                        </Button>
+                        return <LoadingButton />
                       }
 
                       if (error) {
                         console.error('could not get wishlist', error);
-                        return <Button disabled variant="danger">
-                          <FaTimesCircle />
-                        </Button>
+                        return <ErrorButton error={error} />
                       }
 
                       const { isInWishlist } = data
@@ -82,50 +96,54 @@ class ProductTeaserOverlay extends React.Component {
                         return <Mutation mutation={REMOVE_FROM_WISHLIST} variables={wishListVars} refetchQueries={() => [{ query: WISHLIST_QUERY, variables: wishListVars }, { query: WISHLIST_QUERY_ALL, variables: { token: this.props.currentUser.getToken() }}]}>
                         {(mutationFn, { loading, error, data }) => {
                           if (loading) {
-                            return <Button disabled variant="light">
-                              <FaSpinner />
-                            </Button>
+                            return <LoadingButton />
                           }
 
                           if (error) {
                             console.error('could not add to wishlist', error);
-                            return <Button disabled variant="danger">
-                              <FaTimesCircle />
-                            </Button>
+                            return <ErrorButton error={error} />
                           }
 
-                          return <Button variant="light" onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}>
+                          return <OverlayTrigger
+                             delay={{ show: 250, hide: 400 }}
+                             overlay={<Tooltip>Remove item from your wishlist</Tooltip>}>
+                             <Button variant="light" onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}>
                             <FaHeartBroken />
                           </Button>
+                          </OverlayTrigger>
                         }}
                         </Mutation>
                       } else {
                         return <Mutation mutation={ADD_TO_WISHLIST} variables={wishListVars} refetchQueries={() => [{ query: WISHLIST_QUERY, variables: wishListVars }, { query: WISHLIST_QUERY_ALL, variables: { token: this.props.currentUser.getToken() }}]}>
                         {(mutationFn, { loading, error, data }) => {
                           if (loading) {
-                            return <Button disabled variant="light">
-                              <FaSpinner />
-                            </Button>
+                            return <LoadingButton />
                           }
 
                           if (error) {
                             console.error('could not add to wishlist', error);
-                            return <Button disabled variant="danger">
-                              <FaTimesCircle />
-                            </Button>
+                            return <ErrorButton error={error} />
                           }
 
-                          return <Button variant="light" onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}>
+                          return <OverlayTrigger
+                             delay={{ show: 250, hide: 400 }}
+                             overlay={<Tooltip>Add item to your wishlist</Tooltip>}>
+                            <Button variant="light" onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}>
                             <FaHeart />
                           </Button>
+                          </OverlayTrigger>
                         }}
                         </Mutation>
                       }
                     }}
                   </Query>
-                  : <Button disabled variant="light">
+                  : <OverlayTrigger
+                     delay={{ show: 250, hide: 400 }}
+                     overlay={<Tooltip>Login to add items to your wishlist</Tooltip>}>
+                  <Button disabled variant="light">
                     <FaHeart />
                   </Button>
+                  </OverlayTrigger>
                 }
 
                 <Query query={CART_GET} variables={{ orderId: this.props.currentUser.getCartId() }}>
@@ -157,36 +175,38 @@ class ProductTeaserOverlay extends React.Component {
                         >
                         {(mutationFn, { loading, error, data }) => {
                           if (loading) {
-                            return <Button disabled variant="light">
-                              <FaSpinner />
-                            </Button>
+                            return <LoadingButton />
                           }
                           if (error) {
                             console.error('could not add to cart', error);
-                            return <Button disabled variant="danger">
-                              <FaTimesCircle />
-                            </Button>
+                            return <ErrorButton error={error} />
                           }
                           if (data) {
-                            return <Button variant="success" onClick={(e) => { e.preventDefault(); e.stopPropagation(); Router.push('/cart'); }}>
+                            return <OverlayTrigger
+                               delay={{ show: 250, hide: 400 }}
+                               overlay={<Tooltip>Item added to your cart</Tooltip>}>
+                               <Button variant="success" onClick={(e) => { e.preventDefault(); e.stopPropagation(); Router.push('/cart'); }}>
                               <FaCheckCircle />
                             </Button>
+                            </OverlayTrigger>
                           }
-                          return <Button
+                          return <OverlayTrigger
+                             delay={{ show: 250, hide: 400 }}
+                             overlay={<Tooltip>Add item to your cart</Tooltip>}>
+                          <Button
                             disabled={this.props.product.productVariants.length !== 0}
                             variant="light"
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}
                             style={{ fontSize: '20px' }}>
                             <FaCartPlus />
                           </Button>
+                          </OverlayTrigger>
                         }}
                       </Mutation>
                     }
 
                     if (loading) {
-                      return <Button disabled variant="light">
-                        <FaSpinner />
-                      </Button>
+                      return <LoadingButton />
                     }
 
                     if (error) {
@@ -201,9 +221,13 @@ class ProductTeaserOverlay extends React.Component {
                                        || [])
                     const isInCart = !!firstMatchingItem
                     if (isInCart) {
-                      return <Button variant="success" onClick={(e) => { e.preventDefault(); e.stopPropagation(); Router.push('/cart'); }}>
+                      return <OverlayTrigger
+                         delay={{ show: 250, hide: 400 }}
+                         overlay={<Tooltip>Item already added to your cart</Tooltip>}>
+                         <Button variant="success" onClick={(e) => { e.preventDefault(); e.stopPropagation(); Router.push('/cart'); }}>
                         <FaCheckCircle />
                       </Button>
+                      </OverlayTrigger>
                     } else {
                       return AddToCartBtn()
                     }
