@@ -137,6 +137,13 @@ class ModifyProductForm extends React.Component {
           </ArrayGroup>
           : <>
 
+          <MakeGroup controlId="ModifyProductForm-qty"
+                     label="Quantity in Stock"
+                     field="qtyInStock"
+                     value={this.state.product.qtyInStock}
+                     onChange={() => setProductField('qtyInStock', Number.parseInt(event.target.value) || 0)}
+          />
+
           <MakeMoneyGroup controlId="ModifyProductForm-price" label="Price" field="price"
             value={this.state.product.price || 0}
             onChange={() => setProductField('price', Number.parseFloat((Number.parseFloat(event.target.value) || 0).toFixed(2))) }
