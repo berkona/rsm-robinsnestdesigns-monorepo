@@ -15,9 +15,9 @@
     "JWT_SECRET": "@jwt-secret",
     "JWT_ISSUER": "@jwt-issuer",
     "JWT_MAX_AGE": "@jwt-max-age",
-    "AWSAccessKeyId": "@AWSAccessKeyId",
-    "AWSSecretKey": "@AWSSecretKey",
-    "AWSUploadBucket": "@AWSUploadBucket"
+    "AWSAccessKeyId": "@awsaccesskeyid",
+    "AWSSecretKey": "@awssecretkey",
+    "AWSUploadBucket": "@awsuploadbucket"
   },
   "builds": [
     { "src": "www/next.config.js", "use": "@now/next" },
