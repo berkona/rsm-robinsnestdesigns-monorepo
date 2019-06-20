@@ -329,6 +329,7 @@ class MyDB extends SQLDataSource {
 
     const countQuery = this.db.count('* as nRecords').from(searchQuery.clone())
 
+
     const categoryInner = this.db.select('Category')
       .from(searchQuery.clone())
       .innerJoin('Products', 'Search.ID', 'Products.ID')
@@ -338,7 +339,23 @@ class MyDB extends SQLDataSource {
       .innerJoin(categoryInner.as('t1'), 't1.Category', 'Category.ID')
       .distinct()
 
-    return Promise.all([ dataQuery, countQuery, categoryQuery ])
+
+
+    const queries = [ dataQuery, countQuery, categoryQuery ]
+    if (args.categoryId) {
+      const subcategoryInner = this.db.select('SubCategory')
+        .from(searchQuery.clone())
+        .innerJoin('Products', 'Search.ID', 'Products.ID')
+
+      const subcategoryQuery = this.db.select('Subcategory.ID as ID', 'Subcategory.Subcategory as Category', 'Comments')
+        .from('Subcategory')
+        .innerJoin(subcategoryInner.as('t1'), 't1.SubCategory', 'Subcategory.ID')
+        .distinct()
+
+      queries.push(subcategoryQuery)
+    }
+
+    return Promise.all(queries)
   }
 
   tryUpsertUser(email, user) {

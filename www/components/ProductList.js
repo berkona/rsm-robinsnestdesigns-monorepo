@@ -34,6 +34,11 @@ query(
       title
       comments
     }
+    subcategories {
+      id
+      title
+      comments
+    }
     records {
       id
       sku
@@ -79,7 +84,7 @@ const ProductList = (props) => {
           if (loading) return <Loader />
           if (error) return <div>Error fetching data: {error.toString()}</div>
           if (props.onCategoriesChanged && typeof props.onCategoriesChanged == "function") {
-            props.onCategoriesChanged(data.allProducts.categories)
+            props.onCategoriesChanged(data.allProducts.categories, data.allProducts.subcategories)
           }
           const makePageLink = (page, text) =>
             <font size="-1" key={page}>

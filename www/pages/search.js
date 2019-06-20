@@ -64,7 +64,8 @@ const SearchPageSEO = (props) => {
           return <></>
         }
         else {
-          const subcategory = props.subcategoryId ? data.allSubcategories.filter((x) => x.id == props.subcategoryId)[0].title : null
+          let subcategory = props.subcategoryId && data.allSubcategories.filter((x) => x.id == props.subcategoryId)[0]
+          subcategory = subcategory && subcategory.title
           return <SEO title={makeTitle(props.searchPhrase, data.category.title, subcategory)} description={makeDescription(props.searchPhrase, data.category.title, subcategory)}/>
         }
       }}
@@ -79,6 +80,7 @@ class SearchPage extends React.Component {
     super(props)
     this.state = {
       categories: [],
+      subcategories: null,
     }
   }
 
@@ -90,6 +92,7 @@ class SearchPage extends React.Component {
             <div style={{ padding: '10px' }}>
               <SearchBlock
                 categories={this.state.categories}
+                subcategories={this.state.subcategories}
                 searchPhrase={this.props.router.query.searchPhrase}
                 categoryId={this.props.router.query.categoryId}
                 subcategoryId={this.props.router.query.subcategoryId}
@@ -119,9 +122,9 @@ class SearchPage extends React.Component {
               page={this.props.router.query.pageNo}
               sortOrder={this.props.router.query.sortOrder}
               listName={'Search Results'}
-              onCategoriesChanged={(categories) => {
-                if (this.state.categories.length != categories.length) {
-                  this.setState({ categories })
+              onCategoriesChanged={(categories, subcategories) => {
+                if (this.state.categories.length != categories.length || this.state.subcategories != subcategories) {
+                  this.setState({ categories, subcategories })
                 }
               }}
             />

@@ -477,13 +477,14 @@ const resolvers = {
       return reduceProduct(x[0])
     }),
     allProducts: (obj, args, context) => context.dataSources.db.listProducts(args).then(results => {
-      const [ rows, countRow, categories ] = results
+      const [ rows, countRow, categories, subcategories ] = results
       return {
         total: countRow[0].nRecords,
         skip: args.skip,
         limit: args.limit,
         records: rows.map(reduceProduct),
-        categories: reduceAllCategories(categories)
+        categories: reduceAllCategories(categories),
+        subcategories: subcategories ? reduceAllCategories(subcategories) : null,
       }
     }),
     saleCategories: (obj, args, context) => context.dataSources.db.listSaleCategories().then(reduceAllCategories),

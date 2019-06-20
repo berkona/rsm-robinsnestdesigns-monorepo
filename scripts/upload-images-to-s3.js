@@ -3,6 +3,7 @@ const AWS = require('aws-sdk')
 const fetch = require('isomorphic-fetch')
 var fs = require('fs')
 var path = require('path')
+const url = require('url')
 
 if (!process.env.SQL_ENGINE || !process.env.SQL_HOST || !process.env.SQL_USER || !process.env.SQL_PWD || !process.env.SQL_DB) {
   throw new Error('You must set the environmental variables: SQL_ENGINE, SQL_HOST, SQL_USER, SQL_PWD, SQL_DB before starting server')
@@ -24,6 +25,7 @@ const s3 = new AWS.S3()
 
 const BUCKET = 'robins-nest-designs-public-images.solipsisdev.com'
 const CDN_URL = 'https://robins-nest-designs-public-images.solipsisdev.com/'
+const SITE_PREFIX = 'https://www.robinsnestdesigns.com/ahpimages/'
 
 const downloadUrl = async (url, file) => {
   const res = await fetch(url)
@@ -80,14 +82,14 @@ async function main() {
       const row = rows[i]
       console.log('Processing ID ' + row.ID)
 
-      let url = null
+      let imageUrl = null
       let urls = []
       if (row.Hyperlinked_Image)
         urls.push(row.Hyperlinked_Image)
       if (row.Image)
-        urls.push(`https://www.robinsnestdesigns.com/ahpimages/${row.Image}`)
+        urls.push(url.resolve(SITE_PREFIX, row.Image))
       if (row.Thumbnail)
-        urls.push(`https://www.robinsnestdesigns.com/ahpimages/${row.Thumbnail}`)
+        urls.push(url.resolve(SITE_PREFIX, row.Thumbnail))
 
       for (let j = 0 ; j < urls.length; j++) {
         let testUrl = urls[j]
@@ -96,42 +98,51 @@ async function main() {
           console.log('testUrl was null, skipping')
           continue
         }
+
+        if (testUrl.startsWith(CDN_URL)) {
+          console.log('found CDN url, skipping item')
+          break
+        }
+
         if (testUrl.endsWith('/')) {
           console.log('testUrl was directory')
           continue
         }
-        if (!testUrl.endsWith('.png') && !testUrl.endsWith('.gif') && !testUrl.endsWith('.jpg')) {
+
+        if (!testUrl.toLowerCase().endsWith('.png')
+         && !testUrl.toLowerCase().endsWith('.gif')
+         && !testUrl.toLowerCase().endsWith('.jpg')
+         && !testUrl.toLowerCase().endsWith('.jpeg')) {
           console.log('testUrl was not a valid image')
           continue
         }
-        if (testUrl.startsWith(CDN_URL)) {
-          console.log('found CDN url, skipping item')
-          url = null
-          break
-        }
-        try {
-          const res = await fetch(testUrl)
-          if (res.ok) {
-            url = testUrl
-            break
-          } else {
-            console.warn('Could not fetch url', res.status)
+
+        for (let k = 0; k < 3; k++) {
+          try {
+            const res = await fetch(testUrl)
+            if (res.ok) {
+              imageUrl = testUrl
+              break
+            } else {
+              console.warn('Could not fetch url', res.status)
+            }
+          } catch (err) {
+            console.warn('Could not fetch url', err)
           }
-        } catch (err) {
-          console.warn('Could not fetch url', err)
         }
+        if (imageUrl != null) break
       }
 
-      if (url == null) {
+      if (imageUrl == null) {
         console.warn('No valid image for product id ' + row.ID)
         continue
       }
 
-      const parts = url.split('.')
+      const parts = imageUrl.split('.')
       const ending = parts[parts.length-1]
 
       var file = 'image-' + Date.now() + '-' + parseInt((Math.random() * 10000000000000000000)).toString(36) + '.' + ending
-      await downloadUrl(url, file)
+      await downloadUrl(imageUrl, file)
       await uploadUrl(BUCKET, file)
       fs.unlinkSync(file)
 

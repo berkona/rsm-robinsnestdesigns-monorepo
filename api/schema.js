@@ -159,6 +159,7 @@ const typeDefs = gql`
     limit: Int!
     records: [Product!]!
     categories: [Category!]!
+    subcategories: [SubCategory!]
   }
 
   input ProductPatchInput {

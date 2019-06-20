@@ -146,44 +146,40 @@ class SearchBlock extends React.Component {
 				</Form.Group>
 
 				{
-					self.state.categoryId ?
-					<Form.Group controlId="subcategoryId">
+					self.state.categoryId
+					? <Form.Group controlId="subcategoryId">
 						<Form.Label>Subcategory</Form.Label>
-					<Query query={findSubcategory} variables={{ categoryId: self.state.categoryId }}>
-						{({ loading, error, data}) => {
-							if (loading) {
-								return <p>Loading...</p>
-							}
+						<Query query={findSubcategory} variables={{ categoryId: self.state.categoryId }}>
+								{({ loading, error, data}) => {
+									if (loading) {
+										return <p>Loading...</p>
+									}
 
-							if (error) {
-								return <p>Network error {error.toString()}</p>
-							}
+									if (error) {
+										return <p>Network error {error.toString()}</p>
+									}
 
-							if (self.state.subcategoryId) {
-								const subcat = data
-									&& data.allSubcategories
-									&& data.allSubcategories
-											.filter(x => x.id == self.state.subcategoryId)
-											[0]
-									|| null
-								if (!subcat) return <p>Error finding subcategoryId</p>
-								return <ul><li><SearchLink categoryId={self.state.categoryId} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
-									<a>&#60; {subcat.title}</a>
-								</SearchLink></li></ul>
-							} else {
-								return <ul>
-									{data.allSubcategories.map(c => (
-										<li key={c.id}><SearchLink categoryId={self.state.categoryId} subcategoryId={c.id} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
-											<a>{c.title}</a>
-										</SearchLink></li>
-									))}
-								</ul>
-							}
-						}}
-					</Query>
-						</Form.Group>
-					:
-					<></>
+									if (self.state.subcategoryId) {
+										const subcategories = (this.props.subcategories || data && data.allSubcategories)
+										const subcat = subcategories && subcategories
+													.filter(x => x.id == self.state.subcategoryId)
+													[0]
+											|| null
+										return <ul><li><SearchLink categoryId={self.state.categoryId} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
+											<a>&#60; {subcat && subcat.title || self.state.subcategoryId}</a>
+										</SearchLink></li></ul>
+									} else {
+										return <ul>
+											{(this.props.subcategories || data.allSubcategories).map(c => (
+												<li key={c.id}><SearchLink categoryId={self.state.categoryId} subcategoryId={c.id} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
+													<a>{c.title}</a>
+												</SearchLink></li>
+											))}
+										</ul>
+									}
+								}}
+							</Query>
+						</Form.Group> : <></>
 				}
 			</Form>
 		)
