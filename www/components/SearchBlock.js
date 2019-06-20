@@ -119,71 +119,72 @@ class SearchBlock extends React.Component {
 					<Form.Check type="checkbox" label="Recently Added" checked={self.state.newOnly} onChange={self.handleNewOnlyChange}></Form.Check>
 				</Form.Group>
 
-					{
-						self.state.categoryId ? 	<Form.Group controlId="categoryId">
-							<Form.Label>Category</Form.Label><Query query={findCategory}>
-								{({ loading, error, data}) => {
-									const category = data
-										&& data.allCategories
-										&& data.allCategories
-												.filter(x => x.id == self.state.categoryId)
-												[0]
-										|| null
-									if (!category) {
-										return <ul><li><SearchLink searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
-											<a>&lt; {self.state.categoryId}</a>
-											</SearchLink></li></ul>
-									} else {
-											return <ul><li><SearchLink searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
-											<a>&lt; {category.title}</a>
-											</SearchLink></li></ul>
-									}
-
-
-								}}
-							</Query></Form.Group> : <CategoryLinks />
-					}
-
-					{
-						self.state.categoryId ?
-						<Form.Group controlId="subcategoryId">
-							<Form.Label>Subcategory</Form.Label>
-						<Query query={findSubcategory} variables={{ categoryId: self.state.categoryId }}>
-							{({ loading, error, data}) => {
-								if (loading) {
-									return <p>Loading...</p>
-								}
-
-								if (error) {
-									return <p>Network error {error.toString()}</p>
-								}
-
-								if (self.state.subcategoryId) {
-									const subcat = data
-										&& data.allSubcategories
-										&& data.allSubcategories
-												.filter(x => x.id == self.state.subcategoryId)
-												[0]
-										|| null
-									if (!subcat) return <p>Error finding subcategoryId</p>
-									return <ul><li><SearchLink categoryId={self.state.categoryId} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
-										<a>&#60; {subcat.title}</a>
+				<Form.Group controlId="categoryId">
+					<Form.Label>Category</Form.Label>
+					{ self.state.categoryId ? <Query query={findCategory}>
+						{({ loading, error, data}) => {
+							const category = data
+								&& data.allCategories
+								&& data.allCategories
+										.filter(x => x.id == self.state.categoryId)
+										[0]
+								|| null
+							if (!category) {
+								return <ul><li><SearchLink searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
+									<a>&lt; {self.state.categoryId}</a>
 									</SearchLink></li></ul>
-								} else {
-									return <ul>
-										{data.allSubcategories.map(c => (
-											<li key={c.id}><SearchLink categoryId={self.state.categoryId} subcategoryId={c.id} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
-												<a>{c.title} &gt;</a>
-											</SearchLink></li>
-										))}
-									</ul>
-								}
-							}}
-						</Query>
-							</Form.Group>
-						:
-						<></>
-					}
+							} else {
+									return <ul><li><SearchLink searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
+									<a>&lt; {category.title}</a>
+									</SearchLink></li></ul>
+							}
+
+						}}
+					</Query>
+				:	this.props.categories ? <CategoryLinks categories={this.props.categories} /> : <></>
+				}
+				</Form.Group>
+
+				{
+					self.state.categoryId ?
+					<Form.Group controlId="subcategoryId">
+						<Form.Label>Subcategory</Form.Label>
+					<Query query={findSubcategory} variables={{ categoryId: self.state.categoryId }}>
+						{({ loading, error, data}) => {
+							if (loading) {
+								return <p>Loading...</p>
+							}
+
+							if (error) {
+								return <p>Network error {error.toString()}</p>
+							}
+
+							if (self.state.subcategoryId) {
+								const subcat = data
+									&& data.allSubcategories
+									&& data.allSubcategories
+											.filter(x => x.id == self.state.subcategoryId)
+											[0]
+									|| null
+								if (!subcat) return <p>Error finding subcategoryId</p>
+								return <ul><li><SearchLink categoryId={self.state.categoryId} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
+									<a>&#60; {subcat.title}</a>
+								</SearchLink></li></ul>
+							} else {
+								return <ul>
+									{data.allSubcategories.map(c => (
+										<li key={c.id}><SearchLink categoryId={self.state.categoryId} subcategoryId={c.id} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
+											<a>{c.title}</a>
+										</SearchLink></li>
+									))}
+								</ul>
+							}
+						}}
+					</Query>
+						</Form.Group>
+					:
+					<></>
+				}
 			</Form>
 		)
 	}

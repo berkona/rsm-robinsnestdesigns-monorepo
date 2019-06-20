@@ -29,6 +29,11 @@ query(
     limit: $limit,
     sort: $sort) {
     total,
+    categories {
+      id
+      title
+      comments
+    }
     records {
       id
       sku
@@ -73,7 +78,9 @@ const ProductList = (props) => {
         ({ loading, error, data }) => {
           if (loading) return <Loader />
           if (error) return <div>Error fetching data: {error.toString()}</div>
-
+          if (props.onCategoriesChanged && typeof props.onCategoriesChanged == "function") {
+            props.onCategoriesChanged(data.allProducts.categories)
+          }
           const makePageLink = (page, text) =>
             <font size="-1" key={page}>
               <SearchLink

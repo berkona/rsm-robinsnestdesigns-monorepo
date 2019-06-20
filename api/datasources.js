@@ -329,7 +329,16 @@ class MyDB extends SQLDataSource {
 
     const countQuery = this.db.count('* as nRecords').from(searchQuery.clone())
 
-    return Promise.all([ dataQuery, countQuery ])
+    const categoryInner = this.db.select('Category')
+      .from(searchQuery.clone())
+      .innerJoin('Products', 'Search.ID', 'Products.ID')
+
+    const categoryQuery = this.db.select(categoryFields)
+      .from('Category')
+      .innerJoin(categoryInner.as('t1'), 't1.Category', 'Category.ID')
+      .distinct()
+
+    return Promise.all([ dataQuery, countQuery, categoryQuery ])
   }
 
   tryUpsertUser(email, user) {

@@ -44,6 +44,25 @@ class MyNavbar extends React.Component {
       this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
   }
 
+  componentDidUpdate() {
+    const {
+      categoryId,
+      subcategoryId,
+      onSaleOnly,
+      newOnly
+    } = this.props.router.query
+    if (categoryId != this.state.categoryId
+      || subcategoryId != this.state.subcategoryId
+      || onSaleOnly != this.state.onSaleOnly
+      || newOnly != this.state.newOnly) {
+        this.setState({
+          categoryId,
+          subcategoryId,
+          onSaleOnly,
+          newOnly
+        })
+      }
+  }
   handleSearchChange() {
       this.setState({
         searchPhrase: event.target.value

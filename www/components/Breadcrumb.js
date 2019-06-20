@@ -36,7 +36,7 @@ const MyBreadcrumb = (props) => {
     } = props.query;
     return (
       <Breadcrumb>
-        <BreadcrumbItem href="/" active={!categoryId && !subcategoryId && !searchPhrase}>All categories</BreadcrumbItem>
+        <BreadcrumbItem href={SearchLinkStr({ searchPhrase, onSaleOnly, newOnly })} active={!categoryId && !subcategoryId && !searchPhrase}>All categories</BreadcrumbItem>
         {
           categoryId
           ?
@@ -45,7 +45,7 @@ const MyBreadcrumb = (props) => {
                const category = (loading || error)
                 ? { title: '' + categoryId }
                 : data.allCategories.reduce((accum, next) => next.id == categoryId ? next : accum, { title: '' + categoryId })
-               return <BreadcrumbItem href={SearchLinkStr({ categoryId, onSaleOnly, newOnly })} active={!subcategoryId && !searchPhrase}>{category.title}</BreadcrumbItem>
+               return <BreadcrumbItem href={SearchLinkStr({ searchPhrase, categoryId, onSaleOnly, newOnly })} active={!subcategoryId && !searchPhrase}>{category.title}</BreadcrumbItem>
              }}
            </Query>
           : <></>
@@ -58,7 +58,7 @@ const MyBreadcrumb = (props) => {
                 const subcategory = (loading || error)
                   ? { title: '' + subcategoryId }
                   : data.allSubcategories.reduce((accum, next) => next.id == subcategoryId ? next : accum, { title: '' + subcategoryId })
-                return <BreadcrumbItem href={SearchLinkStr({ categoryId, subcategoryId, onSaleOnly, newOnly })} active={!searchPhrase && !product}>{subcategory.title}</BreadcrumbItem>
+                return <BreadcrumbItem href={SearchLinkStr({ searchPhrase, categoryId, subcategoryId, onSaleOnly, newOnly })} active={!searchPhrase && !product}>{subcategory.title}</BreadcrumbItem>
               }
             }
           </Query>
