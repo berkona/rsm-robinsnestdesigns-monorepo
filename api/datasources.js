@@ -142,9 +142,9 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
   const SearchAllFields = (searchPhrase) => {
     return [
         makeQuery(100).where('Products.ItemID', searchPhrase),
-        makeQuery(40).where('Products.ItemName', 'like', `% ${searchPhrase}%`),
-        makeQuery(10).where('Products.Keywords', 'like', `% ${searchPhrase}%`),
-        makeQuery(4).where('Products.Description', 'like', `% ${searchPhrase}%`),
+        makeQuery(50).where('Products.ItemName', 'like', `% ${searchPhrase}%`),
+        makeQuery(25).where('Products.Keywords', 'like', `% ${searchPhrase}%`),
+        makeQuery(5).where('Products.Description', 'like', `% ${searchPhrase}%`),
     ]
   }
 
@@ -153,12 +153,14 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
   if (!searchPhrase || tokens.length == 0) {
     return makeQuery(1)
   } else {
+    const relevanceCutoff = (tokens.length-1) * 25
     const queries = tokens.map(SearchAllFields).reduce((a, b) => a.concat(b), [])
     let unionQ = queries.reduce((a, b) => a.unionAll(b)).as('Search_inner')
     return builder.select('ID')
                   .sum('relevance as relevance')
                   .from(unionQ)
                   .groupBy('ID')
+                  .having('relevance', '>', relevanceCutoff)
   }
 }
 
@@ -324,7 +326,7 @@ class MyDB extends SQLDataSource {
     else {
       dataQuery = dataQuery
         .orderBy('relevance', 'desc')
-        .orderBy('ItemName', 'asc')
+        .orderBy('Products.ID', 'desc')
     }
 
     const countQuery = this.db.count('* as nRecords').from(searchQuery.clone())
