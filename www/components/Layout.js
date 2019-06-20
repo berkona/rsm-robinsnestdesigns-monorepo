@@ -31,7 +31,6 @@ const Layout = props => (
       {/* CSS for robinsnestdesigns */}
       <link rel='stylesheet' type='text/css' href='/static/site.css' />
       <link  rel="stylesheet" type="text/css" href='/static/ToggleSlider.css' />
-      <link href="/static/droplinetabs.css" rel="stylesheet" type="text/css" />
       <link href="/static/react-datepicker.min.css" rel="stylesheet" type="text/css" />
     </Head>
 
@@ -59,9 +58,6 @@ const Layout = props => (
         </div>
       </Col>
     </Row>
-
-    <script type="text/javascript" src="/static/jquery-1.3.2.min.js"></script>
-    <script type="text/javascript" src="/static/droplinemenu.js"></script>
   </Container>
 )
 
