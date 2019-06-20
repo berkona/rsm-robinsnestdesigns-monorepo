@@ -13,6 +13,7 @@ import Router from 'next/router'
 import { CART_GET, WISHLIST_QUERY_ALL, WISHLIST_QUERY, REMOVE_FROM_WISHLIST, ADD_TO_WISHLIST } from '../constants/queries'
 import Tooltip from 'react-bootstrap/Tooltip'
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
+import { LazyLoadImage } from 'react-lazy-load-image-component';
 
 const ADD_TO_CART = gql`
   mutation addToCart($productId: ID!, $qty: Int!, $orderId: ID, $variant: ID) {
@@ -50,6 +51,11 @@ const ErrorButton = (props) => <OverlayTrigger
     <FaTimesCircle />
   </Button>
 </OverlayTrigger>
+
+const ProductImage = (props) =>
+  (props.product.hyperlinkedImage || props.product.thumbnail || props.product.image)
+  ? <LazyLoadImage src={props.product.hyperlinkedImage || `https://www.robinsnestdesigns.com/ahpimages/${props.product.image || props.product.thumbnail}`} />
+  : <LazyLoadImage src="/static/no-image.png"/>
 
 class ProductTeaserOverlay extends React.Component {
 
@@ -105,7 +111,7 @@ class ProductTeaserOverlay extends React.Component {
                           }
 
                           return <OverlayTrigger
-                             delay={{ show: 250, hide: 400 }}
+                             delay={{ show: 250, hide: 100 }}
                              overlay={<Tooltip>Remove item from your wishlist</Tooltip>}>
                              <Button variant="light" onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}>
                             <FaHeartBroken />
@@ -126,7 +132,7 @@ class ProductTeaserOverlay extends React.Component {
                           }
 
                           return <OverlayTrigger
-                             delay={{ show: 250, hide: 400 }}
+                             delay={{ show: 250, hide: 100 }}
                              overlay={<Tooltip>Add item to your wishlist</Tooltip>}>
                             <Button variant="light" onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}>
                             <FaHeart />
@@ -138,7 +144,7 @@ class ProductTeaserOverlay extends React.Component {
                     }}
                   </Query>
                   : <OverlayTrigger
-                     delay={{ show: 250, hide: 400 }}
+                     delay={{ show: 250, hide: 100 }}
                      overlay={<Tooltip>Login to add items to your wishlist</Tooltip>}>
                   <Button disabled variant="light">
                     <FaHeart />
@@ -183,7 +189,7 @@ class ProductTeaserOverlay extends React.Component {
                           }
                           if (data) {
                             return <OverlayTrigger
-                               delay={{ show: 250, hide: 400 }}
+                               delay={{ show: 250, hide: 100 }}
                                overlay={<Tooltip>Item added to your cart</Tooltip>}>
                                <Button variant="success" onClick={(e) => { e.preventDefault(); e.stopPropagation(); Router.push('/cart'); }}>
                               <FaCheckCircle />
@@ -193,7 +199,7 @@ class ProductTeaserOverlay extends React.Component {
 
                           if (this.props.product.productVariants.length !== 0) {
                             return <OverlayTrigger
-                               delay={{ show: 250, hide: 400 }}
+                               delay={{ show: 250, hide: 100 }}
                                overlay={<Tooltip>Click to add to cart from detail page</Tooltip>}>
                             <Button
                               variant="light"
@@ -203,7 +209,7 @@ class ProductTeaserOverlay extends React.Component {
                             </OverlayTrigger>
                           } else {
                             return <OverlayTrigger
-                               delay={{ show: 250, hide: 400 }}
+                               delay={{ show: 250, hide: 100 }}
                                overlay={<Tooltip>Add item to your cart</Tooltip>}>
                             <Button
                               variant="light"
@@ -234,7 +240,7 @@ class ProductTeaserOverlay extends React.Component {
                     const isInCart = !!firstMatchingItem
                     if (isInCart) {
                       return <OverlayTrigger
-                         delay={{ show: 250, hide: 400 }}
+                         delay={{ show: 250, hide: 100 }}
                          overlay={<Tooltip>Item already added to your cart</Tooltip>}>
                          <Button variant="success" onClick={(e) => { e.preventDefault(); e.stopPropagation(); Router.push('/cart'); }}>
                         <FaCheckCircle />
@@ -288,11 +294,7 @@ const ProductTeaser = (props) => {
                                    position={props.position}
                                    currentUser={currentUser}>
                 <div style={{ width: '100%', height: '100%', position: 'absolute', top: '0', left: '0' }}>
-                  {
-                    (props.product.hyperlinkedImage || props.product.thumbnail || props.product.image)
-                    ? <img src={props.product.hyperlinkedImage || `https://www.robinsnestdesigns.com/ahpimages/${props.product.image || props.product.thumbnail}`}></img>
-                    : <img src="/static/no-image.png"/>
-                  }
+                  <ProductImage product={props.product} />
                 </div>
               </ProductTeaserOverlay>
              </div>
