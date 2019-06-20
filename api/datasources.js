@@ -141,10 +141,10 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
 
   const SearchAllFields = (searchPhrase) => {
     return [
-        makeQuery(20).where('Products.ItemID', searchPhrase),
-        makeQuery(10).where('Products.ItemName', 'like', `%${searchPhrase}%`),
-        makeQuery(5).where('Products.Keywords', 'like', `%${searchPhrase}%`),
-        makeQuery(2).where('Products.Description', 'like', `%${searchPhrase}%`),
+        makeQuery(100).where('Products.ItemID', searchPhrase),
+        makeQuery(40).where('Products.ItemName', 'like', `% ${searchPhrase}%`),
+        makeQuery(10).where('Products.Keywords', 'like', `% ${searchPhrase}%`),
+        makeQuery(4).where('Products.Description', 'like', `% ${searchPhrase}%`),
     ]
   }
 
