@@ -256,7 +256,7 @@ const CartItemTeaser = (props) => (
           </Col>
           <Col md={6}>
             <Row>
-              <Col md={8}>
+              <Col md={7}>
                 <Mutation mutation={updateCartItem} variables={{ cartItemId: props.cartItemId, variant: props.variant }} update={(cache, { data }) => {
                   cache.writeQuery({
                     query: query,
@@ -296,7 +296,7 @@ const CartItemTeaser = (props) => (
                   }}
                 </Mutation>
               </Col>
-              <Col md={4}>
+              <Col md={5}>
                 <p style={{ fontSize: '16px', fontWeight: 'bold', textAlign: 'right' }}>
                   ${(props.qty * props.price).toFixed(2)}
                 </p>
