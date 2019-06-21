@@ -27,11 +27,13 @@
   "routes": [
     { "src": "/graphql", "dest": "api/handler.js" },
     {
-      "src": "/",
-      "dest": "/www/",
-      "headers": {
-        "cache-control": "s-maxage=300, max-age=0"
-      }
+      "src": "/googlea7696e4bbcfecd2f.html",
+      "dest": "/www/static/googlea7696e4bbcfecd2f.html",
+      "headers": { "cache-control": "immutable" }
+    },
+    {
+      "src": "/_next/static/(?:[^/]+/pages|chunks|runtime)/.+",
+      "headers": { "cache-control": "immutable" }
     },
     {
       "src": "/product/(?<productId>[^/]+).*$",
@@ -64,13 +66,11 @@
       "dest": "/www/admin/category-details?categoryId=$categoryId"
     },
     {
-      "src": "/googlea7696e4bbcfecd2f.html",
-      "dest": "/www/static/googlea7696e4bbcfecd2f.html",
-      "headers": { "cache-control": "immutable" }
-    },
-    {
-      "src": "/_next/static/(?:[^/]+/pages|chunks|runtime)/.+",
-      "headers": { "cache-control": "immutable" }
+      "src": "/",
+      "dest": "/www/",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
     },
     {
       "src": "/(.*)",
