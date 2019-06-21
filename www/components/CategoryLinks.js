@@ -5,9 +5,11 @@ import { withRouter } from 'next/router'
 
 export const sidebarQuery = gql`
   query {
-    allCategories {
-      id
-      title
+    allProducts {
+      categories {
+        id
+        title
+      }
     }
   }
 `
@@ -71,7 +73,7 @@ const CategoryLinks = withRouter((props) => (
       if (loading) return <div>Loading sidebar...</div>
       if (error) return <div>Error fetching data: <p>{error.toString()}</p></div>
       return <CategoryLinks_inner
-        sortedCategories={arrangeCategories(data.allCategories)}
+        sortedCategories={arrangeCategories(data.allProducts.categories)}
         searchPhrase={props.router.query.searchPhrase}
         onSaleOnly={props.router.query.onSaleOnly}
         newOnly={props.router.query.newOnly}

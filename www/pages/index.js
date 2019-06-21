@@ -60,7 +60,7 @@ const ProductCarouselItem = (props) => <Query query={FIND_ONE_PRODUCT} variables
       />
       <div style={{ height: '300px' }}>
         {props.header}
-        <Row style={{ height: '240px' }}>
+        <Row style={{ height: '220px' }}>
           <Col md={6} style={{ height: '100%' }}>
             <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'left' }}>
               <ProductImage lazy={false} imgProps={{ style: { maxWidth: '100%', height: '100%' } }} product={product} />
@@ -142,7 +142,7 @@ const Index = (props) => (
           </SearchLink>
           <ProductList isTeaser={true} sortOrder="random" categoryId={215} limit={8} listName={'Index - New in Bargin Bin'} />
           <hr />
-          
+
         </div>
       </div>
     </Col>
