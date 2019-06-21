@@ -25,6 +25,7 @@
     { "src": "api/handler.js", "use": "@now/node" }
   ],
   "routes": [
+    { "src": "/graphql", "dest": "api/handler.js" },
     {
       "src": "/",
       "dest": "/www/",
@@ -32,12 +33,28 @@
         "cache-control": "s-maxage=300, max-age=0"
       }
     },
-    { "src": "/graphql", "dest": "api/handler.js" },
-    { "src": "/googlea7696e4bbcfecd2f.html", "dest": "/www/static/googlea7696e4bbcfecd2f.html" },
-    { "src": "/product/(?<productId>[^/]+).*$", "dest": "/www/product?productId=$productId" },
+    {
+      "src": "/product/(?<productId>[^/]+).*$",
+      "dest": "/www/product?productId=$productId",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
+    },
     { "src": "/category/(?<categoryId>[^/]+).*$", "dest": "/www/category?categoryId=$categoryId" },
-    { "src": "/order/(?<orderId>[^/]+).*$", "dest": "/www/order?orderId=$orderId" },
-    { "src": "/search.*$", "dest": "/www/search" },
+    {
+      "src": "/order/(?<orderId>[^/]+).*$",
+      "dest": "/www/order?orderId=$orderId",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
+    },
+    {
+      "src": "/search.*$",
+      "dest": "/www/search",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
+    },
     {
       "src": "/admin/product-details/(?<productId>[^/]+).*$",
       "dest": "/www/admin/product-details?productId=$productId"
@@ -47,15 +64,20 @@
       "dest": "/www/admin/category-details?categoryId=$categoryId"
     },
     {
+      "src": "/googlea7696e4bbcfecd2f.html",
+      "dest": "/www/static/googlea7696e4bbcfecd2f.html",
+      "headers": { "cache-control": "immutable" }
+    },
+    {
+      "src": "/_next/static/(?:[^/]+/pages|chunks|runtime)/.+",
+      "headers": { "cache-control": "immutable" }
+    },
+    {
       "src": "/(.*)",
       "dest": "/www/$1",
       "headers": {
         "x-request-path": "$1"
       }
-    },
-    {
-      "src": "/_next/static/(?:[^/]+/pages|chunks|runtime)/.+",
-      "headers": { "cache-control": "immutable" }
     }
   ]
 }
