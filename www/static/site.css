@@ -621,3 +621,11 @@ TR.even,
 .btn.btn-primary {
     color: '#006699;'
 }
+
+.carousel-indicators li {
+    background-color: #888;
+}
+
+.carousel-indicators .active {
+    background-color: #333;
+}
