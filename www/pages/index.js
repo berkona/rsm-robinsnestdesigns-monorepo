@@ -13,6 +13,7 @@ import ApolloError from '../components/ApolloError'
 import PriceDisplay from '../components/PriceDisplay'
 import { Impression } from '../lib/next-ga-ec'
 import { ProductLink} from '../components/Links'
+import ProductImage from '../components/ProductImage'
 
 const FIND_ONE_PRODUCT = gql`
 query($categoryId: ID, $onSaleOnly: Boolean, $newOnly: Boolean) {
@@ -23,6 +24,8 @@ query($categoryId: ID, $onSaleOnly: Boolean, $newOnly: Boolean) {
       category
       subcategory
       hyperlinkedImage
+      image
+      thumbnail
       name
       description
       isOnSale
@@ -57,10 +60,10 @@ const ProductCarouselItem = (props) => <Query query={FIND_ONE_PRODUCT} variables
       />
       <div style={{ height: '300px' }}>
         {props.header}
-        <Row>
-          <Col md={6}>
-            <div style={{ width: '100%', height: '100%', position: 'absolute', top: '0', left: '0' }}>
-              <img style={{ height: '240px' }} src={product.hyperlinkedImage} alt={"Picture of " + product.name}/>
+        <Row style={{ height: '240px' }}>
+          <Col md={6} style={{ height: '100%' }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center' }}>
+              <ProductImage lazy={false} imgProps={{ style: { maxWidth: '100%', height: '100%' } }} product={product} />
             </div>
           </Col>
           <Col md={6}>

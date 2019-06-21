@@ -13,7 +13,7 @@ import Router from 'next/router'
 import { CART_GET, WISHLIST_QUERY_ALL, WISHLIST_QUERY, REMOVE_FROM_WISHLIST, ADD_TO_WISHLIST } from '../constants/queries'
 import Tooltip from 'react-bootstrap/Tooltip'
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
-import { LazyLoadImage } from 'react-lazy-load-image-component';
+import ProductImage from './ProductImage'
 
 const ADD_TO_CART = gql`
   mutation addToCart($productId: ID!, $qty: Int!, $orderId: ID, $variant: ID) {
@@ -51,11 +51,6 @@ const ErrorButton = (props) => <OverlayTrigger
     <FaTimesCircle />
   </Button>
 </OverlayTrigger>
-
-const ProductImage = (props) =>
-  (props.product.hyperlinkedImage || props.product.thumbnail || props.product.image)
-  ? <LazyLoadImage src={props.product.hyperlinkedImage || `https://www.robinsnestdesigns.com/ahpimages/${props.product.image || props.product.thumbnail}`} />
-  : <LazyLoadImage src="/static/no-image.png"/>
 
 class ProductTeaserOverlay extends React.Component {
 

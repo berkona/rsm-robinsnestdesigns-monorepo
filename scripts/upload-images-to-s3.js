@@ -78,7 +78,7 @@ async function main() {
 
     skip += batchSize
 
-    for (let i = 0; i < batchSize; i++) {
+    for (let i = 0; i < rows.length; i++) {
       const row = rows[i]
       console.log('Processing ID ' + row.ID)
 
