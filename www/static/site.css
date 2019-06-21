@@ -135,13 +135,13 @@ p {
 #siteName {
     /* margin-left: 540px; */
     text-align: center;
-    color: #FFFFCC
+    color: #FFFFFF
 }
 
 #siteName h1 {
     margin-bottom: 6px;
     margin-top: 16px;
-    color: #FFFFCC;
+    color: #FFFFFF;
     font-weight: bold;
 }
 
@@ -176,25 +176,15 @@ p {
     margin: 0 0 0 202px;
 }
 
-#homeHeader P {
-    padding-left: 20px;
-    padding-right: 20px;
-    font-size: 90%;
-}
-
 #homeContent {
     /* margin-right: 30px; */
 }
 
 #homeContent h2 {
-    color: #FFFFCC;
+    color: #FFFFFF;
     background-color: #587E98;
     padding: 6px 20px;
     margin: 8px 0 15px 0;
-}
-
-#homeContent p {
-    margin-left: 6px;
 }
 
 /************** On sale (right column) styles ***************/
@@ -206,7 +196,7 @@ p {
 }
 
 #headlines h2 {
-    color: #FFFFCC;
+    color: #FFFFFF;
     background-color: #587E98;
     padding: 6px 10px 6px 20px;
     width: 220px;
@@ -237,7 +227,7 @@ p {
 }
 
 #content.twoColumns h2 {
-    color: #FFFFCC;
+    color: #FFFFFF;
     background-color: #587E98;
     padding: 6px 20px;
     width: 94%;
