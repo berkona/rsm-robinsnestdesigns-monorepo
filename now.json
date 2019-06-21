@@ -6,6 +6,7 @@
   "env": {
     "SQL_ENGINE": "mysql",
     "SQL_HOST": "@sql-host",
+    "SQL_PORT": "@sql-port",
     "SQL_USER": "@sql-user",
     "SQL_PWD": "@sql-password",
     "SQL_DB": "@sql-db",
