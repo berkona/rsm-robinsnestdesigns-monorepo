@@ -40,6 +40,7 @@ const LoadingButton = (props) => <OverlayTrigger
    overlay={<Tooltip>A network request is happening</Tooltip>}>
   <Button disabled variant="light">
     <FaSpinner />
+    <span className="sr-only">Loading</span>
   </Button>
 </OverlayTrigger>
 
@@ -49,6 +50,7 @@ const ErrorButton = (props) => <OverlayTrigger
  >
    <Button disabled variant="danger">
     <FaTimesCircle />
+    <span className="sr-only">A network error occurred: {props.error.toString()}</span>
   </Button>
 </OverlayTrigger>
 
@@ -110,6 +112,7 @@ class ProductTeaserOverlay extends React.Component {
                              overlay={<Tooltip>Remove item from your wishlist</Tooltip>}>
                              <Button variant="light" onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}>
                             <FaHeartBroken />
+                            <span className="sr-only">Remove from wishlist</span>
                           </Button>
                           </OverlayTrigger>
                         }}
@@ -131,6 +134,7 @@ class ProductTeaserOverlay extends React.Component {
                              overlay={<Tooltip>Add item to your wishlist</Tooltip>}>
                             <Button variant="light" onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}>
                             <FaHeart />
+                            <span className="sr-only">Add to wishlist</span>
                           </Button>
                           </OverlayTrigger>
                         }}
@@ -143,6 +147,7 @@ class ProductTeaserOverlay extends React.Component {
                      overlay={<Tooltip>Login to add items to your wishlist</Tooltip>}>
                   <Button disabled variant="light">
                     <FaHeart />
+                    <span className="sr-only">Login to add items to your wishlist</span>
                   </Button>
                   </OverlayTrigger>
                 }
@@ -188,6 +193,7 @@ class ProductTeaserOverlay extends React.Component {
                                overlay={<Tooltip>Item added to your cart</Tooltip>}>
                                <Button variant="success" onClick={(e) => { e.preventDefault(); e.stopPropagation(); Router.push('/cart'); }}>
                               <FaCheckCircle />
+                              <span className="sr-only">Item added to your cart</span>
                             </Button>
                             </OverlayTrigger>
                           }
@@ -200,6 +206,7 @@ class ProductTeaserOverlay extends React.Component {
                               variant="light"
                               style={{ fontSize: '20px' }}>
                               <FaCartPlus />
+                              <span className="sr-only">Click to add to cart from detail page</span>
                             </Button>
                             </OverlayTrigger>
                           } else {
@@ -211,6 +218,7 @@ class ProductTeaserOverlay extends React.Component {
                               onClick={(e) => { e.preventDefault(); e.stopPropagation(); mutationFn(); }}
                               style={{ fontSize: '20px' }}>
                               <FaCartPlus />
+                              <span className="sr-only">Add item to your cart</span>
                             </Button>
                             </OverlayTrigger>
                           }
@@ -239,6 +247,7 @@ class ProductTeaserOverlay extends React.Component {
                          overlay={<Tooltip>Item already added to your cart</Tooltip>}>
                          <Button variant="success" onClick={(e) => { e.preventDefault(); e.stopPropagation(); Router.push('/cart'); }}>
                         <FaCheckCircle />
+                        <span className="sr-only">Item already added to your cart</span>
                       </Button>
                       </OverlayTrigger>
                     } else {
