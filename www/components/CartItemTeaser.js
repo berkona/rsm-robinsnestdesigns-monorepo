@@ -180,7 +180,7 @@ const CartItemTeaser = (props) => (
       />
     <Row style={{ padding: '10px' }}>
       <Col xs={3}>
-        <ProductImage product={props.product} />
+        <ProductImage imgProps={{ style: { maxHeight: '100%', maxWidth: '100%' }}} product={props.product} />
       </Col>
       <Col xs={9}>
         <Row>
