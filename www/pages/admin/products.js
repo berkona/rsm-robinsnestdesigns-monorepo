@@ -31,7 +31,7 @@ export default () => (
         {({ loading, error, data }) => {
           if (loading) return <Loader />
           if (error) return <ApolloError error={error} />
-          return <Table>
+          return <Table striped bordered hover>
             <thead>
               <tr>
                 <th>SKU</th>

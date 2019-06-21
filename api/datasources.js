@@ -227,6 +227,17 @@ class MyDB extends SQLDataSource {
     return query
   }
 
+  insertCategory({ title, comments }) {
+    if (!title) return Promise.reject(`title is required`)
+    return this.db('Category').insert({ Category: title, Comments: comments })
+  }
+
+  updateCategory(categoryId, { title, comments }) {
+    if (!categoryId) return Promise.reject(`categoryId is required`)
+    if (!title) return Promise.reject(`title is required`)
+    return this.db('Category').where('ID', categoryId).limit(1).update({ Category: title, Comments: comments })
+  }
+
   listCategories() {
     const query = this.db
       .select(categoryFields)

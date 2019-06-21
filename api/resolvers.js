@@ -635,6 +635,22 @@ const resolvers = {
       if (!row) throw new Error('product does not exist')
       await context.dataSources.db.updateProduct(productId, { Active: 0 })
     },
+    addCategory: async(obj, { token, category }, context) => {
+      const payload = verifyAuthToken(token)
+      // admin only
+      if (!payload.a) throw new Error('Not authorized')
+      const [ categoryId ] = await context.dataSources.db.insertCategory(category)
+      const [ row ] = await context.dataSources.db.getCategory(categoryId)
+      return reduceCategory(row)
+    },
+    updateCategory: async(obj, { token, categoryId, category }, context) => {
+      const payload = verifyAuthToken(token)
+      // admin only
+      if (!payload.a) throw new Error('Not authorized')
+      await context.dataSources.db.updateCategory(categoryId, category)
+      const [ row ] = await context.dataSources.db.getCategory(categoryId)
+      return reduceCategory(row)
+    }
   },
   Product: {
     isOnSale: (obj, args, context) => isOnSale(obj),

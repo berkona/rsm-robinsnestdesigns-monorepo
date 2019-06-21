@@ -35,6 +35,10 @@
       "dest": "/www/admin/product-details?productId=$productId"
     },
     {
+      "src": "/admin/category-details/(?<categoryId>[^/]+).*$",
+      "dest": "/www/admin/category-details?categoryId=$categoryId"
+    },
+    {
       "src": "/(.*)",
       "dest": "/www/$1",
       "headers": {

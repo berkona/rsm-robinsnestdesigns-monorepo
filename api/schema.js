@@ -50,10 +50,28 @@ const typeDefs = gql`
     placeOrder(orderId: ID!, paypalOrderId: ID!, shipping: Float!, county: String): Order!
     addToWishList(token: String!, productId: ID!): Boolean
     removeFromWishList(token: String!, productId: ID!): Boolean
+
     requestSignedUrl(token: String!, fileName: String!, fileType: String!): SignedUrlPayload!
     createProduct(token: String!, productData: ProductPatchInput!): Product!
     updateProduct(token: String!, productId: ID!, productData: ProductPatchInput!): Product!
     removeProduct(token: String!, productId: ID!): Boolean
+    addCategory(token: String!, category: CategoryInput!): Category!
+    updateCategory(token: String!, categoryId: ID!, category: CategoryInput!): Category!
+    removeCategory(token: String!, categoryId: ID!): Boolean
+    addSubcategory(token: String!, subcategory: SubCategoryInput!): SubCategory!
+    updateSubcategory(token: String!, subcategoryId: ID!, subcategory: SubCategoryInput!): SubCategory!
+    removeSubcategory(token: String!, subcategoryId: ID!): Boolean
+  }
+
+  input CategoryInput {
+    title: String!
+    comments: String
+  }
+
+  input SubCategoryInput {
+    categoryId: ID!
+    title: String!
+    comments: String
   }
 
   type SignedUrlPayload {

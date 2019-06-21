@@ -45,6 +45,7 @@ export const CATEGORY_GET = gql`
     allCategories {
       id
       title
+      comments
     }
   }
 `
