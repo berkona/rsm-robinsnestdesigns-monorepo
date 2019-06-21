@@ -25,6 +25,13 @@
     { "src": "api/handler.js", "use": "@now/node" }
   ],
   "routes": [
+    {
+      "src": "/",
+      "dest": "/www/",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
+    },
     { "src": "/graphql", "dest": "api/handler.js" },
     { "src": "/googlea7696e4bbcfecd2f.html", "dest": "/www/static/googlea7696e4bbcfecd2f.html" },
     { "src": "/product/(?<productId>[^/]+).*$", "dest": "/www/product?productId=$productId" },
