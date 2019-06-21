@@ -88,8 +88,8 @@ const Index = (props) => (
     </Col>
     <Col id="content" xs={12} sm={6} md={9}>
       <div id="homeContent" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
-        <Jumbotron style={{ border: '1px solid #888', backgroundColor: '#FFFFFc', marginTop: '16px', marginBottom: '16px', padding: '1rem 2rem' }}>
-          <Carousel controls={false}>
+
+          <Carousel controls={false} style={{ marginTop: '16px' }}>
             <Carousel.Item><ProductCarouselItem
               variables={{ categoryId: 220 }}
               header={
@@ -122,23 +122,27 @@ const Index = (props) => (
             />
             </Carousel.Item>
           </Carousel>
-        </Jumbotron>
-
+          <hr />
       <div>
           <SearchLink onSaleOnly={true} sortOrder="mostRecent">
             <a><h2>On Sale</h2></a>
           </SearchLink>
           <ProductList isTeaser={true} onSaleOnly={true} sortOrder="random" limit={8} listName={'Index - On Sale'} />
+          <hr />
 
           <SearchLink newOnly={true} sortOrder="mostRecent">
             <a><h2>What's New</h2></a>
           </SearchLink>
           <ProductList isTeaser={true} newOnly={true} sortOrder="random" limit={8} listName={'Index - Whats New'} />
 
+          <hr />
+
           <SearchLink categoryId={215} sortOrder="mostRecent">
             <a><h2>In The Bargain Bin</h2></a>
           </SearchLink>
           <ProductList isTeaser={true} sortOrder="random" categoryId={215} limit={8} listName={'Index - New in Bargin Bin'} />
+          <hr />
+          
         </div>
       </div>
     </Col>
