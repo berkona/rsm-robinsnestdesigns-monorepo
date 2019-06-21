@@ -32,7 +32,8 @@
       "headers": { "cache-control": "immutable" }
     },
     {
-      "src": "/_next/static/(?:[^/]+/pages|chunks|runtime)/.+",
+      "src": "/_next/static/(?<path>(?:[^/]+/pages|chunks|runtime)/.+)",
+      "dest": "/www/_next/static/$path",
       "headers": { "cache-control": "immutable" }
     },
     {
