@@ -62,7 +62,7 @@ const ProductCarouselItem = (props) => <Query query={FIND_ONE_PRODUCT} variables
         {props.header}
         <Row style={{ height: '240px' }}>
           <Col md={6} style={{ height: '100%' }}>
-            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'left' }}>
               <ProductImage lazy={false} imgProps={{ style: { maxWidth: '100%', height: '100%' } }} product={product} />
             </div>
           </Col>
@@ -93,7 +93,7 @@ const Index = (props) => (
             <Carousel.Item><ProductCarouselItem
               variables={{ categoryId: 220 }}
               header={
-                <h2>Featured Item</h2>
+                <><h2>Featured Item</h2><p>Our favourite items for this week</p></>
               }
             />
             </Carousel.Item>
@@ -101,7 +101,7 @@ const Index = (props) => (
             <ProductCarouselItem
               variables={{ onSaleOnly: true }}
               header={
-                <h2>On Sale</h2>
+                <><h2>On Sale</h2><p>Great deals added every day</p></>
               }
             />
             </Carousel.Item>
@@ -109,7 +109,15 @@ const Index = (props) => (
             <ProductCarouselItem
               variables={{ newOnly: true }}
               header={
-                <h2>Recently Added</h2>
+                <><h2>Recently Added</h2><p>Brand new items at great prices</p></>
+              }
+            />
+            </Carousel.Item>
+            <Carousel.Item>
+            <ProductCarouselItem
+              variables={{ categoryId: 215 }}
+              header={
+                <><h2>Bargain Bin</h2><p>Up to 30% off on select items</p></>
               }
             />
             </Carousel.Item>
@@ -128,7 +136,7 @@ const Index = (props) => (
           <ProductList isTeaser={true} newOnly={true} sortOrder="random" limit={8} listName={'Index - Whats New'} />
 
           <SearchLink categoryId={215} sortOrder="mostRecent">
-            <a><h2>In The Bargin Bin</h2></a>
+            <a><h2>In The Bargain Bin</h2></a>
           </SearchLink>
           <ProductList isTeaser={true} sortOrder="random" categoryId={215} limit={8} listName={'Index - New in Bargin Bin'} />
         </div>
