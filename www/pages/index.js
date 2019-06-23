@@ -4,7 +4,6 @@ import Sidebar from '../components/Sidebar'
 import CategoryLinks from '../components/CategoryLinks'
 import ProductList from '../components/ProductList'
 import { SearchLink } from '../components/Links'
-import Jumbotron from 'react-bootstrap/Jumbotron'
 import Carousel from 'react-bootstrap/Carousel'
 import gql from 'graphql-tag'
 import { Query } from 'react-apollo'
@@ -90,36 +89,37 @@ const Index = (props) => (
       <div id="homeContent" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
 
           <Carousel controls={false} style={{ marginTop: '16px' }}>
-            <Carousel.Item><ProductCarouselItem
-              variables={{ categoryId: 220 }}
-              header={
-                <><h2>Featured Item</h2><p>Our favourite items for this week</p></>
-              }
-            />
+            <Carousel.Item>
+              <ProductCarouselItem
+                variables={{ categoryId: 220 }}
+                header={
+                  <><h2>Featured Item</h2><p>Our favourite items for this week</p></>
+                }
+              />
             </Carousel.Item>
             <Carousel.Item>
-            <ProductCarouselItem
-              variables={{ onSaleOnly: true }}
-              header={
-                <><h2>On Sale</h2><p>Great deals added every day</p></>
-              }
-            />
+              <ProductCarouselItem
+                variables={{ onSaleOnly: true }}
+                header={
+                  <><h2>On Sale</h2><p>Great deals added every day</p></>
+                }
+              />
             </Carousel.Item>
             <Carousel.Item>
-            <ProductCarouselItem
-              variables={{ newOnly: true }}
-              header={
-                <><h2>Recently Added</h2><p>Brand new items at great prices</p></>
-              }
-            />
+              <ProductCarouselItem
+                variables={{ newOnly: true }}
+                header={
+                  <><h2>Recently Added</h2><p>Brand new items at great prices</p></>
+                }
+              />
             </Carousel.Item>
             <Carousel.Item>
-            <ProductCarouselItem
-              variables={{ categoryId: 215 }}
-              header={
-                <><h2>Bargain Bin</h2><p>Up to 30% off on select items</p></>
-              }
-            />
+              <ProductCarouselItem
+                variables={{ categoryId: 215 }}
+                header={
+                  <><h2>Bargain Bin</h2><p>Up to 30% off on select items</p></>
+                }
+              />
             </Carousel.Item>
           </Carousel>
           <hr />
