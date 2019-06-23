@@ -274,6 +274,33 @@ class MyDB extends SQLDataSource {
     return query
   }
 
+  insertSubcategory({ categoryId, title, comments }) {
+    if (!title) throw new Error('title is required')
+    if (!categoryId) throw new Error('categoryId is required')
+    return this.db('Subcategory').insert({ Category: categoryId, Subcategory: title, Comments: comments })
+  }
+
+  getSubcategory(subcategoryId) {
+    if (!subcategoryId) throw new Error('subcategory ID is required')
+    return this.db.select(
+        'Subcategory.ID as ID',
+        'Subcategory.Subcategory as Category',
+        'Comments'
+      )
+      .from('Subcategory')
+      .where('ID', subcategoryId)
+  }
+
+  updateSubcategory(subcategoryId, { categoryId, title, comments }) {
+    if (!subcategoryId) throw new Error('subcategory ID is required')
+    if (!categoryId) throw new Error('categoryId is required')
+    if (!title) throw new Error('title is required')
+    return this.db('Subcategory')
+      .where('ID', subcategoryId)
+      .limit(1)
+      .update({ Category: categoryId, Subcategory: title, Comments: comments })
+  }
+
   listSubcategories(categoryId) {
     let query = this.db
       .select('Subcategory.ID as ID', 'Subcategory.Subcategory as Category', 'Comments')

@@ -650,7 +650,23 @@ const resolvers = {
       await context.dataSources.db.updateCategory(categoryId, category)
       const [ row ] = await context.dataSources.db.getCategory(categoryId)
       return reduceCategory(row)
-    }
+    },
+    addSubcategory: async (obj, { token, subcategory }, context) => {
+      const payload = verifyAuthToken(token)
+      // admin only
+      if (!payload.a) throw new Error('Not authorized')
+      const [ categoryId ] = await context.dataSources.db.insertSubcategory(subcategory)
+      const [ row ] = await context.dataSources.db.getSubcategory(categoryId)
+      return reduceCategory(row)
+    },
+    updateSubcategory: async( obj, { token, subcategoryId, subcategory }, context) => {
+      const payload = verifyAuthToken(token)
+      // admin only
+      if (!payload.a) throw new Error('Not authorized')
+      await context.dataSources.db.updateSubcategory(subcategoryId, subcategory)
+      const [ row ] = await context.dataSources.db.getSubcategory(subcategoryId)
+      return reduceCategory(row)
+    },
   },
   Product: {
     isOnSale: (obj, args, context) => isOnSale(obj),

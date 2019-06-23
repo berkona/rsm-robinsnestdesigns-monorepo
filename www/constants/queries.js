@@ -59,10 +59,11 @@ query {
 }
 `
 export const SUBCATEGORY_GET_ONE = gql`
-query($categoryId: ID!) {
+query($categoryId: ID) {
   allSubcategories(categoryId: $categoryId) {
     id
     title
+    comments
   }
 }
 `

@@ -3,7 +3,7 @@ import Col from 'react-bootstrap/Col'
 import Link from 'next/link'
 
 export default (props) => (
-  <Col>
+  <Col><div style={{ padding: '24px'}}>
     <h1>Admin Menu</h1>
     <hr />
     <ul>
@@ -28,5 +28,5 @@ export default (props) => (
         </Link>
       </li>
     </ul>
-  </Col>
+  </div></Col>
 )

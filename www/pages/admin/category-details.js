@@ -1,10 +1,11 @@
 import React from 'react'
+import Table from 'react-bootstrap/Table'
 import Form from 'react-bootstrap/Form'
 import Col from 'react-bootstrap/Col'
 import { withRouter } from 'next/router'
 import ModifyCategoryForm from '../../components/ModifyCategoryForm'
 import { Query, Mutation } from 'react-apollo'
-import { CATEGORY_GET } from '../../constants/queries'
+import { CATEGORY_GET, SUBCATEGORY_GET_ONE } from '../../constants/queries'
 import Loader from '../../components/Loader'
 import ApolloError from '../../components/ApolloError'
 import gql from 'graphql-tag'
@@ -53,4 +54,39 @@ export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
       </CurrentUserContext.Consumer>
     }}
   </Query>
+
+  <h1>Subcategories</h1>
+  <hr />
+  <Query query={SUBCATEGORY_GET_ONE} variables={{ categoryId: props.router.query.categoryId }}>
+    {({ loading, error, data }) => {
+      if (loading) return <Loader />
+      if (error) return <ApolloError error={error} />
+      const allSubcategories = (data && data.allSubcategories) || []
+      return <Table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+          </tr>
+        </thead>
+        <tbody>
+          {allSubcategories.map(category => <tr>
+            <td>
+              <Link href={"/admin/subcategory-details?categoryId=" + props.router.query.categoryId + "&subcategoryId=" + category.id}>
+                <a>{category.id}</a>
+              </Link>
+            </td>
+            <td>{category.title}</td>
+          </tr>
+          )}
+        </tbody>
+      </Table>
+    }}
+  </Query>
+  <hr />
+  <Button variant="outline-dark">
+    <Link href={"/admin/subcategory-create?categoryId=" + props.router.query.categoryId }>
+      Add Subcategory
+    </Link>
+  </Button>
 </div></Col>)
