@@ -50,6 +50,7 @@ const effectivePriceCase = knex.raw(`(CASE
 const productFields =  [
   'Products.ID as ProductID',
   'Qty',
+  'Clearance',
   'Products.ItemID as ItemID',
   'Products.ItemName as ItemName',
   'Description',

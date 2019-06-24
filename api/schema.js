@@ -211,6 +211,7 @@ const typeDefs = gql`
     name: String!
     price: Float!
     qtyInStock: Int!
+    clearance: Boolean!
     isOnSale: Boolean!
     salePrice: Float
     saleStart: String

@@ -65,6 +65,7 @@ function reduceProduct(row) {
     qtyInStock: row.Qty || 0,
     name: row.ItemName,
     price: row.ItemPrice || 0.00,
+    clearance: !!row.Clearance,
     salePrice: row.SalePrice,
     saleStart: row.Sale_Start,
     saleEnd: row.Sale_Stop,
@@ -296,7 +297,7 @@ async function placeOrder(obj, { orderId, paypalOrderId, shipping, county }, con
     throw new Error('invalid arguments')
   }
 
-  const order = await getOrder(context.dataSources.db, orderId, shipping, county)
+  let order = await getOrder(context.dataSources.db, orderId, shipping, county)
 
   let {
     placed,
@@ -381,7 +382,29 @@ async function placeOrder(obj, { orderId, paypalOrderId, shipping, county }, con
     PaypalComplete: 1,
   }
   await context.dataSources.db.placeOrder(customerInfo)
-  return await getOrder(context.dataSources.db, orderId)
+  order = await getOrder(context.dataSources.db, orderId)
+  // post-order actions
+  // TODO: send email to customer, admin
+  // remove each item bought from stock
+  for (let i = 0; i < order.items.length; i++) {
+    let lineItem = order.items[i]
+    // determine if product is in-stock or not
+    if (lineItem.product.qtyInStock && lineItem.product.qtyInStock > 0) {
+      let newQty = lineItem.product.qtyInStock - lineItem.qty
+      if (newQty < 0) {
+        newQty = 0
+        // TODO: do something about this?
+        console.error('Order No ' + order.id + ' had line item qty ' + lineItem.qty + ' for product id ' + lineItem.product.id + ' but only ' + lineItem.product.qtyInStock + ' were in stock')
+      }
+      let patch = { Qty: newQty }
+      if (lineItem.product.clearance && newQty == 0) {
+        patch.Active = 0;
+      }
+      await context.dataSources.db.updateProduct(lineItem.product.id, patch)
+    }
+  }
+
+  return order
 }
 
 async function getOrder(db, orderId, shipping, county, coupon_code) {
