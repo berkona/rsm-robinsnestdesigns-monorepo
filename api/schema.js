@@ -44,23 +44,29 @@ const typeDefs = gql`
     ): AuthPayload!
     signin(email: String!, password: String!): AuthPayload!
     updateUser(token: String!, user: UserPatchInput!) : User!
+
     addToCart(productId: ID!, qty: Int!, orderId: ID, variant: ID): Order!
     updateCartItem(cartItemId: ID!, qty: Int!, variant: ID): Order!
     removeFromCart(cartItemId: ID!): Order!
     placeOrder(orderId: ID!, paypalOrderId: ID!, shipping: Float!, county: String): Order!
+
     addToWishList(token: String!, productId: ID!): Boolean
     removeFromWishList(token: String!, productId: ID!): Boolean
 
     requestSignedUrl(token: String!, fileName: String!, fileType: String!): SignedUrlPayload!
-    createProduct(token: String!, productData: ProductPatchInput!): Product!
+
+    createProduct(token: String!, productData: ProductInsertInput!): Product!
     updateProduct(token: String!, productId: ID!, productData: ProductPatchInput!): Product!
     removeProduct(token: String!, productId: ID!): Boolean
+
     addCategory(token: String!, category: CategoryInput!): Category!
     updateCategory(token: String!, categoryId: ID!, category: CategoryInput!): Category!
     removeCategory(token: String!, categoryId: ID!): Boolean
+
     addSubcategory(token: String!, subcategory: SubCategoryInput!): SubCategory!
     updateSubcategory(token: String!, subcategoryId: ID!, subcategory: SubCategoryInput!): SubCategory!
     removeSubcategory(token: String!, subcategoryId: ID!): Boolean
+
   }
 
   input CategoryInput {
@@ -180,6 +186,25 @@ const typeDefs = gql`
     subcategories: [SubCategory!]
   }
 
+  input ProductInsertInput {
+    sku: String!
+    name: String!
+    price: Float!
+    qtyInStock: Int!
+    categoryId: ID!
+    subcategoryId: ID!
+    description: String
+    hyperlinkedImage: String
+    salePrice: Float
+    saleStart: String
+    saleEnd: String
+    category2: ID
+    subcategory2: ID
+    category3: ID
+    subcategory3: ID
+    keywords: String
+    productVariants: [ProductVariantInput!]!
+  }
   input ProductPatchInput {
       sku: String
       name: String
