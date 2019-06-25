@@ -33,7 +33,7 @@ const MODIFIABLE_FIELDS = [
 ]
 
 const CREATE_PRODUCT = gql`
-mutation($token: String!, $productData: ProductPatchInput!) {
+mutation($token: String!, $productData: ProductInsertInput!) {
   createProduct(token: $token, productData: $productData) {
     id
   }
