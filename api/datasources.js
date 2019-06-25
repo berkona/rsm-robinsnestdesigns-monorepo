@@ -95,7 +95,9 @@ const sw = require ('stopword');
 
 const SearchTokens = (searchPhrase) => {
   // todo support ""?
-  const withStopwords = (searchPhrase || '').split(' ')
+  searchPhrase = searchPhrase || ''
+  searchPhrase = searchPhrase.trim()
+  const withStopwords = searchPhrase.split(' ').map(w => w.trim())
   const noStopwords = sw.removeStopwords(withStopwords)
   return noStopwords
 }
