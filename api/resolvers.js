@@ -601,9 +601,8 @@ const resolvers = {
       })
 
       console.log('insertProduct', patch)
-      const result = await context.dataSources.db.insertProduct(patch)
-      console.log(result)
-      const [ row ] = await context.dataSources.db.getProduct(result.ID)
+      const [ resultId ] = await context.dataSources.db.insertProduct(patch)
+      const [ row ] = await context.dataSources.db.getProduct(resultId)
       return reduceProduct(row)
     },
     updateProduct: async(obj, { token, productId, productData }, context) => {
