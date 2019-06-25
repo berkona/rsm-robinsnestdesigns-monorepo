@@ -1,22 +1,5 @@
 const { SQLDataSource } = require("datasource-sql")
 
-if (!process.env.SQL_ENGINE || !process.env.SQL_PORT || !process.env.SQL_HOST || !process.env.SQL_USER || !process.env.SQL_PWD || !process.env.SQL_DB) {
-  throw new Error('You must set the environmental variables: SQL_ENGINE, SQL_PORT, SQL_HOST, SQL_USER, SQL_PWD, SQL_DB before starting server')
-}
-
-if (typeof knex === 'undefined') {
-  var knex = require('knex')({
-    client: process.env.SQL_ENGINE,
-    connection: {
-      host: process.env.SQL_HOST,
-      user: process.env.SQL_USER,
-      port: process.env.SQL_PORT,
-      password: process.env.SQL_PWD,
-      database: process.env.SQL_DB,
-    },
-  })
-}
-
 const validateArgs = (args) => {
   args = Object.assign({}, { skip: 0, limit: 50, sort: 'relevancy' }, args)
   if (args.limit > 200) args.limit = 200
@@ -169,7 +152,7 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
 }
 
 class MyDB extends SQLDataSource {
-  constructor() {
+  constructor(knex) {
     super()
     this.knex = knex
   }
