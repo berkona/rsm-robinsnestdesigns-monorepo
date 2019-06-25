@@ -1,5 +1,4 @@
 import React from 'react'
-import gql from 'graphql-tag'
 import { Query, Mutation } from 'react-apollo'
 import { FaSpinner, FaHeartBroken, FaHeart } from 'react-icons/fa'
 import { CurrentUserContext } from '../lib/auth'

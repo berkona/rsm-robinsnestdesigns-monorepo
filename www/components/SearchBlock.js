@@ -7,9 +7,6 @@ import Router from 'next/router'
 import { SearchLink, SearchLinkStr } from './Links'
 import CategoryLinks from './CategoryLinks'
 
-import Select from 'react-select'
-import Toggle from 'react-toggle'
-
 import Form from 'react-bootstrap/Form'
 
 const numberItems = gql `

@@ -1,7 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
 import slugify from 'slugify'
-import { productClickEvent } from '../lib/react-ga'
 import { Actions } from '../lib/next-ga-ec'
 
 export const ProductLink = (props) => (

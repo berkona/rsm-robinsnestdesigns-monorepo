@@ -2,8 +2,6 @@ import Breadcrumb from 'react-bootstrap/Breadcrumb'
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
 import { SearchLinkStr } from './Links'
-import { withRouter } from 'next/router'
-import Link from 'next/link'
 
 const findCategory = gql `
 query {

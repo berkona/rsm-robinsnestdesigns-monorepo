@@ -5,7 +5,6 @@ import { ApolloProvider } from 'react-apollo'
 import Layout from '../components/Layout'
 import NProgress from 'nprogress'
 import Router from 'next/router'
-import withGA from "next-ga"
 import Cookies from 'nookies'
 import { CurrentUserProvider } from '../lib/auth'
 // import { initGA } from '../lib/react-ga'
