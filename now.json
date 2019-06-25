@@ -18,13 +18,23 @@
     "JWT_MAX_AGE": "@jwt-max-age",
     "AWSAccessKeyId": "@awsaccesskeyid",
     "AWSSecretKey": "@awssecretkey",
-    "AWSUploadBucket": "@awsuploadbucket"
+    "AWSUploadBucket": "@awsuploadbucket",
+    "SITE_URL": "@site-url"
   },
   "builds": [
     { "src": "www/next.config.js", "use": "@now/next" },
-    { "src": "api/handler.js", "use": "@now/node" }
+    { "src": "api/handler.js", "use": "@now/node" },
+    { "src": "content/home/*", "use": "@now/static" },
+    { "src": "content/blog/*", "use": "@now/static" }
   ],
   "routes": [
+    {
+      "src": "/content/(.*)",
+      "dest": "/content/$1",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
+    },
     { "src": "/graphql", "dest": "api/handler.js" },
     {
       "src": "/googlea7696e4bbcfecd2f.html",

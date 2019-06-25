@@ -28,9 +28,15 @@ Router.events.on('routeChangeComplete', () => NProgress.done())
 Router.events.on('routeChangeError', () => NProgress.done())
 
 class MyApp extends App {
-  static async getInitialProps({ ctx }) {
+  static async getInitialProps(args) {
+    let { Component, ctx } = args
+    let _innerProps = {}
+    if (Component.getInitialProps) {
+      _innerProps = await Component.getInitialProps(args)
+    }
     return {
-      cookies: Cookies.get(ctx)
+      cookies: Cookies.get(ctx),
+      _innerProps: _innerProps
     }
   }
 
@@ -53,7 +59,7 @@ class MyApp extends App {
   }
 
   render () {
-    const { Component, pageProps, apolloClient } = this.props
+    const { Component, _innerProps, pageProps, apolloClient } = this.props
     let token = this.state.currentUserToken
     let cartId = this.state.currentUserCartId
     const CurrentUser = {
@@ -111,7 +117,7 @@ class MyApp extends App {
           <CurrentUserProvider value={CurrentUser}>
             <PageView>
               <Layout>
-                <Component {...pageProps} />
+                <Component {...pageProps} {..._innerProps} />
               </Layout>
             </PageView>
           </CurrentUserProvider>

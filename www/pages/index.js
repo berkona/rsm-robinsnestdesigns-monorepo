@@ -13,6 +13,7 @@ import PriceDisplay from '../components/PriceDisplay'
 import { Impression } from '../lib/next-ga-ec'
 import { ProductLink} from '../components/Links'
 import ProductImage from '../components/ProductImage'
+import { resolve } from 'url'
 
 const FIND_ONE_PRODUCT = gql`
 query($categoryId: ID, $onSaleOnly: Boolean, $newOnly: Boolean) {
@@ -57,7 +58,7 @@ const ProductCarouselItem = (props) => <Query query={FIND_ONE_PRODUCT} variables
                   list={"Index - Banner"}
                   position={1}
       />
-      <div style={{ height: '300px' }}>
+      <div style={{ height: '340px' }}>
         {props.header}
         <Row style={{ height: '220px' }}>
           <Col md={6} style={{ height: '100%' }}>
@@ -87,40 +88,11 @@ const Index = (props) => (
     </Col>
     <Col id="content" xs={12} sm={6} md={9}>
       <div id="homeContent" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
-
           <Carousel controls={false} style={{ marginTop: '16px' }}>
-            <Carousel.Item>
-              <ProductCarouselItem
-                variables={{ categoryId: 220 }}
-                header={
-                  <><h2>Featured Item</h2><p>Our favorite items for this week</p></>
-                }
-              />
-            </Carousel.Item>
-            <Carousel.Item>
-              <ProductCarouselItem
-                variables={{ onSaleOnly: true }}
-                header={
-                  <><h2>On Sale</h2><p>Great deals added every day</p></>
-                }
-              />
-            </Carousel.Item>
-            <Carousel.Item>
-              <ProductCarouselItem
-                variables={{ newOnly: true }}
-                header={
-                  <><h2>Recently Added</h2><p>Brand new items at great prices</p></>
-                }
-              />
-            </Carousel.Item>
-            <Carousel.Item>
-              <ProductCarouselItem
-                variables={{ categoryId: 215 }}
-                header={
-                  <><h2>Bargain Bin</h2><p>Up to 30% off on select items</p></>
-                }
-              />
-            </Carousel.Item>
+            {props.carouselItems.map((url, i) => <Carousel.Item key={url}>
+              <div style={{ height: '340px' }} dangerouslySetInnerHTML={{ __html: props['carouselItem-' + i + '-html'] }}>
+              </div>
+            </Carousel.Item>)}
           </Carousel>
           <hr />
       <div>
@@ -148,5 +120,23 @@ const Index = (props) => (
     </Col>
   </>
 )
+
+const BASE_URL = process.env.SITE_URL || 'http://localhost:3000/'
+
+Index.getInitialProps = async () => {
+  const indexRes = await fetch(resolve(BASE_URL, '/content/home/index.json'))
+  const indexData = await indexRes.json()
+  let initialProps = {
+    carouselItems: indexData.items || []
+  }
+  for (let i = 0; i < initialProps.carouselItems.length; i++) {
+    let fName = initialProps.carouselItems[i]
+    const res = await fetch(resolve(BASE_URL, '/content/home/' + fName))
+    const data = await res.text()
+    let propName = 'carouselItem-' + i + '-html'
+    initialProps[propName] = data
+  }
+  return initialProps
+}
 
 export default Index
