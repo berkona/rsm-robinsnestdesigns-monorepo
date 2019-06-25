@@ -6,7 +6,9 @@ const Header = () => (
   <Row id="header">
     <Col id="logo">
       <Link href="/">
-        <img src="/static/rnd-framed-v3.gif" alt="Robin's Nest Designs Logo" width="520" height="145" id="logo" />
+        <a>
+          <img src="/static/rnd-framed-v3.gif" alt="Robin's Nest Designs Logo" width="520" height="145" id="logo" />
+        </a>
       </Link>
     </Col>
     <Col id="siteName">
