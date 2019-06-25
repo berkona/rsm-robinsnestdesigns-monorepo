@@ -14,6 +14,7 @@ import { Impression } from '../lib/next-ga-ec'
 import { ProductLink} from '../components/Links'
 import ProductImage from '../components/ProductImage'
 import { resolve } from 'url'
+import { BASE_URL } from '../constants/config'
 
 const FIND_ONE_PRODUCT = gql`
 query($categoryId: ID, $onSaleOnly: Boolean, $newOnly: Boolean) {
@@ -120,8 +121,6 @@ const Index = (props) => (
     </Col>
   </>
 )
-
-const BASE_URL = process.env.SITE_URL || 'http://localhost:3000/'
 
 Index.getInitialProps = async () => {
   const indexRes = await fetch(resolve(BASE_URL, '/content/home/index.json'))

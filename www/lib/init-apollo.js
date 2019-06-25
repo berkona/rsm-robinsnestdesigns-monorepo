@@ -1,7 +1,8 @@
-import url from 'url'
 import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { BatchHttpLink } from "apollo-link-batch-http";
+import { BASE_URL } from '../constants/config'
+import { resolve } from 'url'
 
 import fetch from 'isomorphic-unfetch'
 
@@ -15,7 +16,9 @@ if (!process.browser) {
 const defaultValidHostRegex = /^[a-zA-Z0-9_\/\-\.]+.now\.sh$/
 
 function getAPIUrl(req) {
-  return process.browser ? '/graphql' : process.env.API_URL || 'http://localhost:3000/graphql'
+  return process.browser
+    ? '/graphql'
+    : resolve(BASE_URL, '/graphql')
 }
 
 function create (initialState, req) {
