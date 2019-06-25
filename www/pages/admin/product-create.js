@@ -52,7 +52,8 @@ export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
       {currentUser => <>
         <Mutation mutation={CREATE_PRODUCT} variables={{ token: currentUser.getToken() }}>
           {(mutationFn, {loading, error, data }) => {
-            return <ModifyProductForm
+            return <>
+            <ModifyProductForm
               saveLabel={'Create'}
               product={product}
               onSubmit={newProduct => {
@@ -65,6 +66,8 @@ export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
                 mutationFn({ variables: { productData, } }).then(() => Router.push('/admin/products'))
               }}
             />
+            { error && <ApolloError error={error} />}
+            </>
           }}
         </Mutation>
         </>}

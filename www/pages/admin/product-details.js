@@ -59,7 +59,8 @@ export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
       {currentUser => <>
         <Mutation mutation={UPDATE_PRODUCT} variables={{ token: currentUser.getToken(), productId: props.router.query.productId  }} refetchQueries={[{ query: PRODUCT_GET_ONE, variables: { productId: props.router.query.productId } }]}>
           {(mutationFn, {loading, error, data }) => {
-            return <ModifyProductForm
+            return <>
+            <ModifyProductForm
               product={product}
               onSubmit={newProduct => {
                 event.preventDefault()
@@ -71,6 +72,8 @@ export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
                 mutationFn({ variables: { productData, } }).then(() => Router.push('/admin/products'))
               }}
             />
+            { error && <ApolloError error={error} />}
+            </>
           }}
         </Mutation>
         <div style={{ marginTop: '48px' }}>
