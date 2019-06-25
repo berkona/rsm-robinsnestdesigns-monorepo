@@ -18,6 +18,7 @@ export default App => {
       // and extract the resulting data
       const apollo = initApollo(null, ctx.ctx && ctx.ctx.req)
       if (!process.browser) {
+        let getDataFromTree_Start = Date.now()
         try {
           // Run all GraphQL queries
           await getDataFromTree(
@@ -35,6 +36,9 @@ export default App => {
           console.log('Error while running `getDataFromTree`', error)
           console.error('Error while running `getDataFromTree`', error)
         }
+
+        let getDataFromTree_End = Date.now()
+        console.log(ctx.asPath, 'getDataFromTree', 'dt = ' + (getDataFromTree_End - getDataFromTree_Start))
 
         // getDataFromTree does not call componentWillUnmount
         // head side effect therefore need to be cleared manually
