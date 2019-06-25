@@ -93,7 +93,7 @@ const Index = (props) => (
               <ProductCarouselItem
                 variables={{ categoryId: 220 }}
                 header={
-                  <><h2>Featured Item</h2><p>Our favourite items for this week</p></>
+                  <><h2>Featured Item</h2><p>Our favorite items for this week</p></>
                 }
               />
             </Carousel.Item>
