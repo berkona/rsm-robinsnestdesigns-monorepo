@@ -13,6 +13,7 @@ import SEO from '../components/SEO'
 import CartItemTeaser from '../components/CartItemTeaser'
 import { ORDER_GET } from '../constants/queries'
 import Button from 'react-bootstrap/Button'
+import Wishlist from '../components/Wishlist'
 
 const CURRENT_USER = gql`
 query($token: String!) {
@@ -155,8 +156,14 @@ class CartPage extends React.Component {
                           </div>
                           </Col>
                           </Row>
+                          <Row>
+                            <Col>
+                              <h2>My Wish List</h2>
+                              <hr />
+                              <Wishlist />
+                            </Col>
+                          </Row>
                         </div>
-
                       )
                     }
                   }
