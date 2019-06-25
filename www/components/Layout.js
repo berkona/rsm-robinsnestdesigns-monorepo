@@ -6,6 +6,7 @@ import Col from 'react-bootstrap/Col'
 import Header from './Header'
 import Navbar from './Navbar'
 import SiteInfo from './SiteInfo'
+import { FaShippingFast } from 'react-icons/fa'
 
 const Layout = props => (
   <Container id="page_border">
