@@ -24,4 +24,5 @@ export const CurrentUserContext = React.createContext({
   }
 })
 
+export const CurrentUser = CurrentUserContext.Consumer
 export const CurrentUserProvider = CurrentUserContext.Provider
