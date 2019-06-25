@@ -205,6 +205,7 @@ const typeDefs = gql`
     keywords: String
     productVariants: [ProductVariantInput!]!
   }
+  
   input ProductPatchInput {
       sku: String
       name: String
