@@ -107,10 +107,7 @@ class CartPage extends React.Component {
                     return <EmptyShoppingCart />
                   } else {
                       let subtotal = cart.subtotal.toFixed(2)
-                      let shippingCost = cart.shipping.toFixed(2)
-                      let tax =  cart.tax.toFixed(2)
-                      let total = cart.total.toFixed(2)
-
+                      
                       return (
                         <div id="addToCart">
                         <Row>
