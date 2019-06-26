@@ -12,6 +12,7 @@ const typeDefs = gql`
       categoryId: ID,
       subcategoryId: ID,
       searchPhrase: String,
+      priceRange: PriceRange,
       onSaleOnly: Boolean,
       newOnly: Boolean,
       skip: Int,
@@ -205,7 +206,7 @@ const typeDefs = gql`
     keywords: String
     productVariants: [ProductVariantInput!]!
   }
-  
+
   input ProductPatchInput {
       sku: String
       name: String

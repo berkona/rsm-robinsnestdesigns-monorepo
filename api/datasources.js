@@ -102,6 +102,35 @@ const SearchTokens = (searchPhrase) => {
   return noStopwords
 }
 
+/* produces SQL like:
+(  (Price1 > 0 AND Price1 $operator $value)
+ OR (
+       SalePrice > 0
+   AND Sale_Start <= CURRENT_TIMESTAMP
+   AND Sale_Stop >= CURRENT_TIMESTAMP
+   AND SalePrice $operator $value
+ )
+ OR (ItemPrice $operator $value)
+)
+ */
+const WherePrice = (query, operator, value) => {
+  return query.where(builder => builder
+    .orWhere(builder => builder
+      .where('Price1', '>', 0)
+      .where('Price1', operator, value)
+    )
+    .orWhere(builder => builder
+      .where('SalePrice', '>', 0)
+      .whereRaw('Products.Sale_Start <= CURRENT_TIMESTAMP')
+      .whereRaw('Products.Sale_Stop >= CURRENT_TIMESTAMP')
+      .where('SalePrice', operator, value)
+    )
+    .orWhere(builder => builder
+      .where('ItemPrice', operator, value)
+    )
+  )
+}
+
 /**
   Creates a query s.t. it SELECT's productFields + relevance (semantic meaning) based on searchPhrase and filters
  */
@@ -111,7 +140,9 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
   const makeQuery = (weight) => {
     let q = builder;
 
-    q = q.select(knex.raw(`${weight} as relevance`), 'Products.ID')
+    // seems a bit hacky to me but prolly saves some cycles in DB
+    const searchFields = [ knex.raw(`${weight} as relevance`), 'Products.ID' ]
+    q = q.select(searchFields)
     q = q.from('Products').where('Active', 1).whereNotNull('Products.Category')
 
     if (categoryId) {
@@ -138,6 +169,23 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
 
     if (newOnly) {
       q = q.where('Added', '>=', new Date(Date.now() - 1000 * 60 * 60 * 24 * 60))
+    }
+
+    if (priceRange) {
+
+      if (priceRange.lower >= 0
+       && priceRange.higher >= 0
+       && priceRange.higher < priceRange.lower) {
+        throw new Error("Lower must be greater than or equal to higher")
+      }
+
+      if (priceRange.lower >= 0) {
+        q = WherePrice(q, '>=', priceRange.lower)
+      }
+
+      if (priceRange.higher >= 0) {
+        q = WherePrice(q, '<=', priceRange.higher)
+      }
     }
 
     return q
