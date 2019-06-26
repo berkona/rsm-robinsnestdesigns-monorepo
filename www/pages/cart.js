@@ -107,7 +107,7 @@ class CartPage extends React.Component {
                     return <EmptyShoppingCart />
                   } else {
                       let subtotal = cart.subtotal.toFixed(2)
-                      
+
                       return (
                         <div id="addToCart">
                         <Row>
@@ -153,13 +153,14 @@ class CartPage extends React.Component {
                           </div>
                           </Col>
                           </Row>
-                          <Row>
+                          {currentUser.isLoggedIn() && <Row>
                             <Col>
                               <h2>My Wish List</h2>
                               <hr />
                               <Wishlist />
                             </Col>
                           </Row>
+                          }
                         </div>
                       )
                     }
