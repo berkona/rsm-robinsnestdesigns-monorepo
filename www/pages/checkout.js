@@ -240,10 +240,12 @@ class CheckoutPage extends React.Component {
                             <td>Shipping</td>
                             <td style={{ textAlign: 'right' }}>${cartData.cart.shipping.toFixed(2)}</td>
                           </tr>
-                          <tr>
+                          {
+                          cartData.cart.discount > 0 && <tr>
                             <td>Discount</td>
                             <td style={{ textAlign: 'right' }}>(${cartData.cart.discount.toFixed(2)})</td>
                           </tr>
+                          }
                           <tr>
                             <td>Tax</td>
                             <td style={{ textAlign: 'right' }}>${cartData.cart.tax.toFixed(2)}</td>
