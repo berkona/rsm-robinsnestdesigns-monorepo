@@ -145,14 +145,20 @@ const TAXS_TMP = {
 const DEFAULT_TAX_RATE = 7.0
 
 const canApplyPromo = (promo, items, subtotal) => {
-  return false
+  return promo.PriceBreak == null || Number.parseFloat(subtotal) > promo.PriceBreak
 }
 
-const calcPromo = (promo, subtotal) => {
-  return 0
+const calcPromo = (promo, subtotal, shipping) => {
+  if (promo.PercentageOff) {
+    return ( Number.parseFloat(subtotal) * promo.PercentageOff ).toFixed(2)
+  } else if (promo.FreeShipping) {
+    return shipping || '0.00'
+  } else {
+    return promo.MoneyOff || '0.00'
+  }
 }
 
-const reduceOrder = (orderId, rows, shipping, county) => {
+const reduceOrder = (orderId, rows, shipping, county, promo) => {
   const items = rows.map(reduceCartItem)
 
   let subtotal = items.map((ci) => ci.price * ci.qty).reduce((a, b) => a + b, 0)
@@ -160,15 +166,21 @@ const reduceOrder = (orderId, rows, shipping, county) => {
 
   shipping = Number.parseFloat(subtotal) < 75 ? (shipping || '3.99') : '0.00'
 
+  let discount = '0.00'
+  if (promo && canApplyPromo(promo, items, subtotal)) {
+    discount = calcPromo(promo, subtotal, shipping) || '0.00'
+  }
+
+  const taxableTotal = (Number.parseFloat(subtotal) + Number.parseFloat(shipping) - Number.parseFloat(discount)).toFixed(2)
+
   let tax = '0.00'
   if (county) {
     let taxRate = TAXS_TMP[county] || DEFAULT_TAX_RATE
-    const taxableTotal = (Number.parseFloat(subtotal) + Number.parseFloat(shipping)).toFixed(2)
     tax = Number.parseFloat(taxableTotal) * (Number.parseFloat(taxRate) / 100.0)
     tax = tax.toFixed(2)
   }
 
-  let total = Number.parseFloat(subtotal) + Number.parseFloat(shipping) + Number.parseFloat(tax)
+  let total = Number.parseFloat(taxableTotal) + Number.parseFloat(tax)
   total = total.toFixed(2)
 
   return {
@@ -177,6 +189,7 @@ const reduceOrder = (orderId, rows, shipping, county) => {
     items,
     subtotal,
     shipping,
+    discount,
     tax,
     total,
   }
@@ -292,12 +305,18 @@ const removeFromCart = (obj, args, context) => {
   }
 }
 
-async function placeOrder(obj, { orderId, paypalOrderId, shipping, county }, context) {
+async function placeOrder(obj, { orderId, paypalOrderId, shipping, county, promo }, context) {
   if (!orderId || !paypalOrderId || !shipping) {
     throw new Error('invalid arguments')
   }
 
-  let order = await getOrder(context.dataSources.db, orderId, shipping, county)
+  let order = await getOrder(context.dataSources.db, orderId, shipping, county, promo)
+  if (promo && Number.parseFloat(order.discount) > 0) {
+    const promoObj = await context.dataSources.db.getPromo(promo)
+    if (promoObj.SingleUse) {
+      await context.dataSources.db.deletePromo(promoObj.ID)
+    }
+  }
 
   let {
     placed,
@@ -409,7 +428,11 @@ async function placeOrder(obj, { orderId, paypalOrderId, shipping, county }, con
 
 async function getOrder(db, orderId, shipping, county, coupon_code) {
   const rows = await db.listCartItems(orderId)
-  const order = reduceOrder(orderId, rows, shipping, county)
+  let promo = null
+  if (coupon_code)
+    promo = await db.getPromo(coupon_code)
+
+  const order = reduceOrder(orderId, rows, shipping, county, promo)
   const cInfo = await db.getCustomerInfo(orderId)
   if (cInfo) {
     order.placed = true
@@ -511,7 +534,7 @@ const resolvers = {
       }
     }),
     saleCategories: (obj, args, context) => context.dataSources.db.listSaleCategories().then(reduceAllCategories),
-    cart: (obj, args, context) => getOrder(context.dataSources.db, args.orderId, args.shipping, args.county),
+    cart: (obj, args, context) => getOrder(context.dataSources.db, args.orderId, args.shipping, args.county, args.promo),
     user: async (obj, { token }, context) => {
       const user = await getUserFromToken(token, context.dataSources.db)
       return user

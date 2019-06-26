@@ -258,6 +258,18 @@ class MyDB extends SQLDataSource {
     await this.db('WishList').where({ AccountID: uid, ItemID: productId }).limit(1).del()
   }
 
+  async insertPromo(row) {
+    if (!row || !row.Starts || !row.Ends || !row.Coupon) {
+      throw new Error("promo missing required fields")
+    }
+    return this.db('Promotions').insert(row)
+  }
+
+  async updatePromo(promoId, patch) {
+    if (!promoId) throw new Error('promo id is required')
+    return this.db('Promotions').where('ID', promoId).update(patch)
+  }
+
   async getPromo(coupon_code) {
     if (!coupon_code)
       throw new Error('coupon_code required')
@@ -266,6 +278,14 @@ class MyDB extends SQLDataSource {
         .where('Coupon', coupon_code)
         .where('Starts', '<=', new Date())
         .where('Ends', '>=', new Date())
+        .first()
+  }
+
+  async deletePromo(promoId) {
+    const promo = await getPromo(promoId)
+    if (!promo)
+      throw new Error("promo does not exist")
+    this.db('Promotions').where('ID', promoId).limit(1).del()  
   }
 
   getCategory(categoryId) {
