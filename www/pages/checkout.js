@@ -17,10 +17,11 @@ import Link from 'next/link'
 import { PayPalButton } from "react-paypal-button-v2"
 import { checkoutOpenPaypalEvent, checkoutDoneEvent } from '../lib/react-ga'
 import Router from 'next/router'
+import Button from 'react-bootstrap/Button'
 
 const placeCartOrder = gql`
-mutation($orderId: ID!, $paypalOrderId: ID!, $shipping: Float!, $county: String) {
-  placeOrder(orderId: $orderId, paypalOrderId: $paypalOrderId, shipping: $shipping, county: $county) {
+mutation($orderId: ID!, $paypalOrderId: ID!, $shipping: Float!, $county: String, $promo: String) {
+  placeOrder(orderId: $orderId, paypalOrderId: $paypalOrderId, shipping: $shipping, county: $county, promo: $promo) {
     id
   }
 }
@@ -65,6 +66,8 @@ class CheckoutPage extends React.Component {
         shippingCost: '3.99',
         taxIsValid: false,
         needsPageView: true,
+        promo: null,
+        newPromo: '',
       }
   }
 
@@ -84,6 +87,7 @@ class CheckoutPage extends React.Component {
               orderId: currentUser.getCartId(),
               shipping: Number.parseFloat(this.state.shippingCost || '3.99'),
               county: this.state.county,
+              promo: this.state.promo,
             }}>
             {({ loading, error, data }) => {
                 if (error) return <ApolloError error={error} />
@@ -237,6 +241,10 @@ class CheckoutPage extends React.Component {
                             <td style={{ textAlign: 'right' }}>${cartData.cart.shipping.toFixed(2)}</td>
                           </tr>
                           <tr>
+                            <td>Discount</td>
+                            <td style={{ textAlign: 'right' }}>(${cartData.cart.discount.toFixed(2)})</td>
+                          </tr>
+                          <tr>
                             <td>Tax</td>
                             <td style={{ textAlign: 'right' }}>${cartData.cart.tax.toFixed(2)}</td>
                           </tr>
@@ -247,13 +255,40 @@ class CheckoutPage extends React.Component {
                         </tbody>
                       </table>
 
+                      <hr />
+
+                      <Form noValidate
+                            onSubmit={(e) => { e.preventDefault(); this.setState({ promoSubmitted: true, promo: this.state.newPromo }) }}>
+                        <Row>
+                        <Col md={8}>
+                          <Form.Group controlId="checkoutPromo">
+                            <Form.Label>Promo</Form.Label>
+                            <Form.Control
+                              value={this.state.newPromo}
+                              onChange={() => this.setState({ newPromo: event.target.value })}
+                              isInvalid={this.state.promoSubmitted && cartData.cart.discount < 0.01 }
+                              isValid={this.state.promoSubmitted && cartData.cart.discount > 0}
+                            />
+                            <Form.Control.Feedback type={"invalid"}>
+                              This promo code is not valid
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+                        <Col md={4}>
+                          <Button type="submit" style={{ marginTop: '25.5px' }}>Apply</Button>
+                        </Col>
+                        </Row>
+                      </Form>
+
+                      <hr />
+
                       {
                         isZipValid(this.state.shippingZip)
                         && this.state.agreeToPolicies
                         && ( !needsTax(this.state.shippingZip)
                             || this.state.taxIsValid )
                         &&
-                        <Mutation mutation={placeCartOrder} variables={{ orderId: currentUser.getCartId(), shipping: Number.parseFloat(this.state.shippingCost), county: this.state.county }}>
+                        <Mutation mutation={placeCartOrder} variables={{ orderId: currentUser.getCartId(), shipping: Number.parseFloat(this.state.shippingCost), county: this.state.county, promo: this.state.promo }}>
                           {(mutationFn, { loading, error, data }) =>
                             error
                             ? <p>Network error: {error.toString()}</p>
@@ -272,6 +307,7 @@ class CheckoutPage extends React.Component {
                                            item_total: makeAmount(cartData.cart.subtotal),
                                            shipping: makeAmount(cartData.cart.shipping),
                                            tax_total: makeAmount(cartData.cart.tax),
+                                           discount: makeAmount(cartData.cart.discount),
                                          }
                                        },
                                        description: 'Your order with Robin\'s Nest Designs',
@@ -320,6 +356,7 @@ class CheckoutPage extends React.Component {
                               : <p>Order placed</p>
                             }
                         </Mutation>
+                        || <p>Fill out form to continue checkout</p>
                       }
                       { this.state.paypalError && <p>Could not place order: {this.state.paypalError}</p>}
                     </div>

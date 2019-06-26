@@ -4,12 +4,13 @@
 import gql from 'graphql-tag'
 
 export const ORDER_GET = gql`
-  query($orderId: ID!, $shipping: Float, $county: String) {
-    cart(orderId: $orderId, shipping: $shipping, county: $county) {
+  query($orderId: ID!, $shipping: Float, $county: String, $promo: String) {
+    cart(orderId: $orderId, shipping: $shipping, county: $county, promo: $promo) {
       id
       placed
       subtotal
       shipping
+      discount
       tax
       total
       items {
