@@ -54,7 +54,10 @@ export default (props) => (
     <Col>
       <div style={{ padding: '16px' }}>
         <h1>Subscribe to the Newletter</h1>
-        <p>Use the form below to subscribe to our newsletter and get the latest news and deals</p>
+        <p>Want to get notified of the latest sales and newest items? Then sign up for our newsletter and about once a week you will receive an email with this information from us. Sometimes you will receive a second email in a week to announce a special sale or event that occurred after the sending of the weekly email, and Robin was too excited about the news to wait to tell you!</p>
+
+        <p>Robin's Nest Designs respects your privacy. We do not give out any information on our mailing list. All your information is strictly confidential and secure. This list is intended to keep you informed of sales and new items only.</p>
+
         <hr />
         <MailchimpSubscribe
           url={mailchimpUrl}
