@@ -285,7 +285,7 @@ class MyDB extends SQLDataSource {
     const promo = await getPromo(promoId)
     if (!promo)
       throw new Error("promo does not exist")
-    this.db('Promotions').where('ID', promoId).limit(1).del()  
+    this.db('Promotions').where('ID', promoId).limit(1).del()
   }
 
   getCategory(categoryId) {
@@ -406,7 +406,8 @@ class MyDB extends SQLDataSource {
   listProducts(args) {
     args = validateArgs(args)
 
-    const searchQuery = buildSearchQuery(this.db, args).as('Search')
+    const searchQueryNoAs = buildSearchQuery(this.db, args)
+    const searchQuery = searchQueryNoAs.as('Search')
     console.log('listProducts', searchQuery.toString())
 
     let dataQuery =  this.db.select(productFields)
@@ -441,32 +442,61 @@ class MyDB extends SQLDataSource {
 
     const countQuery = this.db.count('* as nRecords').from(searchQuery.clone())
 
-
-    const categoryInner = this.db.select('Category')
-      .from(searchQuery.clone())
-      .innerJoin('Products', 'Search.ID', 'Products.ID')
-
     const categoryQuery = this.db.select(categoryFields)
       .from('Category')
-      .innerJoin(categoryInner.as('t1'), 't1.Category', 'Category.ID')
-      .distinct()
-
-
+      .orderBy('Category', 'ASC')
+      .whereIn('Category.ID',
+        this.db.select('Category')
+          .from(searchQueryNoAs.clone().as('Search1'))
+          .innerJoin('Products', 'Products.ID', 'Search1.ID')
+          .union(
+            this.db.select('CategoryB as Category')
+              .from(searchQueryNoAs.clone().as('Search2'))
+              .innerJoin('Products', 'Products.ID', 'Search2.ID')
+          )
+          .union(
+            this.db.select('CategoryC as Category')
+              .from(searchQueryNoAs.clone().as('Search3'))
+              .innerJoin('Products', 'Products.ID', 'Search3.ID')
+          )
+      )
 
     const queries = [ dataQuery, countQuery, categoryQuery ]
-    if (args.categoryId) {
-      const subcategoryInner = this.db.select('SubCategory')
-        .from(searchQuery.clone())
-        .innerJoin('Products', 'Search.ID', 'Products.ID')
 
-      const subcategoryQuery = this.db.select('Subcategory.ID as ID', 'Subcategory.Subcategory as Category', 'Comments')
-        .from('Subcategory')
-        .innerJoin(subcategoryInner.as('t1'), 't1.SubCategory', 'Subcategory.ID')
-        .distinct()
+    if (args.categoryId) {
+      const subcategoryQuery = this.db.select(
+        'Subcategory.ID as ID',
+        'Subcategory.Subcategory as Category',
+        'Comments'
+      )
+      .from('Subcategory')
+      .where('Subcategory.Category', '=', args.categoryId)
+      .orderBy('Subcategory.Subcategory', 'ASC')
+      .whereIn('Subcategory.ID',
+        this.db.select('Subcategory')
+          .from(searchQueryNoAs.clone().as('Search1'))
+          .innerJoin('Products', 'Products.ID', 'Search1.ID')
+          .union(
+            this.db.select('SubcategoryB as Subcategory')
+              .from(searchQueryNoAs.clone().as('Search2'))
+              .innerJoin('Products', 'Products.ID', 'Search2.ID')
+          )
+          .union(
+            this.db.select('SubcategoryC as Subcategory')
+              .from(searchQueryNoAs.clone().as('Search3'))
+              .innerJoin('Products', 'Products.ID', 'Search3.ID')
+          )
+      )
 
       queries.push(subcategoryQuery)
     }
 
+    for (var i = 0; i < queries.length; i++) {
+      console.log('query[' + i + ']:')
+      console.log(queries[i].toString())
+      console.log()
+    }
+    
     return Promise.all(queries)
   }
 
