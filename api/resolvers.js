@@ -447,12 +447,10 @@ async function placeOrder(obj, { orderId, paypalOrderId, shipping, county, promo
     to: email_address,
     subject: "Your Order with Robin's Nest Designs",
     template: "order-placed",
-    'h:X-Mailgun-Variables': {
-      customerFirstName: (name && name.given_name) || sFirstName,
-      orderNo: orderId,
-      orderDate: new Date().toLocaleDateString(),
-      orderLink,
-    }
+    'v:customerFirstName':  (name && name.given_name) || sFirstName,
+    'v:orderNo': orderId,
+    'v:orderDate': new Date().toLocaleDateString(),
+    'v:orderLink': orderLink,
   })
 
   return order
