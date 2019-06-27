@@ -2,7 +2,8 @@ const { GraphQLScalarType } = require('graphql');
 const { Kind } = require('graphql/language');
 const paypal = require('@paypal/checkout-server-sdk');
 const paypalClient = require('./paypal')
-var aws = require('aws-sdk');
+const aws = require('aws-sdk');
+const sendEmail = require('./email')
 
 // Configure aws with your accessKeyId and your secretAccessKey
 aws.config.update({
@@ -311,12 +312,6 @@ async function placeOrder(obj, { orderId, paypalOrderId, shipping, county, promo
   }
 
   let order = await getOrder(context.dataSources.db, orderId, shipping, county, promo)
-  if (promo && Number.parseFloat(order.discount) > 0) {
-    const promoObj = await context.dataSources.db.getPromo(promo)
-    if (promoObj.SingleUse) {
-      await context.dataSources.db.deletePromo(promoObj.ID)
-    }
-  }
 
   let {
     placed,
@@ -339,10 +334,12 @@ async function placeOrder(obj, { orderId, paypalOrderId, shipping, county, promo
 
   let {
     name,
-    email,
+    email_address,
     phone,
     address,
   } = paypalOrder.payer
+
+  phone = phone && phone.phone_number
 
   let {
     address_line_1,
@@ -378,7 +375,7 @@ async function placeOrder(obj, { orderId, paypalOrderId, shipping, county, promo
     FirstName: sFirstName,
     LastName: sLastName,
     Phone: phone,
-    Email: email,
+    Email: email_address,
     Address: shippingAddressLine,
     City: shippingCity,
     State: shippingState,
@@ -392,18 +389,22 @@ async function placeOrder(obj, { orderId, paypalOrderId, shipping, county, promo
     BZip: postal_code,
     BCountry: country_code,
     BPhone: phone,
-    BEmail: email,
+    BEmail: email_address,
     Subtotal: subtotal,
     SalesTax: tax,
     Shipping: realShipping,
     Total: total,
+    Coupon: promo,
+    Discount: order.discount || 0.00,
+    CardType: 'Paypal',
     Paypal: 1,
     PaypalComplete: 1,
   }
   await context.dataSources.db.placeOrder(customerInfo)
   order = await getOrder(context.dataSources.db, orderId)
+
   // post-order actions
-  // TODO: send email to customer, admin
+
   // remove each item bought from stock
   for (let i = 0; i < order.items.length; i++) {
     let lineItem = order.items[i]
@@ -422,6 +423,37 @@ async function placeOrder(obj, { orderId, paypalOrderId, shipping, county, promo
       await context.dataSources.db.updateProduct(lineItem.product.id, patch)
     }
   }
+
+  // remove promo used if single use
+  if (promo && Number.parseFloat(order.discount) > 0) {
+    const promoObj = await context.dataSources.db.getPromo(promo)
+    if (promoObj.SingleUse) {
+      await context.dataSources.db.deletePromo(promoObj.ID)
+    }
+  }
+
+  // send email to admin & user
+  const orderLink = process.env.SITE_URL + 'order/' + orderId
+
+  await sendEmail({
+    from: "Robin's Nest Designs <postmaster@mg.robinsnestdesigns.com>",
+    to: "robin@robinsnestdesigns.com",
+    subject: "Order Placed",
+    text: 'A new order has been placed.  See: ' + orderLink,
+  })
+
+  await sendEmail({
+    from: "Robin's Nest Designs <postmaster@mg.robinsnestdesigns.com>",
+    to: email_address,
+    subject: "Your Order with Robin's Nest Designs",
+    template: "order-placed",
+    'h:X-Mailgun-Variables': {
+      customerFirstName: (name && name.given_name) || sFirstName,
+      orderNo: orderId,
+      orderDate: new Date().toLocaleDateString(),
+      orderLink,
+    }
+  })
 
   return order
 }

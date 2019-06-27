@@ -19,7 +19,8 @@
     "AWSAccessKeyId": "@awsaccesskeyid",
     "AWSSecretKey": "@awssecretkey",
     "AWSUploadBucket": "@awsuploadbucket",
-    "SITE_URL": "@site-url"
+    "SITE_URL": "@site-url",
+    "MAILGUN_API_KEY": "@mailgun-api-key"
   },
   "builds": [
     { "src": "www/next.config.js", "use": "@now/next" },

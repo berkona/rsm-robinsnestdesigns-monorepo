@@ -23,8 +23,8 @@ AWS.config.update({ region: 'us-east-1' })
 
 const s3 = new AWS.S3()
 
-const BUCKET = 'robins-nest-designs-public-images.solipsisdev.com'
-const CDN_URL = 'https://robins-nest-designs-public-images.solipsisdev.com/'
+const BUCKET = 'public-images-static-af327.robinsnestdesigns.com'
+const CDN_URL = 'https://public-images-static-af327.robinsnestdesigns.com/'
 const SITE_PREFIX = 'https://www.robinsnestdesigns.com/ahpimages/'
 
 const downloadUrl = async (url, file) => {
@@ -59,6 +59,9 @@ const uploadUrl = (bucket, file) => new Promise((resolve, reject) => {
     }
   })
 })
+
+let nInvalid = 0
+let nSkipped = 0
 
 async function main() {
   const batchSize = 100
@@ -101,6 +104,7 @@ async function main() {
 
         if (testUrl.startsWith(CDN_URL)) {
           console.log('found CDN url, skipping item')
+          nSkipped++
           break
         }
 
@@ -135,6 +139,7 @@ async function main() {
 
       if (imageUrl == null) {
         console.warn('No valid image for product id ' + row.ID)
+        nInvalid++
         continue
       }
 
@@ -150,7 +155,7 @@ async function main() {
       await knex('Products').where('ID', row.ID).update({ Hyperlinked_Image: CDN_URL + file })
     }
   } while (rows.length > 0)
-
+  nInvalid = nInvalid - nSkipped
 }
 
-main().then(() => console.log('all images uploaded to s3')).catch(err => console.error(err))
+main().then(() => console.log('all images uploaded to s3: nInvalid={' + nInvalid + '} nSkipped={' + nSkipped + '}')).catch(err => console.error(err))
