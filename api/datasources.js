@@ -408,7 +408,7 @@ class MyDB extends SQLDataSource {
 
     const searchQueryNoAs = buildSearchQuery(this.db, args)
     const searchQuery = searchQueryNoAs.as('Search')
-    console.log('listProducts', searchQuery.toString())
+    //console.log('listProducts', searchQuery.toString())
 
     let dataQuery =  this.db.select(productFields)
       .from(searchQuery.clone())
@@ -491,12 +491,12 @@ class MyDB extends SQLDataSource {
       queries.push(subcategoryQuery)
     }
 
-    for (var i = 0; i < queries.length; i++) {
-      console.log('query[' + i + ']:')
-      console.log(queries[i].toString())
-      console.log()
-    }
-    
+    // for (var i = 0; i < queries.length; i++) {
+    //   console.log('query[' + i + ']:')
+    //   console.log(queries[i].toString())
+    //   console.log()
+    // }
+
     return Promise.all(queries)
   }
 
