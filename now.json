@@ -1,7 +1,7 @@
 {
   "version": 2,
   "name": "robins-nest-designs",
-  "alias": ["robins-nest-designs.berkona.now.sh", "beta.robinsnestdesigns.com"],
+  "alias": ["beta.robinsnestdesigns.com"],
   "regions": [ "iad1" ],
   "env": {
     "SQL_ENGINE": "mysql",
