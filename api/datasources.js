@@ -4,6 +4,8 @@ if (!process.env.SQL_ENGINE || !process.env.SQL_PORT || !process.env.SQL_HOST ||
   throw new Error('You must set the environmental variables: SQL_ENGINE, SQL_PORT, SQL_HOST, SQL_USER, SQL_PWD, SQL_DB before starting server')
 }
 
+const CACHE_TTL = 300
+
 const knex = require('knex')({
   client: process.env.SQL_ENGINE,
   connection: {
@@ -295,8 +297,8 @@ class MyDB extends SQLDataSource {
       .select(categoryFields)
       .from('Category')
       .where('Category.ID', categoryId)
-
-    return query
+    // todo fix cache consistency issues here
+    return this.getCached(query, CACHE_TTL)
   }
 
   insertCategory({ title, comments }) {
@@ -317,7 +319,7 @@ class MyDB extends SQLDataSource {
       .where('Category.Category', 'like', '%-%')
       .orderBy('Category.Category', 'ASC')
 
-    return query
+    return this.getCached(query, CACHE_TTL)
   }
 
   listSaleCategories() {
@@ -351,13 +353,13 @@ class MyDB extends SQLDataSource {
 
   getSubcategory(subcategoryId) {
     if (!subcategoryId) throw new Error('subcategory ID is required')
-    return this.db.select(
+    return this.getCached(this.db.select(
         'Subcategory.ID as ID',
         'Subcategory.Subcategory as Category',
         'Comments'
       )
       .from('Subcategory')
-      .where('ID', subcategoryId)
+      .where('ID', subcategoryId), CACHE_TTL)
   }
 
   updateSubcategory(subcategoryId, { categoryId, title, comments }) {
@@ -377,7 +379,7 @@ class MyDB extends SQLDataSource {
       .orderBy('Subcategory.Subcategory', 'ASC')
     if (categoryId)
       query = query.where('Subcategory.Category', '=', categoryId)
-    return query
+    return this.getCached(query, CACHE_TTL)
   }
 
   insertProduct(productData) {
@@ -400,7 +402,7 @@ class MyDB extends SQLDataSource {
     .where('Products.ID', productId)
     .leftJoin('Category', 'Products.Category', 'Category.ID')
     .leftJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
-    return query
+    return this.getCached(query, CACHE_TTL)
   }
 
   listProducts(args) {
@@ -461,7 +463,11 @@ class MyDB extends SQLDataSource {
           )
       )
 
-    const queries = [ dataQuery, countQuery, categoryQuery ]
+    const queries = [
+      dataQuery,
+      countQuery,
+      categoryQuery
+    ]
 
     if (args.categoryId) {
       const subcategoryQuery = this.db.select(
@@ -496,8 +502,8 @@ class MyDB extends SQLDataSource {
     //   console.log(queries[i].toString())
     //   console.log()
     // }
-
-    return Promise.all(queries)
+    const self = this
+    return Promise.all(queries.map(q => self.getCached(q, CACHE_TTL)))
   }
 
   tryUpsertUser(email, user) {
@@ -625,7 +631,8 @@ class MyDB extends SQLDataSource {
   }
 
   getTaxTables() {
-    return this.db.select('*').from('TaxTables')
+    const query = this.db.select('*').from('TaxTables')
+    return this.getCached(query, CACHE_TTL)
   }
 }
 
