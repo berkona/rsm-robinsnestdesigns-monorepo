@@ -636,3 +636,12 @@ TR.even,
 .carousel-indicators .active {
     background-color: #333;
 }
+
+/* Fix bug with react-bootstrap inline forms */
+@media (max-width: 576px) {
+    .form-inline .form-control {
+        display: inline-block;
+        width: auto;
+        vertical-align: middle;
+    }
+}
