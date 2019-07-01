@@ -108,6 +108,12 @@ p {
 #page_border {
     min-height: 800px;
     margin: 0px auto;
+    max-width: 100%;
+    padding: 0px;
+}
+
+@media (min-width: 1200px) #page_border {
+    max-width: 1140px;
 }
 
 #page_border_inner {
