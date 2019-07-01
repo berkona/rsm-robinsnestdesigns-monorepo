@@ -1,6 +1,6 @@
 const { ApolloServer } = require('apollo-server-micro')
 
-const { MyDB } = require('./datasources')
+const { knex, MyDB } = require('./datasources')
 const { typeDefs } = require('./schema')
 const { verifyAuthToken, resolvers } = require('./resolvers')
 
@@ -19,10 +19,18 @@ const server = new ApolloServer({
   }
 })
 
-module.exports = server.createHandler({
+const graphqlHandler = server.createHandler({
   cors: {
     origin: true,
     credentials: true,
     allowedHeaders: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Apollo-Tracing'
   },
 })
+
+module.exports = async (req, res) => {
+  try {
+    await graphqlHandler(req, res)
+  } finally {
+    await knex.destroy()
+  }
+}

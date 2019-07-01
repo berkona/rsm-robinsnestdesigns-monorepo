@@ -23,6 +23,19 @@ const typeDefs = gql`
     user(token: String!): User
     wishlist(token: String!): [WishListItem!]!
     isInWishlist(token: String!, productId: ID!): Boolean
+    allPromos(token: String!): [Promo!]!
+  }
+
+  type Promo {
+    id: ID!
+    coupon: String!
+    starts: Date!
+    ends: Date!
+    requiresTotal: Float
+    requiresSubcategory: ID
+    percentageOff: Float
+    moneyOff: Float
+    freeShipping: Boolean
   }
 
   scalar Date
