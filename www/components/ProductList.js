@@ -95,7 +95,7 @@ const ProductList = (props) => {
                 onSaleOnly={props.onSaleOnly}
                 newOnly={props.newOnly}
                 pageNo={page}
-                sortOrder={props.sortOrder}
+                sortOrder={isTeaser ? 'mostRecent' : props.sortOrder}
               >
                 <a>{text}</a>
               </SearchLink>
