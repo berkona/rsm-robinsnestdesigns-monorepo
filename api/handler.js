@@ -28,6 +28,7 @@ const graphqlHandler = server.createHandler({
 })
 
 module.exports = async (req, res) => {
+  knex.initialize()
   try {
     await graphqlHandler(req, res)
   } finally {
