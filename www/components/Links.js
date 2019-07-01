@@ -16,9 +16,24 @@ export const CategoryLink = (props) => (
 )
 
 export const SearchLinkStr = (args) => {
+  const { categoryId, subcategoryId, pageNo } = args
+  delete args.categoryId
+  delete args.subcategoryId
+  delete args.pageNo
+
   let queryString = Object.keys(args).filter(key => key && args[key]).map(key => key + '=' + args[key]).join('&')
   if (queryString.length > 0) queryString = '?' + queryString
-  return '/search' + queryString
+  let url = '/search'
+  if (categoryId) {
+    url += '/c/' + categoryId
+  }
+  if (subcategoryId) {
+    url += '/sc/' + subcategoryId
+  }
+  if (pageNo) {
+    url += '/p/' + pageNo
+  }
+  return url + queryString
 }
 
 export const SearchLink = ({ categoryId, subcategoryId, searchPhrase, pageNo, onSaleOnly, newOnly, sortOrder, children }) => {

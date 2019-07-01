@@ -38,6 +38,10 @@
     },
     { "src": "/graphql", "dest": "api/handler.js" },
     {
+      "src": "/sitemap.xml",
+      "dest": "/www/static/sitemap.xml"
+    },
+    {
       "src": "/googlea7696e4bbcfecd2f.html",
       "dest": "/www/static/googlea7696e4bbcfecd2f.html",
       "headers": { "cache-control": "immutable" }
@@ -58,6 +62,41 @@
     {
       "src": "/order/(?<orderId>[^/]+).*$",
       "dest": "/www/order?orderId=$orderId",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
+    },
+    {
+      "src": "/search/c/(?<categoryId>[^/]+)/sc/(?<subcategoryId>[^/]+)/p/(?<pageNo>[^/]+)",
+      "dest": "/www/search?categoryId=$categoryId&subcategoryId=$subcategoryId&pageNo=$pageNo",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
+    },
+    {
+      "src": "/search/c/(?<categoryId>[^/]+)/sc/(?<subcategoryId>[^/]+)",
+      "dest": "/www/search?categoryId=$categoryId&subcategoryId=$subcategoryId",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
+    },
+    {
+      "src": "/search/c/(?<categoryId>[^/]+)/p/(?<pageNo>[^/]+)",
+      "dest": "/www/search?categoryId=$categoryId&pageNo=$pageNo",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
+    },
+    {
+      "src": "/search/c/(?<categoryId>[^/]+)",
+      "dest": "/www/search?categoryId=$categoryId",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
+    },
+    {
+      "src": "/search/p/(?<pageNo>[^/]+)",
+      "dest": "/www/search?pageNo=$pageNo",
       "headers": {
         "cache-control": "s-maxage=300, max-age=0"
       }

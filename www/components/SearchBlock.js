@@ -67,19 +67,6 @@ class SearchBlock extends React.Component {
 		}
 		self.handleOnSaleOnlyChange = (event) => handleCheckToggle(event, 'onSaleOnly')
 		self.handleNewOnlyChange = (event) => handleCheckToggle(event, 'newOnly')
-
-		self.handleCategoryChange = (option) => {
-			self.setState({
-				categoryId: option && option.value,
-				subcategoryId: null,
-			}, () => Router.push(SearchLinkStr(self.state)))
-		}
-
-		self.handleSubcategoryChange = (option) => {
-			self.setState({
-				subcategoryId: option && option.value,
-			}, () => Router.push(SearchLinkStr(self.state)))
-		}
 	}
 
 	componentDidUpdate(prevProps) {
