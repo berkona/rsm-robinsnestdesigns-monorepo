@@ -51,9 +51,9 @@ const IsWithinDateRange = (timestamp, rangeStart, rangeEnd) => {
 }
 
 const TokenizeStr = (str) => {
-  return str.split(' ').map(s => {
-    return s.trim().replace(/\W+/g, '')
-  }).filter(s => s && s.length)
+  return str && str.split(' ').map(s => {
+    return s && s.trim().replace(/\W+/g, '')
+  }).filter(s => s && s.length) || []
 }
 
 const MakeSEOKeywords = (product) => {
