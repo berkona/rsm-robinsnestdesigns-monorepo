@@ -8,7 +8,7 @@ import Navbar from './Navbar'
 import SiteInfo from './SiteInfo'
 
 const Layout = props => (
-  <Container id="page_border" style={{ padding: '0' }}>
+  <Container id="page_border">
     <Head>
       <title>Exclusive needlework charts and kits for cross stitch and needlepoint | Robin's Next Designs</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -43,7 +43,7 @@ const Layout = props => (
       </Col>
     </Row>
 
-    <Row>
+    <Row noGutters={true}>
       <Col>
         <div id="page_border_inner">
           <Row>

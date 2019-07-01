@@ -113,7 +113,7 @@ p {
 
 @media (max-width: 1200px) {
     #page_border {
-        max-width: 100%;
+        max-width: calc(100% - 30px);
     }
 }
 
