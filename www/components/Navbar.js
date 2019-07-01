@@ -80,7 +80,7 @@ class MyNavbar extends React.Component {
       <Navbar bg="light" expand="lg">
         <Link href="/">
           <a>
-            <Navbar.Brand>Robin's Nest Designs</Navbar.Brand>
+            <Navbar.Brand>Home</Navbar.Brand>
           </a>
         </Link>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />

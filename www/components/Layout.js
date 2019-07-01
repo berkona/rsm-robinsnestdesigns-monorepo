@@ -6,10 +6,9 @@ import Col from 'react-bootstrap/Col'
 import Header from './Header'
 import Navbar from './Navbar'
 import SiteInfo from './SiteInfo'
-import { FaShippingFast } from 'react-icons/fa'
 
 const Layout = props => (
-  <Container id="page_border">
+  <Container id="page_border" style={{ padding: '0' }}>
     <Head>
       <title>Exclusive needlework charts and kits for cross stitch and needlepoint | Robin's Next Designs</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -34,7 +33,7 @@ const Layout = props => (
       <link href="/static/react-datepicker.min.css" rel="stylesheet" type="text/css" />
     </Head>
 
-    <Row id="masthead" className="d-none d-sm-block">
+    <Row id="masthead" className="d-none d-sm-block" noGutters={true}>
       <Header />
     </Row>
 

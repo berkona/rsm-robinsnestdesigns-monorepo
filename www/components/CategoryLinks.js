@@ -18,6 +18,7 @@ const arrangeCategories = (categories) => {
   var categoryPrefixes = {}
   categories.forEach((e) => {
     let [ prefix, suffix ] = e.title.split('-')
+    if (!prefix || !suffix) return
     e.suffix = suffix
     if (!categoryPrefixes[prefix]) categoryPrefixes[prefix] = []
     categoryPrefixes[prefix].push(e)
