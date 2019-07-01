@@ -3,12 +3,19 @@ import Head from 'next/head'
 export default (props) => (
   <>
     <Head>
+      <meta name="og:site_name" content="Robin's Nest Designs" />
       { props.title
-        ? <title>{ props.title + ' | Robin\'s Nest Designs' }</title>
+        ? <>
+            <title>{ props.title + ' | Robin\'s Nest Designs' }</title>
+            <meta name="og:title" content={props.title} />
+          </>
         : undefined
       }
       { props.description
-        ? <meta name="description" content={ props.description } />
+        ? <>
+            <meta name="description" content={ props.description } />
+            <meta name="og:description" content={props.description} />
+          </>
         : undefined
       }
       { props.keywords

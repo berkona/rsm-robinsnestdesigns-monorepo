@@ -13,6 +13,8 @@ import AddToCart from './AddToCart'
 import AddToWishList from './AddToWishList'
 import PriceDisplay from './PriceDisplay'
 import { Product, ProductDetailAction } from '../lib/next-ga-ec'
+import ProductImage from './ProductImage'
+import Head from 'next/head'
 
 export const pageQuery = gql`
 query($id: ID!) {
@@ -42,8 +44,26 @@ query($id: ID!) {
 }
 `
 
+const DEFAULT_KEYWORDS = 'cross,stitch,needlepoint,quilting,punchneedle,patterns,charts,graphs,needles,DMC,Anchor,Mill,Hill,Pearl,perle,cotton,beads,floss,kits,linen,Aida,Lugana,evenweave,afghans,tabletop,placemats,napkins,bread,covers,cloths,Jubilee,Jobelan,Wichelt,Zweigart,Charles,Kreinik,metallic,threads,Marlitt,Lavender,Lace,Mirabilia,Butternut,Road,nora,Corbett,Marilyn,Imblum,Pooh,Disney,John,James,Piecemakers,tapestry,beading,baby,bibs,towels,bookmark,fabrics,leaflets,books,needlework,stitchery,needlearts,sewing,crafts,keepsakes,collectibles,heirloom,gifts,home,decor,furnishings,flowers,Christmas,ornaments,cats,dogs'.split(',')
+
 const IsWithinDateRange = (timestamp, rangeStart, rangeEnd) => {
   return timestamp > rangeStart && timestamp < rangeEnd
+}
+
+const TokenizeStr = (str) => {
+  return str.split(' ').map(s => {
+    return s.trim().replace(/\W+/g, '')
+  }).filter(s => s && s.length)
+}
+
+const MakeSEOKeywords = (product) => {
+  return Array.from(new Set(
+    DEFAULT_KEYWORDS,
+    TokenizeStr(product.name)
+    .concat(TokenizeStr(product.description))
+    .concat(TokenizeStr(product.category))
+    .concat(TokenizeStr(product.subcategory))
+  )).join(',')
 }
 
 const ProductDetail = (props) => (
@@ -83,7 +103,8 @@ const ProductDetail = (props) => (
                />
       <SEO
         title={data.product.name + ' | ' + data.product.category + ' | ' + data.product.subcategory}
-        description={'Buy ' + data.product.name + ' now. ' + data.product.description}
+        description={'Check out ' + data.product.name + ' at Robin\'s Nest Designs now. ' + data.product.description}
+        keywords={MakeSEOKeywords(data.product)}
       />
       <Row>
         <Col>
@@ -94,11 +115,10 @@ const ProductDetail = (props) => (
         <Col xs={12} md={7}>
           <div style={{  padding: '0px 24px' }}>
             <div className="product-large-image">
-              {
-                (data.product.hyperlinkedImage || data.product.thumbnail || data.product.image)
-                ? <img src={data.product.hyperlinkedImage || `https://www.robinsnestdesigns.com/ahpimages/${data.product.image || data.product.thumbnail}`}></img>
-                : <img src="/static/no-image.png"/>
-              }
+              <ProductImage product={data.product} />
+              <Head>
+                <meta name="og:image" content={data.product.hyperlinkedImage || (data.product.image && `https://www.robinsnestdesigns.com/ahpimages/${data.product.image}`) || (data.product.thumbnail && `https://www.robinsnestdesigns.com/ahpimages/${data.product.thumbnail}`)} />
+              </Head>
             </div>
           </div>
         </Col>

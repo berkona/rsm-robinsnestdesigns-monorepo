@@ -83,12 +83,12 @@ class MyNavbar extends React.Component {
             <Navbar.Brand>Home</Navbar.Brand>
           </a>
         </Link>
+        <Form inline onSubmit={this.handleSearchSubmit}>
+          <FormControl type="text" placeholder="Search" className="mr-sm-2" value={this.state.searchPhrase} onChange={this.handleSearchChange} />
+          <Button variant="dark" type="submit">Search</Button>
+        </Form>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Form inline onSubmit={this.handleSearchSubmit}>
-            <FormControl type="text" placeholder="Search" className="mr-sm-2" value={this.state.searchPhrase} onChange={this.handleSearchChange} />
-            <Button variant="dark" type="submit">Search</Button>
-          </Form>
           <Nav className="ml-auto">
             <Nav.Item>
               <Link href="/subscribe" passHref>
