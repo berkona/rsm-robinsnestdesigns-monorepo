@@ -3,8 +3,12 @@ import Link from 'next/link'
 import slugify from 'slugify'
 import { Actions } from '../lib/next-ga-ec'
 
+export ProductLinkStr(props) => (
+  `/product/${props.productId}/${slugify('' + props.category)}/${slugify('' + props.subcategory)}/${slugify('' + props.title)}?listref=${props.listName}`
+)
+
 export const ProductLink = (props) => (
-  <Link href={`/product?productId=${props.productId}&listref=${props.listName}`} as={`/product/${props.productId}/${slugify('' + props.category)}/${slugify('' + props.subcategory)}/${slugify('' + props.title)}?listref=${props.listName}`} prefetch>
+  <Link href={`/product?productId=${props.productId}&listref=${props.listName}`} as={ProductLinkStr(props)} prefetch>
     <a onClick={() => Actions.ProductClick({ sku: props.sku, category: props.category + '/' + props.subcategory, name: props.title, position: props.position, list: props.listName })}>{props.children}</a>
   </Link>
 )

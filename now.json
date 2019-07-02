@@ -39,7 +39,10 @@
     { "src": "/graphql", "dest": "api/handler.js" },
     {
       "src": "/sitemap.xml",
-      "dest": "/www/static/sitemap.xml"
+      "dest": "/www/static/sitemap.xml",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
     },
     {
       "src": "/googlea7696e4bbcfecd2f.html",
