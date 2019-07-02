@@ -3,7 +3,7 @@ import Link from 'next/link'
 import slugify from 'slugify'
 import { Actions } from '../lib/next-ga-ec'
 
-export ProductLinkStr(props) => (
+export ProductLinkStr = (props) => (
   `/product/${props.productId}/${slugify('' + props.category)}/${slugify('' + props.subcategory)}/${slugify('' + props.title)}?listref=${props.listName}`
 )
 
