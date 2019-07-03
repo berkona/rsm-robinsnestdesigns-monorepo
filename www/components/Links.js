@@ -40,11 +40,17 @@ export const SearchLinkStr = (args) => {
   return url + queryString
 }
 
+export const SearchLinkStrClient = (args) => {
+  let queryString = Object.keys(args).filter(key => key && args[key]).map(key => key + '=' + args[key]).join('&')
+  if (queryString.length > 0) queryString = '?' + queryString
+  let url = '/search'
+  return url + queryString
+}
+
 export const SearchLink = ({ categoryId, subcategoryId, searchPhrase, pageNo, onSaleOnly, newOnly, sortOrder, children }) => {
-  // TODO: can we alias this to a clean url?
-  const link = SearchLinkStr({ categoryId, subcategoryId, searchPhrase, pageNo, onSaleOnly, newOnly, sortOrder })
+  const args = { categoryId, subcategoryId, searchPhrase, pageNo, onSaleOnly, newOnly, sortOrder }
   return (
-    <Link href={link} prefetch>
+    <Link href={SearchLinkStrClient(args)} as={SearchLinkStr(args)} prefetch>
       {children}
     </Link>
   )
