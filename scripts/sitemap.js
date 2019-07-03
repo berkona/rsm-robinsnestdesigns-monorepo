@@ -1,3 +1,4 @@
+const stream = require('stream');
 const fs = require('fs')
 const url = require('url')
 const sitemap = require('sitemap')
@@ -60,74 +61,138 @@ const dbWithRetry = async (dbfn, nRetries = 10) => {
   throw new Error('Maximum retries exhausted', lastErr)
 }
 
-const addAllPages = async (db, urls, args) => {
-  const [ _, countRow ] = await dbWithRetry(() => db.listProducts(args))
-  const total = countRow[0].nRecords
-  const limit = 50
-  const nPages = Math.ceil(total / limit)
-  console.log('Adding', nPages, 'pages from', args)
-  for (let page = 1; page <= nPages; page++) {
-    let linkArgs = Object.assign({}, args, { pageNo: page })
-    urls.add(SearchLinkStr(linkArgs))
+const timeAsyncFn = async (fn, title) => {
+  const startTime = Date.now()
+  try {
+    const retVal = await fn()
+    return retVal
+  } finally {
+    const endTime = Date.now()
+    console.log('timeAsyncFn', title, 'took', endTime - startTime, 'ms')
   }
+}
+
+const addProductUrls = async (db, urls) => {
+  const productStream = knex.select(
+    'Products.ID as ProductID',
+    'Products.ItemName as ItemName',
+    'Category.Category as Category',
+    'Subcategory.Subcategory as Subcategory')
+  .from('Products')
+  .innerJoin('Category', 'Products.Category', 'Category.ID')
+  .innerJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
+  .where('Active', 1)
+  .stream()
+
+  for await (const productRow of productStream) {
+    const props = {
+      productId: productRow.ProductID,
+      category: productRow.Category,
+      subcategory: productRow.Subcategory,
+      title: productRow.ItemName,
+      listName: 'sitemap',
+    }
+    urls.add(makeUrlObj(ProductLinkStr(props)))
+  }
+}
+
+const getCategories = () => knex.raw(`
+  select Category as ID,
+  count(Products.ID) as nProducts from Products
+  where Active = 1 and Category is not null
+  group by Category
+  having nProducts > 0
+  union
+  select CategoryB as ID,
+  count(Products.ID) as nProducts from Products
+  where Active = 1 and CategoryB is not null
+  group by CategoryB
+  having nProducts > 0
+  union
+  select CategoryC as ID,
+  count(Products.ID) as nProducts from Products
+  where Active = 1 and CategoryC is not null
+  group by CategoryC
+  having nProducts > 0
+`)
+
+const getSubcategories = () => knex.raw(`
+  select Subcategory.Category as Category, Products.SubCategory as ID,
+  count(Products.ID) as nProducts from Products
+  inner join Subcategory on Subcategory.ID = Products.SubCategory
+  where Active = 1 and Products.SubCategory is not null
+  group by Products.SubCategory
+  having nProducts > 0
+  union
+  select Subcategory.Category as Category, SubCategoryB as ID,
+  count(Products.ID) as nProducts from Products
+  inner join Subcategory on Subcategory.ID = Products.SubCategoryB
+  where Active = 1 and Products.SubCategoryB is not null
+  group by SubCategoryB
+  having nProducts > 0
+  union
+  select Subcategory.Category as Category, SubCategoryC as ID,
+  count(Products.ID) as nProducts from Products
+  inner join Subcategory on Subcategory.ID = Products.SubCategoryC
+  where Active = 1 and Products.SubCategoryC is not null
+  group by SubCategoryC
+  having nProducts > 0
+`)
+
+const addSearchUrls = async(db, urls) => {
+
+  const processCategories = async () => {
+    const allCategories = await dbWithRetry(getCategories)
+    allCategories.forEach(category => {
+      const categoryArgs = { categoryId: category.ID }
+      urls.add(makeUrlObj(SearchLinkStr(categoryArgs)))
+    })
+  }
+
+  const processSubcategories = async () => {
+    const allSubcategories = await dbWithRetry(getSubcategories)
+    allSubcategories.forEach(subcategory => {
+      const subcatArgs = { categoryId: subcategory.Category, subcategoryId: subcategory.ID }
+      urls.add(makeUrlObj(SearchLinkStr(subcatArgs)))
+    })
+  }
+
+  await Promise.all([
+    timeAsyncFn(processCategories, 'processCategories'),
+    timeAsyncFn(processSubcategories, 'processSubcategories'),
+  ])
 }
 
 const handler = async (hostname) => {
   if (!hostname) throw new Error("Set SITE_URL before continuing")
 
   const cacheTime = 600000
-  const urls = new Set()
   const db = new MyDB()
   await db.initialize({ context: {} })
 
-  const [ _, countRow ] = await dbWithRetry(() => db.listProducts())
-  const total = countRow[0].nRecords
-  const limit = 1000
-  const nPages = Math.ceil(total / limit)
-  for (let page = 1; page <= nPages; page++) {
-    const [ rows ] = await dbWithRetry(() => db.listProducts({ skip: (page-1) * limit, limit, }))
-    console.log('Processing', { skip: (page-1) * limit, limit, })
-    rows.forEach(productRow => {
-      const props = {
-        productId: productRow.ProductID,
-        category: productRow.Category,
-        subcategory: productRow.Subcategory,
-        title: productRow.ItemName,
-        listName: 'sitemap',
-      }
-      urls.add(ProductLinkStr(props))
-    })
-  }
-
-  const [ __1, __2, categories ] = await dbWithRetry(() => db.listProducts())
-  await Promise.all(categories.map(async (category) => {
-    const categoryArgs = { categoryId: category.ID }
-    urls.add(SearchLinkStr(categoryArgs))
-    //await addAllPages(db, urls, categoryArgs)
-    const [ __3, __4, __5, allSubcategories ] = await dbWithRetry(() => db.listProducts(categoryArgs))
-    await Promise.all(allSubcategories.map(async (subcategory) => {
-      const subcatArgs = { categoryId: category.ID, subcategoryId: subcategory.ID }
-      urls.add(SearchLinkStr(subcatArgs))
-      //await addAllPages(db, urls, subcatArgs)
-    }))
-  }))
-
-  return sitemap.createSitemap({
+  const urls = sitemap.createSitemap({
     hostname,
     cacheTime,
-    urls: Array.from(urls).map(u => makeUrlObj(u)),
-  }).toString()
+  })
+
+  await Promise.all([
+    timeAsyncFn(() => addProductUrls(db, urls), 'addProductUrls'),
+    timeAsyncFn(() => addSearchUrls(db, urls), 'addSearchUrls')
+  ])
+
+  return await timeAsyncFn(() => urls.toString(), 'sitemap.createSitemap')
 }
 
-const [ nodePath, scriptPath, hostname, sitemapDest ] = process.argv
+const main = async () => {
+  const [ , , hostname, sitemapDest ] = process.argv
 
-if (!hostname) {
-  console.log('USAGE: node sitemap.js HOSTNAME [FILE]')
-} else {
-  handler(hostname).then((sitemap) => {
-    fs.writeFileSync(sitemapDest || 'sitemap.xml', sitemap)
+  if (!hostname) {
+    console.log('USAGE: node sitemap.js HOSTNAME [FILE]')
+  } else {
+    const sitemap = await timeAsyncFn(() => handler(hostname), 'handler')
+    await timeAsyncFn(() => fs.writeFileSync(sitemapDest || 'sitemap.xml', sitemap), 'writeFileSync')
     console.log('sitemap generated')
-  }).catch(err => {
-    console.error('Error generating sitemap', err)
-  }).finally(() => knex.destroy())
+  }
 }
+
+main().finally(() => knex.destroy())
