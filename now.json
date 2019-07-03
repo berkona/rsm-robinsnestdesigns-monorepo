@@ -7,7 +7,7 @@
     "SQL_ENGINE": "mssql",
     "SQL_PORT": "1433",
     "SQL_HOST": "@sql-host-pegweb-prod",
-    "SQL_USER": "@sql-user-pegweb-prod ",
+    "SQL_USER": "@sql-user-pegweb-prod",
     "SQL_PWD": "@sql-pwd-pegweb-prod",
     "SQL_DB": "@sql-db-pegweb-prod",
     "PAYPAL_CLIENTID": "@paypal-client-id",
