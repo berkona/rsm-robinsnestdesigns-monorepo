@@ -645,3 +645,15 @@ TR.even,
         vertical-align: middle;
     }
 }
+
+.btn-primary:not(:disabled):not(.disabled) {
+    color: #fff;
+    background-color: #006699;
+    border-color: #006699;
+}
+
+.btn-primary:not(:disabled):not(.disabled):hover {
+    color: #fff;
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
