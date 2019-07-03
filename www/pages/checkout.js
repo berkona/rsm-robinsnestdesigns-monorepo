@@ -10,7 +10,6 @@ import { CurrentUserContext } from '../lib/auth'
 import { ORDER_GET } from '../constants/queries'
 import Loader from '../components/Loader'
 import ApolloError from '../components/ApolloError'
-import Redirect from '../components/Redirect'
 import SEO from '../components/SEO'
 import { Product } from '../lib/next-ga-ec'
 import Link from 'next/link'
@@ -18,6 +17,7 @@ import { PayPalButton } from "react-paypal-button-v2"
 import { checkoutOpenPaypalEvent, checkoutDoneEvent } from '../lib/react-ga'
 import Router from 'next/router'
 import Button from 'react-bootstrap/Button'
+import { PAYPAL_CLIENTID_LIVE } from '../constants/config'
 
 const placeCartOrder = gql`
 mutation($orderId: ID!, $paypalOrderId: ID!, $shipping: Float!, $county: String, $promo: String) {
@@ -296,7 +296,7 @@ class CheckoutPage extends React.Component {
                             ? <p>Network error: {error.toString()}</p>
                             : !data
                               ? <PayPalButton
-                                 options={{ clientId: 'AfRXnOb4Weq93kfQLyPKfaW3e8bYvRbkDBoeTZwCPLcxdottjyLo5t00XxZteN6Up6bmYIKn-GRSUMg2' }}
+                                 options={{ clientId: PAYPAL_CLIENTID_LIVE }}
                                  amount={cartData.cart.total}
                                  createOrder={(data, actions) => {
                                    checkoutOpenPaypalEvent(cartData.cart.items)
