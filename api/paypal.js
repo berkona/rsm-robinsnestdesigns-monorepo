@@ -6,7 +6,9 @@ if (!process.env.PAYPAL_CLIENTID || !process.env.PAYPAL_CLIENTSECRET)
 
 let clientId =  process.env.PAYPAL_CLIENTID
 let clientSecret = process.env.PAYPAL_CLIENTSECRET
-let environment = new paypal.core.SandboxEnvironment(clientId, clientSecret)
+let environment = process.env.NODE_ENV == "production"
+  ? new paypal.core.LiveEnvironment(clientId, clientSecret)
+  : new paypal.core.SandboxEnvironment(clientId, clientSecret)
 let client = new paypal.core.PayPalHttpClient(environment)
 
 module.exports = client;
