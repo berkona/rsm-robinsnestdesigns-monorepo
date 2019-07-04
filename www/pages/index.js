@@ -80,14 +80,14 @@ const ProductCarouselItem = (props) => <Query query={FIND_ONE_PRODUCT} variables
 
 const Index = (props) => (
   <>
-    <Col className="d-none d-sm-block" sm={6} md={3}>
+    <Col className="d-none d-sm-block" sm={4} md={3}>
       <Sidebar>
         <div style={{ padding: '5px 10px 5px 10px' }}>
           <CategoryLinks />
         </div>
       </Sidebar>
     </Col>
-    <Col id="content" xs={12} sm={6} md={9}>
+    <Col id="content" xs={12} sm={8} md={9}>
       <div id="homeContent" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
           <Carousel controls={false} style={{ marginTop: '16px' }}>
             {props.carouselItems.map((url, i) => <Carousel.Item key={url}>
@@ -122,7 +122,10 @@ const Index = (props) => (
   </>
 )
 
+let indexContentCache = null
+
 Index.getInitialProps = async () => {
+  if (indexContentCache) return indexContentCache
   const indexRes = await fetch(resolve(BASE_URL, '/content/home/index.json'))
   const indexData = await indexRes.json()
   let initialProps = {
@@ -135,6 +138,7 @@ Index.getInitialProps = async () => {
     let propName = 'carouselItem-' + i + '-html'
     initialProps[propName] = data
   }
+  indexContentCache = initialProps
   return initialProps
 }
 
