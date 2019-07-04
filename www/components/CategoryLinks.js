@@ -39,7 +39,9 @@ const CategoryLinks_inner = (props) => (
     <ul>
     {
       props.sortedCategories.map((prefixObj) => (
-        <li className="subcategory" key={`sidebar-super-category-${prefixObj.prefix}`}>
+        <li key={`sidebar-super-category-${prefixObj.prefix}`}
+            className="subcategory"
+            style={{ fontSize: '16px' }}>
           {prefixObj.prefix}
           <ul>
             { prefixObj.children.map(c => (
@@ -49,7 +51,7 @@ const CategoryLinks_inner = (props) => (
                     onSaleOnly={props.onSaleOnly}
                     newOnly={props.newOnly}
                     >
-                    <a>{c.suffix}</a>
+                    <a style={{ fontSize: '16px' }}>{c.suffix}</a>
                   </SearchLink>
                 </li>
               )

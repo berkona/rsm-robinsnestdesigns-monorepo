@@ -115,11 +115,11 @@ class SearchBlock extends React.Component {
 								|| null
 							if (!category) {
 								return <ul><li><SearchLink searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
-									<a>&lt; {self.state.categoryId}</a>
+									<a style={{ fontSize: '16px', }}>&lt; {self.state.categoryId}</a>
 									</SearchLink></li></ul>
 							} else {
 									return <ul><li><SearchLink searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
-									<a>&lt; {category.title}</a>
+									<a style={{ fontSize: '16px', }}>&lt; {category.title}</a>
 									</SearchLink></li></ul>
 							}
 
@@ -150,13 +150,13 @@ class SearchBlock extends React.Component {
 													[0]
 											|| null
 										return <ul><li><SearchLink categoryId={self.state.categoryId} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
-											<a>&#60; {subcat && subcat.title || self.state.subcategoryId}</a>
+											<a style={{ fontSize: '16px', }}>&#60; {subcat && subcat.title || self.state.subcategoryId}</a>
 										</SearchLink></li></ul>
 									} else {
 										return <ul>
 											{(this.props.subcategories || data.allSubcategories).map(c => (
 												<li key={c.id}><SearchLink categoryId={self.state.categoryId} subcategoryId={c.id} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
-													<a>{c.title}</a>
+													<a style={{ fontSize: '16px', }}>{c.title}</a>
 												</SearchLink></li>
 											))}
 										</ul>
