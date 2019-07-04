@@ -1,5 +1,6 @@
 import React from 'react'
 import Loader from 'react-loaders'
+import LoaderCSS from '../styles/loaders'
 
 export default (props) => (
   <div style={{
@@ -11,5 +12,6 @@ export default (props) => (
     height: '100%', }
   }>
     <Loader color="#8BA8BC" type="square-spin" />
+    <LoaderCSS />
   </div>
 )

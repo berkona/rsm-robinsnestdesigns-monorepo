@@ -5,6 +5,7 @@ import Button from 'react-bootstrap/Button'
 import gql from 'graphql-tag'
 import { Mutation } from 'react-apollo'
 import {CurrentUserContext } from '../lib/auth'
+import { NO_IMAGE_URL } from '../constants/config'
 
 const SIGN_URL_REQ = gql`
 mutation($token: String!, $fileName: String!, $fileType: String!) {
@@ -34,7 +35,7 @@ class UploadFileToAWS extends Component {
       <Form.Group controlId={this.props.controlId}>
         <Form.Label>{this.props.label}</Form.Label>
         <div style={{ marginBottom: '10px', height: '240px' }}>
-          <img style={{ maxWidth: '100%', maxHeight: '100%', }} src={this.props.value || "/static/no-image.png"} />
+          <img style={{ maxWidth: '100%', maxHeight: '100%', }} src={this.props.value || NO_IMAGE_URL} />
         </div>
         <Form.Control onChange={this.handleChange} ref={(ref) => { self.uploadInput = ref; }} type="file" accept=".gif,.jpg,.jpeg,.png" />
         { this.state.success && <Form.Text>

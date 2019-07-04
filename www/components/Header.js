@@ -2,13 +2,14 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Link from 'next/link'
 import { FaShippingFast } from 'react-icons/fa'
+import { BANNER_IMAGE } from '../constants/config'
 
 const Header = () => (
   <Row id="header">
     <Col id="logo">
       <Link href="/">
         <a>
-          <img src="/static/rnd-framed-v3.gif" alt="Robin's Nest Designs Logo" width="520" height="145" id="logo" />
+          <img src={BANNER_IMAGE} alt="Robin's Nest Designs Logo" width="520" height="145" id="logo" />
         </a>
       </Link>
     </Col>
