@@ -34,7 +34,7 @@ const dbWithRetry = async (dbfn, nRetries = 10) => {
       return retVal
     } catch (err) {
       lastErr = err
-      console.error('DB encountered error, trying again after ' + waitTime + ' ms', err)
+      console.error('DB encountered error, trying again after', waitTime, 'ms', err)
       await WaitPromise(waitTime)
       waitTime *= waitGrowth
     }
