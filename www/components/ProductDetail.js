@@ -79,7 +79,7 @@ const ProductDetail = (props) => (
       }
     }
     const isOnSale = data.product.salePrice > 0 && IsWithinDateRange(Date.now(), parseDate(data.product.saleStart), parseDate(data.product.saleEnd))
-    const shippingTime = data.product.qtyInStock > 0 ? 'Ships in 1-2 business days' : 'Order by Tuesday at 12 PM EST'
+    const shippingTime = data.product.qtyInStock > 0 ? 'Ships in 1-2 business days' : 'Order by Tuesday at 12 PM ET'
     return (
       <div className="product-detail">
       <ProductDetailAction />
