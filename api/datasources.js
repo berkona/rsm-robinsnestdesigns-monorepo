@@ -17,6 +17,24 @@ const knex = require('knex')({
   },
 })
 
+const dbWithRetry = async (dbfn, nRetries = 10) => {
+  let waitTime = 100
+  let waitGrowth = 2.5
+  let lastErr = null
+  for (let i = 0; i < nRetries; i++) {
+    try {
+      const retVal = await dbfn()
+      return retVal
+    } catch (err) {
+      lastErr = err
+      console.error('DB encountered error, trying again after ' + waitTime + ' ms', err)
+      await WaitPromise(waitTime)
+      waitTime *= waitGrowth
+    }
+  }
+  throw new Error('Maximum retries exhausted', lastErr)
+}
+
 const validateArgs = (args) => {
   args = Object.assign({}, { skip: 0, limit: 50, sort: 'relevancy' }, args)
   if (args.limit > 200) args.limit = 200
@@ -226,22 +244,22 @@ class MyDB extends SQLDataSource {
 
   async getWishList(uid) {
     if (!uid) throw new Error('uid is required')
-    return await this.db.select(['WishList.Date as AddedDate', 'WishList.ID as WishListID'].concat(productFields))
+    return await dbWithRetry(() => this.db.select(['WishList.Date as AddedDate', 'WishList.ID as WishListID'].concat(productFields))
       .from('WishList')
       .where('AccountID', uid)
       .innerJoin('Products', 'WishList.ItemID', 'Products.ID')
       .innerJoin('Category', 'Products.Category', 'Category.ID')
-      .innerJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
+      .innerJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID'))
   }
 
   async isInWishlist(uid, productId) {
     if (!uid) throw new Error('uid is required')
     if (!productId) throw new Error('productId is required')
-    const result = await this.db.select('ID')
+    const result = await dbWithRetry(() => this.db.select('ID')
       .from('WishList')
       .where('AccountID', uid)
       .where('ItemID', productId)
-      .first()
+      .first())
     return !!result
   }
 
@@ -298,7 +316,7 @@ class MyDB extends SQLDataSource {
       .from('Category')
       .where('Category.ID', categoryId)
     // todo fix cache consistency issues here
-    return this.getCached(query, CACHE_TTL)
+    return dbWithRetry(() => this.getCached(query, CACHE_TTL))
   }
 
   insertCategory({ title, comments }) {
@@ -319,7 +337,7 @@ class MyDB extends SQLDataSource {
       .where('Category.Category', 'like', '%-%')
       .orderBy('Category.Category', 'ASC')
 
-    return this.getCached(query, CACHE_TTL)
+    return dbWithRetry(() => this.getCached(query, CACHE_TTL))
   }
 
   listSaleCategories() {
@@ -342,7 +360,7 @@ class MyDB extends SQLDataSource {
       .innerJoin(inner.as('t1'), 'Category.ID', 't1.ID')
       .orderBy('Category.Category', 'ASC')
 
-    return query
+    return dbWithRetry(() => query)
   }
 
   insertSubcategory({ categoryId, title, comments }) {
@@ -353,13 +371,13 @@ class MyDB extends SQLDataSource {
 
   getSubcategory(subcategoryId) {
     if (!subcategoryId) throw new Error('subcategory ID is required')
-    return this.getCached(this.db.select(
+    return dbWithRetry(() => this.getCached(this.db.select(
         'Subcategory.ID as ID',
         'Subcategory.Subcategory as Category',
         'Comments'
       )
       .from('Subcategory')
-      .where('ID', subcategoryId), CACHE_TTL)
+      .where('ID', subcategoryId), CACHE_TTL))
   }
 
   updateSubcategory(subcategoryId, { categoryId, title, comments }) {
@@ -379,7 +397,7 @@ class MyDB extends SQLDataSource {
       .orderBy('Subcategory.Subcategory', 'ASC')
     if (categoryId)
       query = query.where('Subcategory.Category', '=', categoryId)
-    return this.getCached(query, CACHE_TTL)
+    return dbWithRetry(() => this.getCached(query, CACHE_TTL))
   }
 
   insertProduct(productData) {
@@ -402,7 +420,7 @@ class MyDB extends SQLDataSource {
     .where('Products.ID', productId)
     .leftJoin('Category', 'Products.Category', 'Category.ID')
     .leftJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
-    return this.getCached(query, CACHE_TTL)
+    return dbWithRetry(() => this.getCached(query, CACHE_TTL))
   }
 
   listProducts(args) {
@@ -503,7 +521,7 @@ class MyDB extends SQLDataSource {
     //   console.log()
     // }
     const self = this
-    return Promise.all(queries.map(q => self.getCached(q, CACHE_TTL)))
+    return Promise.all(queries.map(q => dbWithRetry(() => self.getCached(q, CACHE_TTL))))
   }
 
   tryUpsertUser(email, user) {
@@ -518,17 +536,17 @@ class MyDB extends SQLDataSource {
 
   findUserById(uid) {
     if (!uid) throw new Error('uid is required')
-    return this.db.select('*')
+    return dbWithRetry(() => this.db.select('*')
       .from('CustomerAccounts')
       .where('ID', uid)
-      .first()
+      .first())
   }
 
   findUser(email) {
-    return this.db.select('*')
+    return dbWithRetry(() => this.db.select('*')
       .from('CustomerAccounts')
       .where('Email', email)
-      .first()
+      .first())
   }
 
   updateUser(uid, patch) {
@@ -540,25 +558,25 @@ class MyDB extends SQLDataSource {
   }
 
   nextCartNumber() {
-      return this.db.select('CustomerID').from('Cart').orderBy('CustomerID', 'DESC').first().then((r) =>
+      return dbWithRetry(() => this.db.select('CustomerID').from('Cart').orderBy('CustomerID', 'DESC').first()).then((r) =>
         r && r.CustomerID && (Number.parseInt(r.CustomerID) + 1)
       )
   }
 
   listCartItems(cartId) {
-    return this.db.select(cartItemFields.concat(productFields))
+    return dbWithRetry(() => this.db.select(cartItemFields.concat(productFields))
       .from('Cart')
       .leftJoin('Products', 'Products.ID', 'Cart.ProductID')
       .leftJoin('Category', 'Products.Category', 'Category.ID')
       .leftJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
-      .where('CustomerID', cartId)
+      .where('CustomerID', cartId))
   }
 
   async getCartItem(cartItemId) {
     if (!cartItemId) {
       throw new Error('cartItemId not set')
     }
-    return await this.db.select('*').from('Cart').where('ID', cartItemId).first()
+    return await dbWithRetry(() => this.db.select('*').from('Cart').where('ID', cartItemId).first())
   }
 
   insertCartItem(cartId, qty, productId, variant) {
@@ -627,12 +645,12 @@ class MyDB extends SQLDataSource {
   }
 
   getCustomerInfo(orderId) {
-    return this.db.select('*').from('CustomerInfo').where('CustomerID', orderId).first()
+    return dbWithRetry(() => this.db.select('*').from('CustomerInfo').where('CustomerID', orderId).first())
   }
 
   getTaxTables() {
     const query = this.db.select('*').from('TaxTables')
-    return this.getCached(query, CACHE_TTL)
+    return dbWithRetry(() => this.getCached(query, CACHE_TTL))
   }
 }
 
