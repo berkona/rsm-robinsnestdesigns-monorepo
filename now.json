@@ -12,14 +12,14 @@
     "SQL_DB": "@sql-db-pegweb-prod",
     "PAYPAL_CLIENTID": "@paypal-client-id-rsm-live",
     "PAYPAL_CLIENTSECRET": "@paypal-client-secret-rsm-live",
-    "API_URL": "@api-url",
+    "API_URL": "@api-url-beta",
     "JWT_SECRET": "@jwt-secret",
     "JWT_ISSUER": "@jwt-issuer",
     "JWT_MAX_AGE": "@jwt-max-age",
     "AWSAccessKeyId": "@awsaccesskeyid",
     "AWSSecretKey": "@awssecretkey",
     "AWSUploadBucket": "@awsuploadbucket",
-    "SITE_URL": "@site-url",
+    "SITE_URL": "@site-url-beta",
     "MAILGUN_API_KEY": "@mailgun-api-key"
   },
   "builds": [
