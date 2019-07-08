@@ -102,17 +102,21 @@ const getCategories = () => knex.raw(`
   group by Category
   having nProducts > 0
   union
+  (
   select CategoryB as ID,
   count(Products.ID) as nProducts from Products
   where Active = 1 and CategoryB is not null
   group by CategoryB
   having nProducts > 0
+  )
   union
+  (
   select CategoryC as ID,
   count(Products.ID) as nProducts from Products
   where Active = 1 and CategoryC is not null
   group by CategoryC
   having nProducts > 0
+  )
 `)
 
 const getSubcategories = () => knex.raw(`
@@ -123,19 +127,23 @@ const getSubcategories = () => knex.raw(`
   group by Products.SubCategory
   having nProducts > 0
   union
+  (
   select Subcategory.Category as Category, SubCategoryB as ID,
   count(Products.ID) as nProducts from Products
   inner join Subcategory on Subcategory.ID = Products.SubCategoryB
   where Active = 1 and Products.SubCategoryB is not null
   group by SubCategoryB
   having nProducts > 0
+  )
   union
+  (
   select Subcategory.Category as Category, SubCategoryC as ID,
   count(Products.ID) as nProducts from Products
   inner join Subcategory on Subcategory.ID = Products.SubCategoryC
   where Active = 1 and Products.SubCategoryC is not null
   group by SubCategoryC
   having nProducts > 0
+  )
 `)
 
 const addSearchUrls = async(db, urls) => {
