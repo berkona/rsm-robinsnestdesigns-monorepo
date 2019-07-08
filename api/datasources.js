@@ -17,6 +17,12 @@ const knex = require('knex')({
   },
 })
 
+const WaitPromise = (ms) => {
+  return new Promise((resolve, reject) => {
+      setTimeout(() => resolve(), ms)
+  })
+}
+
 const dbWithRetry = async (dbfn, nRetries = 10) => {
   let waitTime = 100
   let waitGrowth = 2.5
