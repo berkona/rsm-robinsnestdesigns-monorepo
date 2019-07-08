@@ -16,7 +16,7 @@ const SiteInfo = () => (
     </p>
     <div id="footer">
         <div id="footerLeft">
-          Copyright 1996-2010 ©<br></br>Robin Monroe
+          Copyright 1996-{new Date().getFullYear()} ©<br></br>Robin Monroe
         </div>
         <div id="footerCenter">
           Send questions and comments about needlework products to: robin@robinsnestdesigns.com<br></br>
