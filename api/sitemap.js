@@ -201,6 +201,6 @@ module.exports = async (req, res) => {
     res.setHeader('content-encoding', 'gzip' )
     res.send( gzipped )
   } finally {
-    knex.destroy()
+    await knex.destroy()
   }
 }
