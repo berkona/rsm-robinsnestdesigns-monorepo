@@ -42,9 +42,7 @@ const WaitPromise = (ms) => {
   })
 }
 
-const dbWithRetry = async (dbfn, nRetries = 10) => {
-  let waitTime = 100
-  let waitGrowth = 2.5
+const dbWithRetry = async (dbfn, nRetries = 5, waitTime = 100, waitGrowth = 2.5) => {
   let lastErr = null
   for (let i = 0; i < nRetries; i++) {
     try {
@@ -67,7 +65,7 @@ const timeAsyncFn = async (fn, title) => {
     return retVal
   } finally {
     const endTime = Date.now()
-    console.log('timeAsyncFn', title, 'took', endTime - startTime, 'ms')
+    //console.log('timeAsyncFn', title, 'took', endTime - startTime, 'ms')
   }
 }
 
@@ -96,54 +94,54 @@ const addProductUrls = async (db, urls) => {
 }
 
 const getCategories = () => knex.raw(`
-  select Category as ID,
-  count(Products.ID) as nProducts from Products
+  select Category as ID
+  from Products
   where Active = 1 and Category is not null
   group by Category
-  having nProducts > 0
+  having count(Products.ID) > 0
   union
   (
-  select CategoryB as ID,
-  count(Products.ID) as nProducts from Products
+  select CategoryB as ID
+  from Products
   where Active = 1 and CategoryB is not null
   group by CategoryB
-  having nProducts > 0
+  having count(Products.ID) > 0
   )
   union
   (
-  select CategoryC as ID,
-  count(Products.ID) as nProducts from Products
+  select CategoryC as ID
+  from Products
   where Active = 1 and CategoryC is not null
   group by CategoryC
-  having nProducts > 0
+  having count(Products.ID) > 0
   )
 `)
 
 const getSubcategories = () => knex.raw(`
-  select Subcategory.Category as Category, Products.SubCategory as ID,
-  count(Products.ID) as nProducts from Products
-  inner join Subcategory on Subcategory.ID = Products.SubCategory
-  where Active = 1 and Products.SubCategory is not null
-  group by Products.SubCategory
-  having nProducts > 0
-  union
-  (
-  select Subcategory.Category as Category, SubCategoryB as ID,
-  count(Products.ID) as nProducts from Products
-  inner join Subcategory on Subcategory.ID = Products.SubCategoryB
-  where Active = 1 and Products.SubCategoryB is not null
-  group by SubCategoryB
-  having nProducts > 0
-  )
-  union
-  (
-  select Subcategory.Category as Category, SubCategoryC as ID,
-  count(Products.ID) as nProducts from Products
-  inner join Subcategory on Subcategory.ID = Products.SubCategoryC
-  where Active = 1 and Products.SubCategoryC is not null
-  group by SubCategoryC
-  having nProducts > 0
-  )
+  select t1.ID as ID, Subcategory.Category as Category
+  from (
+    select Products.SubCategory as ID
+    from Products
+    where Active = 1 and Products.SubCategory is not null
+    group by Products.SubCategory
+    having count(Products.ID) > 0
+    union
+    (
+      select SubCategoryB as ID
+      from Products
+      where Active = 1 and Products.SubCategoryB is not null
+      group by SubCategoryB
+      having count(Products.ID) > 0
+    )
+    union (
+      select SubCategoryC as ID
+      from Products
+      where Active = 1 and Products.SubCategoryC is not null
+      group by SubCategoryC
+      having count(Products.ID) > 0
+    )
+  ) as t1
+  inner join Subcategory on Subcategory.ID = t1.ID
 `)
 
 const addSearchUrls = async(db, urls) => {
@@ -196,10 +194,14 @@ module.exports = async (req, res) => {
     if (!hostname) throw new Error('set SITE_URL in env')
     const sitemap = await timeAsyncFn(() => handler(hostname), 'handler')
     const gzipped = zlib.gzipSync(sitemap)
-    console.log('sitemap.length', sitemap.length, 'gzipped.length', gzipped.length)
+    //console.log('sitemap.length', sitemap.length, 'gzipped.length', gzipped.length)
     res.setHeader('content-type', 'application/xml')
     res.setHeader('content-encoding', 'gzip' )
     res.send( gzipped )
+  } catch(err) {
+    res.status(500)
+    res.send("Internal server error")
+    console.error(err)
   } finally {
     await knex.destroy()
   }

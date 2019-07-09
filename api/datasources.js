@@ -24,9 +24,7 @@ const WaitPromise = (ms) => {
   })
 }
 
-const dbWithRetry = async (dbfn, nRetries = 10) => {
-  let waitTime = 100
-  let waitGrowth = 2.5
+const dbWithRetry = async (dbfn, nRetries = 5, waitTime = 100, waitGrowth = 2.5) => {
   let lastErr = null
   for (let i = 0; i < nRetries; i++) {
     try {
