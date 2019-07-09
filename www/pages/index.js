@@ -80,6 +80,43 @@ const ProductCarouselItem = (props) => <Query query={FIND_ONE_PRODUCT} variables
 
 const Index = (props) => (
   <>
+    <style jsx global>
+    {`
+          .carousel-inner {
+            display: flex;
+          }
+
+          .carousel-item {
+            padding-bottom: 20px;
+          }
+
+          .carousel-item.active {
+            display: flex;
+          }
+
+          .carousel-title {
+
+          }
+
+          .carousel-body {
+            display: flex;
+            flex-direction: row;
+          }
+
+          .carousel-body > div {
+            padding: 10px;
+          }
+
+          .carousel-body .row > div {
+            padding: 10px;
+          }
+
+          .carousel-body img {
+            width: 100%;
+            height: auto;
+          }
+    `}
+    </style>
     <Col className="d-none d-sm-block" sm={4} md={3}>
       <Sidebar>
         <div style={{ padding: '5px 10px 5px 10px' }}>
@@ -91,7 +128,7 @@ const Index = (props) => (
       <div id="homeContent" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
           <Carousel controls={false} style={{ marginTop: '16px' }}>
             {props.carouselItems.map((url, i) => <Carousel.Item key={url}>
-              <div style={{ height: '340px' }} dangerouslySetInnerHTML={{ __html: props['carouselItem-' + i + '-html'] }}>
+              <div dangerouslySetInnerHTML={{ __html: props['carouselItem-' + i + '-html'] }}>
               </div>
             </Carousel.Item>)}
           </Carousel>
