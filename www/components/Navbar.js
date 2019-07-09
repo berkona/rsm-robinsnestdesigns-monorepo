@@ -78,6 +78,14 @@ class MyNavbar extends React.Component {
     const isLoggedIn = this.context.isLoggedIn()
     return (
       <Navbar bg="light" expand="lg">
+        <style jsx global>{`
+          @media (max-width: 576px) {
+            .navbar .form-inline .form-control {
+              width: 120px;
+              margin-right: 5px;
+            }
+          }
+        `}</style>
         <Link href="/">
           <a>
             <Navbar.Brand>Home</Navbar.Brand>
