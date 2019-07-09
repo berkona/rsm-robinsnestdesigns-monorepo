@@ -26,8 +26,7 @@
     { "src": "www/next.config.js", "use": "@now/next" },
     { "src": "api/handler.js", "use": "@now/node" },
     { "src": "api/sitemap.js", "use": "@now/node" },
-    { "src": "content/home/*", "use": "@now/static" },
-    { "src": "content/blog/*", "use": "@now/static" }
+    { "src": "content/home/*", "use": "@now/static" }
   ],
   "routes": [
     {
@@ -42,7 +41,7 @@
       "src": "/sitemap.xml",
       "dest": "api/sitemap.js",
       "headers": {
-        "cache-control": "s-maxage=300, max-age=0"
+        "cache-control": "s-maxage=86400, max-age=0"
       }
     },
     {
