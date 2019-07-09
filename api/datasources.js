@@ -15,7 +15,7 @@ const knex = require('knex')({
     password: process.env.SQL_PWD,
     database: process.env.SQL_DB,
   },
-  pool: { min: 0, max: 2 }
+  pool: { min: 0, max: 4 }
 })
 
 const WaitPromise = (ms) => {
