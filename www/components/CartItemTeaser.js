@@ -179,12 +179,12 @@ const CartItemTeaser = (props) => (
       variant={props.variant}
       />
     <Row style={{ padding: '10px' }}>
-      <Col xs={3}>
+      <Col xs={4} sm={3}>
         <ProductImage imgProps={{ style: { maxHeight: '100%', maxWidth: '100%' }}} product={props.product} />
       </Col>
-      <Col xs={9}>
+      <Col xs={8} sm={9}>
         <Row>
-          <Col md={6}>
+          <Col md={6} style={{ marginBottom: '10px' }}>
           <div style={{marginBottom: '10px' }}>
             <ProductLink productId={props.product.id}
                          sku={props.product.sku}
@@ -211,7 +211,7 @@ const CartItemTeaser = (props) => (
               })
             }}>
               {(mutationFn, { loading, error, data }) => {
-                return <Button variant="outline-dark" onClick={mutationFn} disabled={!props.token || loading}>
+                return <Button variant="outline-dark" onClick={mutationFn} disabled={!props.token || loading} style={{ marginRight: '5px'}}>
                   { loading ? <FaSpinner /> : <>Save for later</> }
                 </Button>
               }}

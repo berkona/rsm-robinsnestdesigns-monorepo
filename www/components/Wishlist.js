@@ -43,7 +43,7 @@ const Wishlist = (props) => (
         return <Container>
           <Row>
             { (!data || data.wishlist.length == 0) && <Col><div style={{ padding: '150px' }}align="center"><h2>You haven't added any items to your wishlist</h2></div></Col> }
-            {[...data.wishlist.map(wishListItem => <Col xs={6} md={4} lg={3} key={wishListItem.id}>
+            {[...data.wishlist.map(wishListItem => <Col sm={12} md={6} lg={4} xl={3} key={wishListItem.id}>
                 <ProductTeaser product={wishListItem.product} />
               </Col>)
             ]}
