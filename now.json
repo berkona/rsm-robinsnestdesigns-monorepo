@@ -30,6 +30,41 @@
   ],
   "routes": [
     {
+      "src": "/whats_new.cfm",
+      "status": 301,
+      "headers": {
+        "Location": "/search?onSaleOnly=true&sortOrder=mostRecent"
+      }
+    },
+    {
+      "src": "/add_to_cart.cfm",
+      "status": 301,
+      "headers": {
+        "Location": "/cart"
+      }
+    },
+    {
+      "src": "/wish_list.cfm",
+      "status": 301,
+      "headers": {
+        "Location": "/wishlist"
+      }
+    },
+    {
+      "src": "/Newsletters/newsletter-signup.cfm",
+      "status": 301,
+      "headers": {
+        "Location": "/subscribe"
+      }
+    },
+    {
+      "src": "/search.cfm",
+      "status": 301,
+      "headers": {
+        "Location": "/search"
+      }
+    },
+    {
       "src": "/content/(.*)",
       "dest": "/content/$1",
       "headers": {
@@ -128,10 +163,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/www/$1",
-      "headers": {
-        "x-request-path": "$1"
-      }
+      "dest": "/www/$1"
     }
   ]
 }
