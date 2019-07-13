@@ -1,0 +1,19 @@
+service:              robins-nest-designs
+
+provider:
+  name:               aws
+  runtime:            nodejs10.x
+  stage:              dev
+
+plugins:
+  - serverless-nextjs-plugin
+
+custom:
+  serverless-nextjs:
+    assetsBucketName: robins-nest-designs-static-assets-2b52cd79
+    nextConfigDir:    ./
+    routes:           []
+
+package:
+  exclude:
+    - ./**
