@@ -1,12 +1,12 @@
 import React from 'react'
-import Col from 'react-bootstrap/Col'
 import ProductDetail from '../components/ProductDetail'
+import ContentWithSidebar from '../components/ContentWithSidebar'
 import { withRouter } from 'next/router'
 
 const ProductPage = withRouter((props) => (
-  <Col>
+  <ContentWithSidebar>
     <ProductDetail productId={props.router.query.productId} listref={props.router.query.listref}/>
-  </Col>
+  </ContentWithSidebar>
 ))
 
 export default ProductPage

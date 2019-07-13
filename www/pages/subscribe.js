@@ -1,8 +1,8 @@
 import React from 'react'
 import MailchimpSubscribe from "react-mailchimp-subscribe"
-import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
+import ContentWithSidebar from '../components/ContentWithSidebar'
 
 const mailchimpUrl = "https://robinsnestdesigns.us10.list-manage.com/subscribe/post?u=a40afd248779cabb18bc9e150&amp;id=ee8f35f684"
 
@@ -51,7 +51,7 @@ const CustomForm = ({ status, message, onValidated }) => {
 };
 
 export default (props) => (
-    <Col>
+    <ContentWithSidebar>
       <div style={{ padding: '16px' }}>
         <h1>Subscribe to the Newletter</h1>
         <p>Want to get notified of the latest sales and newest items? Then sign up for our newsletter and about once a week you will receive an email with this information from us. Sometimes you will receive a second email in a week to announce a special sale or event that occurred after the sending of the weekly email, and Robin was too excited about the news to wait to tell you!</p>
@@ -70,5 +70,5 @@ export default (props) => (
           )}
         />
       </div>
-    </Col>
+    </ContentWithSidebar>
 )

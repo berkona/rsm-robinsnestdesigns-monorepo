@@ -6,7 +6,7 @@ export default (props) => (
     <a href="https://www.paypal.com/us/verified/pal=rsmonroe22@gmail.com" target="_blank">
       <img src="http://www.paypal.com/en_US/i/icon/verification_seal.gif" alt="Official PayPal Seal" border="0" />
     </a>
-    <img src="/static/horizontal_solution_PPeCheck.gif" width="253" height="80" border="0" />
+    <img src="https://public-images-static-af327.robinsnestdesigns.com/horizontal_solution_PPeCheck.gif" width="253" height="80" border="0" />
   </p>
   <p>We are a verified PayPal merchant.</p>
   <blockquote>

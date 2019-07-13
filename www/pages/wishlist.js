@@ -1,15 +1,15 @@
 import React from 'react'
-import Col from 'react-bootstrap/Col'
 import SEO from '../components/SEO'
 import Wishlist from '../components/Wishlist'
+import ContentWithSidebar from '../components/ContentWithSidebar'
 
-const WishListPage = (props) => <Col>
+const WishListPage = (props) => <ContentWithSidebar>
   <SEO title="Wish List" description="See all your favorited items in one place"></SEO>
   <div style={{ padding: '16px'}}>
     <h2>My Wish List</h2>
     <hr />
     <Wishlist />
   </div>
-</Col>
+</ContentWithSidebar>
 
 export default WishListPage

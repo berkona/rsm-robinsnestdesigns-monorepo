@@ -14,6 +14,7 @@ import CartItemTeaser from '../components/CartItemTeaser'
 import { ORDER_GET } from '../constants/queries'
 import Button from 'react-bootstrap/Button'
 import Wishlist from '../components/Wishlist'
+import ContentWithSidebar from '../components/ContentWithSidebar'
 
 const CURRENT_USER = gql`
 query($token: String!) {
@@ -50,8 +51,8 @@ const makeAmount = (value) => {
 
 const needsTax = (zip) => isZipValid(zip) && (zip.startsWith('27') || zip.startsWith('28'))
 
-const EmptyShoppingCart = props => <Col>
-  <div id="addToCart" style={{ padding: '24px' }}>
+const EmptyShoppingCart = props => (
+ <div id="addToCart" style={{ padding: '24px' }}>
     <h1>My Shopping Cart</h1>
     <hr />
     <div className="msg" align="center"> <h3>Your Shopping Cart Is Empty</h3> </div>
@@ -63,7 +64,7 @@ const EmptyShoppingCart = props => <Col>
     <br></br>
     <PaymentOptions />
   </div>
-</Col>
+)
 
 class CartPage extends React.Component {
   constructor(props) {
@@ -82,10 +83,10 @@ class CartPage extends React.Component {
       {currentUser => {
         const cartId = currentUser.getCartId()
         if (!cartId) {
-          return <EmptyShoppingCart />
+          return <ContentWithSidebar><EmptyShoppingCart /></ContentWithSidebar>
         } else {
           return (
-            <Col>
+            <ContentWithSidebar>
             <div style={{padding: '24px'}}>
             <Query query={ORDER_GET} variables={{
               orderId: cartId,
@@ -168,7 +169,7 @@ class CartPage extends React.Component {
                 }
               </Query>
               </div>
-              </Col>
+              </ContentWithSidebar>
             )
         }
       }}

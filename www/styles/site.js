@@ -352,11 +352,14 @@ export default () => (
   #categories {
       /* padding: 5px 10px 5px 10px; */
       margin-bottom: 10px;
-      border-bottom: 1px solid #cccccc;
       color: #006699;
   }
 
   #categories li {
+      margin: 2px 0px;
+  }
+
+  #categories .subcategory li {
       border-bottom: 1px solid #cccccc !important;
   }
 

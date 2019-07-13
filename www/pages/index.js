@@ -1,7 +1,6 @@
 import Col from 'react-bootstrap/Col'
 import Row from 'react-bootstrap/Row'
-import Sidebar from '../components/Sidebar'
-import CategoryLinks from '../components/CategoryLinks'
+import ContentWithSidebar from '../components/ContentWithSidebar'
 import ProductList from '../components/ProductList'
 import { SearchLink } from '../components/Links'
 import Carousel from 'react-bootstrap/Carousel'
@@ -117,14 +116,7 @@ const Index = (props) => (
           }
     `}
     </style>
-    <Col className="d-none d-sm-block" sm={4} md={3}>
-      <Sidebar>
-        <div style={{ padding: '5px 10px 5px 10px' }}>
-          <CategoryLinks />
-        </div>
-      </Sidebar>
-    </Col>
-    <Col id="content" xs={12} sm={8} md={9}>
+    <ContentWithSidebar>
       <div id="homeContent" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
           <Carousel controls={false} style={{ marginTop: '16px' }}>
             {props.carouselItems.map((url, i) => <Carousel.Item key={url}>
@@ -155,7 +147,7 @@ const Index = (props) => (
 
         </div>
       </div>
-    </Col>
+    </ContentWithSidebar>
   </>
 )
 
