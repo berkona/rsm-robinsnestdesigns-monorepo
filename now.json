@@ -18,7 +18,7 @@
     "JWT_MAX_AGE": "@jwt-max-age",
     "AWSAccessKeyId": "@awsaccesskeyid",
     "AWSSecretKey": "@awssecretkey",
-    "AWSUploadBucket": "@awsuploadbucket",
+    "AWSUploadBucket": "@aws-upload-bucket-prod",
     "SITE_URL": "@site-url-beta",
     "MAILGUN_API_KEY": "@mailgun-api-key"
   },
