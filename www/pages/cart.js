@@ -16,6 +16,7 @@ import Button from 'react-bootstrap/Button'
 import Wishlist from '../components/Wishlist'
 import ContentWithSidebar from '../components/ContentWithSidebar'
 
+
 const CURRENT_USER = gql`
 query($token: String!) {
   user(token: $token) {
