@@ -186,7 +186,7 @@ const handler = async (hostname) => {
     timeAsyncFn(async () => {
       const categories = await db.listProductCategories()
       categories.forEach(c => urls.add(makeUrlObj('/category' + c.id)))
-    }, 'addCategoryUrls')
+    }, 'addCategoryUrls'),
     timeAsyncFn(() => addProductUrls(db, urls), 'addProductUrls'),
     timeAsyncFn(() => addSearchUrls(db, urls), 'addSearchUrls')
   ])
