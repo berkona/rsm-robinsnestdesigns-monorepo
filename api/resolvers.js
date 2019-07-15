@@ -589,7 +589,9 @@ const resolvers = {
       })
 
       console.log('insertProduct', patch)
-      const [ resultId ] = await context.dataSources.db.insertProduct(patch)
+      const result = await context.dataSources.db.insertProduct(patch)
+      console.log('insertProduct result',result)
+      const [ resultId ] = result
       const [ row ] = await context.dataSources.db.getProduct(resultId)
       return reduceProduct(row)
     },

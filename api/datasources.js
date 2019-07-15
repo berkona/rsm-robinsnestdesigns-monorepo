@@ -410,7 +410,7 @@ class MyDB extends SQLDataSource {
 
   insertProduct(productData) {
     if (!productData) return Promise.reject(`productData is required`)
-    return this.db('Products').insert(productData)
+    return this.db('Products').insert(productData).returning('ID')
   }
 
   updateProduct(productId, productData) {
