@@ -35,7 +35,7 @@ export default () => <ContentWithSidebar>
   <Query query={CATEGORY_GET}>
     {({ loading, error, data }) => !data || !data.allProducts || !data.allProducts.categories ? <p>No data</p> :
     <GridList items={data.allProducts.categories}>
-      {c => <CategoryTeaser category={c}>
+      {c => <CategoryTeaser key={c.id} category={c}>
           <CategoryLink categoryId={c.id}>
             <Button style={{ marginTop: '8px' }}><a>Browse subcategories</a></Button>
           </CategoryLink>

@@ -57,7 +57,7 @@ export default withRouter(({ router }) => <ContentWithSidebar>
     {({ loading, error, data }) => (
       !data || !data.allProducts || !data.allProducts.subcategories ? <Loader /> :
       <GridList items={data.allProducts.subcategories}>
-        {c => <CategoryTeaser category={c}>
+        {c => <CategoryTeaser key={c.id} category={c}>
             <SearchLink categoryId={router.query.categoryId}
                             subcategoryId={c.id}
                             sortOrder="mostRecent">
