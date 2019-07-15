@@ -26,6 +26,7 @@
     { "src": "www/next.config.js", "use": "@now/next" },
     { "src": "api/handler.js", "use": "@now/node" },
     { "src": "api/sitemap.js", "use": "@now/node" },
+    { "src": "api/redirect.js", "use": "@now/node" },
     { "src": "content/home/*", "use": "@now/static" }
   ],
   "routes": [
@@ -173,6 +174,10 @@
       "headers": {
         "cache-control": "s-maxage=300, max-age=0"
       }
+    },
+    {
+      "src": "/(.*)\\.cfm$",
+      "dest": "api/redirect.js"
     },
     {
       "src": "/(.*)",
