@@ -510,7 +510,7 @@ const resolvers = {
       const wishList = reduceWishList(wlRows)
       return wishList
     },
-    isInWishlist: (obj, { token, productId }, context) => context.dataSources.db.isInWishlist(verifyAuthToken(token).uid, productId),
+    // isInWishlist: (obj, { token, productId }, context) => context.dataSources.db.isInWishlist(verifyAuthToken(token).uid, productId),
   },
   Mutation: {
     signin,

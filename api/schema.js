@@ -22,7 +22,6 @@ const typeDefs = gql`
     cart(orderId: ID!, shipping: Float, county: String, promo: String): Order
     user(token: String!): User
     wishlist(token: String!): [WishListItem!]!
-    isInWishlist(token: String!, productId: ID!): Boolean
     allPromos(token: String!): [Promo!]!
   }
 

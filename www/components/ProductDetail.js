@@ -82,6 +82,11 @@ const ProductDetail = (props) => (
     const shippingTime = data.product.qtyInStock > 0 ? 'Ships in 1-2 business days' : 'Order by Tuesday at 12 PM ET'
     return (
       <div className="product-detail">
+      <style jsx>{`
+        .product-detail {
+          margin-top: 16px;
+        }
+      `}</style>
       <ProductDetailAction />
       <Product sku={data.product.sku}
                name={data.product.name}

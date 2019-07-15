@@ -6,31 +6,48 @@ import gql from 'graphql-tag'
 import Router from 'next/router'
 import { SearchLink, SearchLinkStr } from './Links'
 import CategoryLinks from './CategoryLinks'
+import ApolloError from './ApolloError'
 
 import Form from 'react-bootstrap/Form'
 
-const numberItems = gql `
-query {
-  allProducts {
-    total
-  }
-}
-`
-
-const findCategory = gql `
-query {
-  allCategories {
-    id
-    title
+const findCategory = gql`
+query(
+  $categoryId: ID,
+  $subcategoryId: ID,
+  $searchPhrase: String,
+  $onSaleOnly: Boolean,
+  $newOnly: Boolean) {
+  allProducts(
+    categoryId: $categoryId,
+    subcategoryId: $subcategoryId,
+    searchPhrase: $searchPhrase,
+    onSaleOnly: $onSaleOnly,
+    newOnly: $newOnly) {
+  	categories {
+			id
+			title
+		}
   }
 }
 `
 
 const findSubcategory = gql `
-query($categoryId: ID!) {
-  allSubcategories(categoryId: $categoryId) {
-    id
-    title
+query(
+  $categoryId: ID,
+  $subcategoryId: ID,
+  $searchPhrase: String,
+  $onSaleOnly: Boolean,
+  $newOnly: Boolean) {
+  allProducts(
+    categoryId: $categoryId,
+    subcategoryId: $subcategoryId,
+    searchPhrase: $searchPhrase,
+    onSaleOnly: $onSaleOnly,
+    newOnly: $newOnly) {
+  	subcategories {
+			id
+			title
+		}
   }
 }
 `
@@ -105,46 +122,61 @@ class SearchBlock extends React.Component {
 
 				<Form.Group controlId="categoryId">
 					<Form.Label>Category</Form.Label>
-					{ self.state.categoryId ? <Query query={findCategory}>
+					<Query query={findCategory} variables={{
+						searchPhrase: self.state.searchPhrase,
+						categoryId: self.state.categoryId,
+						subcategoryId: self.state.subcategoryId,
+						onSaleOnly: self.state.onSaleOnly == "true",
+						newOnly: self.state.newOnly == "true"
+					}}>
 						{({ loading, error, data}) => {
-							const category = data
-								&& data.allCategories
-								&& data.allCategories
-										.filter(x => x.id == self.state.categoryId)
-										[0]
-								|| null
-							if (!category) {
-								return <ul><li><SearchLink searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
-									<a style={{ fontSize: '16px', }}>&lt; {self.state.categoryId}</a>
-									</SearchLink></li></ul>
-							} else {
-									return <ul><li><SearchLink searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
-									<a style={{ fontSize: '16px', }}>&lt; {category.title}</a>
-									</SearchLink></li></ul>
-							}
+							if (loading) return <p>Loading...</p>
+							if (error) return <ApolloError error={error} />
 
+							if (self.state.categoryId) {
+								const category = data
+									&& data.allProducts.categories
+									&& data.allProducts.categories
+											.filter(x => x.id == self.state.categoryId)
+											[0]
+									|| null
+								if (!category) {
+									return <ul><li><SearchLink searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
+										<a style={{ fontSize: '16px', }}>&lt; {self.state.categoryId}</a>
+										</SearchLink></li></ul>
+								} else {
+										return <ul><li><SearchLink searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
+										<a style={{ fontSize: '16px', }}>&lt; {category.title}</a>
+										</SearchLink></li></ul>
+								}
+							} else {
+								return <CategoryLinks categories={data.allProducts.categories} />
+							}
 						}}
 					</Query>
-				:	this.props.categories ? <CategoryLinks categories={this.props.categories} /> : <></>
-				}
 				</Form.Group>
 
 				{
 					self.state.categoryId
 					? <Form.Group controlId="subcategoryId">
 						<Form.Label>Subcategory</Form.Label>
-						<Query query={findSubcategory} variables={{ categoryId: self.state.categoryId }}>
+						<Query query={findSubcategory} variables={{
+							searchPhrase: self.state.searchPhrase,
+							categoryId: self.state.categoryId,
+							subcategoryId: self.state.subcategoryId,
+							onSaleOnly: self.state.onSaleOnly == "true",
+							newOnly: self.state.newOnly == "true"
+						}}>
 								{({ loading, error, data}) => {
 									if (loading) {
 										return <p>Loading...</p>
 									}
 
-									if (error) {
-										return <p>Network error {error.toString()}</p>
-									}
+									if (error) return <ApolloError error={error} />
+
+									const subcategories = (data && data.allProducts && data.allProducts.subcategories )
 
 									if (self.state.subcategoryId) {
-										const subcategories = (this.props.subcategories || data && data.allSubcategories)
 										const subcat = subcategories && subcategories
 													.filter(x => x.id == self.state.subcategoryId)
 													[0]
@@ -154,7 +186,7 @@ class SearchBlock extends React.Component {
 										</SearchLink></li></ul>
 									} else {
 										return <ul>
-											{(this.props.subcategories || data.allSubcategories).map(c => (
+											{subcategories.map(c => (
 												<li key={c.id}><SearchLink categoryId={self.state.categoryId} subcategoryId={c.id} searchPhrase={self.state.searchPhrase} onSaleOnly={self.state.onSaleOnly} newOnly={self.state.newOnly}>
 													<a style={{ fontSize: '16px', }}>{c.title}</a>
 												</SearchLink></li>

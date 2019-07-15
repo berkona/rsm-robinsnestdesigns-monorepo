@@ -147,7 +147,7 @@ query($token: String!) {
 
 export const WISHLIST_QUERY = gql`
 query($token: String!, $productId: ID!) {
-  isInWishlist(token: $token, productId: $productId)
+  isInWishlist(token: $token, productId: $productId) @client
 }
 `
 

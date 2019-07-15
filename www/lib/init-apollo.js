@@ -3,8 +3,15 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { BatchHttpLink } from "apollo-link-batch-http";
 import { BASE_URL } from '../constants/config'
 import { resolve } from 'url'
-
+import { WISHLIST_QUERY_ALL } from '../constants/queries'
 import fetch from 'isomorphic-unfetch'
+import gql from 'graphql-tag'
+
+const typeDefs = gql`
+  extend type Query {
+    isInWishlist(token: String!, productId: ID!): Boolean
+  }
+`
 
 let apolloClient = null
 
@@ -32,6 +39,16 @@ function create (initialState, req) {
     ssrMode: !process.browser, // Disables forceFetch on the server (so queries are only run once)
     link: httpLink,
     cache,
+    typeDefs,
+    resolvers: {
+      Query: {
+        isInWishlist: async (_, { token, productId }, { client }) => {
+          const { data } = await client.query({ query: WISHLIST_QUERY_ALL, variables: { token } })
+          const { wishlist } = data
+          return wishlist.some(item => item && item.product && item.product.id == productId)
+        }
+      }
+    }
   })
   return client
 }

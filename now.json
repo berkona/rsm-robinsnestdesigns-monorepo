@@ -76,7 +76,7 @@
       "src": "/sitemap.xml",
       "dest": "api/sitemap.js",
       "headers": {
-        "cache-control": "s-maxage=86400, max-age=0"
+        "cache-control": "public,max-age=86400,s-maxage=86400"
       }
     },
     {

@@ -28,17 +28,7 @@ query(
     skip: $skip,
     limit: $limit,
     sort: $sort) {
-    total,
-    categories {
-      id
-      title
-      comments
-    }
-    subcategories {
-      id
-      title
-      comments
-    }
+    total
     records {
       id
       sku
@@ -83,9 +73,9 @@ const ProductList = (props) => {
         ({ loading, error, data }) => {
           if (loading) return <Loader />
           if (error) return <div>Error fetching data: {error.toString()}</div>
-          if (props.onCategoriesChanged && typeof props.onCategoriesChanged == "function") {
-            props.onCategoriesChanged(data.allProducts.categories, data.allProducts.subcategories)
-          }
+          // if (props.onCategoriesChanged && typeof props.onCategoriesChanged == "function") {
+          //   props.onCategoriesChanged(data.allProducts.categories, data.allProducts.subcategories)
+          // }
           const makePageLink = (page, text) =>
             <font size="-1" key={page}>
               <SearchLink
