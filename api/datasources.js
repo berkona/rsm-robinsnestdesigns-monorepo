@@ -37,7 +37,7 @@ const dbWithRetry = async (dbfn, nRetries = 5, waitTime = 100, waitGrowth = 2.5)
       waitTime *= waitGrowth
     }
   }
-  throw new Error('Maximum retries exhausted', lastErr)
+  throw new Error(lastErr && lastErr.message || lastErr || 'Maximum retries exceeded, no error message')
 }
 
 const validateArgs = (args) => {
