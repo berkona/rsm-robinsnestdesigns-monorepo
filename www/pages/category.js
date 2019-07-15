@@ -10,6 +10,7 @@ import Breadcrumb from 'react-bootstrap/Breadcrumb'
 import gql from 'graphql-tag'
 import Button from 'react-bootstrap/Button'
 import SEO from '../components/SEO'
+import ApolloError from '../components/ApolloError'
 
 const CATEGORY_GET = gql`
 query($categoryId: ID!) {
@@ -35,9 +36,10 @@ query($categoryId: ID!) {
 
 export default withRouter(({ router }) => <ContentWithSidebar>
   <Query query={CATEGORY_GET} variables={{ categoryId: router.query.categoryId }}>
-    {({ loading, error, data }) => {
-      if (!data || !data.category) return <></>
-      return <>
+    {({ loading, error, data }) => loading ? <Loader />
+      : error ? <ApolloError error={error} />
+      : (!data || !data.category) ? <></>
+      : <>
         <SEO title={"Browse " + data.category.title} description={"Browse all the subcategories of " + data.category.title + " at Robin's Nest Designs"} />
         <div className="clearfix" style={{ marginTop: '10px' }}>
           <div className="float-left">
@@ -51,7 +53,7 @@ export default withRouter(({ router }) => <ContentWithSidebar>
         </div>
         {data.category.comments && <p>{data.category.comments}</p>}
       </>
-    }}
+    }
   </Query>
   <Query query={SUBCATEGORY_GET_ONE} variables={{ categoryId: router.query.categoryId }}>
     {({ loading, error, data }) => (
