@@ -85,7 +85,7 @@ class ModifyProductForm extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      product: this.props.product || {}
+      product: Object.assign({ qtyInStock: 0 }, this.props.product || {})
     }
   }
 
