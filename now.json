@@ -96,7 +96,20 @@
         "cache-control": "s-maxage=300, max-age=0"
       }
     },
-    { "src": "/category/(?<categoryId>[^/]+).*$", "dest": "/www/category?categoryId=$categoryId" },
+    {
+      "src": "/categories",
+      "dest": "/www/categories",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
+    },
+    {
+      "src": "/category/(?<categoryId>[^/]+).*$",
+      "dest": "/www/category?categoryId=$categoryId",
+      "headers": {
+        "cache-control": "s-maxage=300, max-age=0"
+      }
+    },
     {
       "src": "/order/(?<orderId>[^/]+).*$",
       "dest": "/www/order?orderId=$orderId",
