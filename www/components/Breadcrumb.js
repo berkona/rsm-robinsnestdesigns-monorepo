@@ -34,7 +34,7 @@ const MyBreadcrumb = (props) => {
     } = props.query;
     return (
       <Breadcrumb>
-        <BreadcrumbItem href={SearchLinkStr({ searchPhrase, onSaleOnly, newOnly })} active={!categoryId && !subcategoryId && !searchPhrase}>All categories</BreadcrumbItem>
+        <BreadcrumbItem href={"/categories"} active={!categoryId && !subcategoryId && !searchPhrase}>All categories</BreadcrumbItem>
         {
           categoryId
           ?

@@ -27,11 +27,22 @@ const graphqlHandler = server.createHandler({
   },
 })
 
+const LOG_THRESHOLD = 1000
+
 module.exports = async (req, res) => {
+  const startTime = Date.now()
   await knex.initialize()
   try {
     await graphqlHandler(req, res)
   } finally {
+    const endTime = Date.now()
+    if (endTime - startTime > LOG_THRESHOLD) {
+      console.log(
+        'ERROR - slow request detected:\n',
+        'Total time to handle request', endTime - startTime, '\n',
+        'req.body', req.body, '\n'
+      )
+    }
     await knex.destroy()
   }
 }

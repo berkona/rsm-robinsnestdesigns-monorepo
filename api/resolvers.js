@@ -2,98 +2,20 @@ const { GraphQLScalarType } = require('graphql');
 const { Kind } = require('graphql/language');
 const paypal = require('@paypal/checkout-server-sdk');
 const paypalClient = require('./paypal')
-const aws = require('aws-sdk');
+
+const ProductList = require('./ProductList')
+
 const sendEmail = require('./email')
 
-// Configure aws with your accessKeyId and your secretAccessKey
-aws.config.update({
-  region: 'us-east-1', // Put your aws region here
-  accessKeyId: process.env.AWSAccessKeyId,
-  secretAccessKey: process.env.AWSSecretKey
-})
+const reduceAllCategories = require('./reduceAllCategories')
+const reduceProduct = require('./reduceProduct')
+const reduceCategory = require('./reduceCategory')
 
-const S3_BUCKET = process.env.AWSUploadBucket
-
-const signS3Url = async (fileName, fileType) => {
-  if (!fileName || !fileType)
-    throw new Error('fileName and fileType both required to sign url')
-
-  const s3 = new aws.S3();  // Create a new instance of S3
-
-// Set up the payload of what we are sending to the S3 api
-  const s3Params = {
-    Bucket: S3_BUCKET,
-    Key: fileName,
-    Expires: 500,
-    ContentType: fileType,
-    ACL: 'public-read'
-  };
-  // Make a request to the S3 API to get a signed URL which we can use to upload our file
-  const data = await s3.getSignedUrl('putObject', s3Params);
-  // Data payload of what we are sending back, the url of the signedRequest and a URL where we can access the content after its saved.
-  const returnData = {
-    signedUrl: data,
-    publicUrl: `https://${S3_BUCKET}/${fileName}`
-  };
-  return returnData
-}
+const signS3Url = require('./signS3Url')
 
 // Provide resolver functions for your schema fields
 module.exports = exports = {}
 
-function reduceAllCategories(rows) {
-  return rows.map(reduceCategory)
-}
-
-function reduceProduct(row) {
-  const productVariants = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ].reduce((arr, nVariant) => {
-    const priceField = 'Price' + nVariant
-    const optionField = 'Option' + nVariant
-    const id = Number.parseInt(('' + row.ProductID) + '' + (nVariant-1))
-    if (row[priceField]) {
-      arr.push({
-        id,
-        price: Number.parseFloat(row[priceField]),
-        text: row[optionField],
-      })
-    }
-    return arr
-  }, [])
-
-  return {
-    id: row.ProductID,
-    sku: row.ItemID,
-    qtyInStock: row.Qty || 0,
-    name: row.ItemName,
-    price: row.ItemPrice || 0.00,
-    clearance: !!row.Clearance,
-    salePrice: row.SalePrice,
-    saleStart: row.Sale_Start,
-    saleEnd: row.Sale_Stop,
-    description: row.Description,
-    image: row.Image,
-    thumbnail: row.Thumbnail,
-    category: row.Category,
-    categoryId: row.CategoryId,
-    subcategory: row.Subcategory,
-    subcategoryId: row.SubcategoryId,
-    category2: row.CategoryB,
-    category3: row.CategoryC,
-    subcategory2: row.SubCategoryB,
-    subcategory3: row.SubCategoryC,
-    hyperlinkedImage: row.hyperlinkedImage,
-    keywords: row.Keywords || '',
-    productVariants,
-  }
-}
-
-function reduceCategory(row) {
-  return {
-    id: row.ID,
-    title: row.Category,
-    comments: row.Comments,
-  }
-}
 
 const reduceUser = (row) => {
   return {
@@ -544,6 +466,29 @@ const resolvers = {
       return null;
     },
   }),
+  Category: {
+    image: async (obj, args, context) => {
+      const products = await context.dataSources.db.listProducts({
+        categoryId: obj.id,
+        limit: 200,
+        sortOrder: 'mostRecent',
+      })
+      const product = products.map(reduceProduct).filter(p => p && p.hyperlinkedImage)[0]
+      return product.hyperlinkedImage
+    },
+  },
+  SubCategory: {
+    image: async (obj, args, context) => {
+      let [ product ] = await context.dataSources.db.listProducts({
+        subcategoryId: obj.id,
+        limit: 200,
+        sortOrder: 'mostRecent',
+      })
+      product = products.map(reduceProduct).filter(p => p.hyperlinkedImage)[0]
+      return product.hyperlinkedImage
+    },
+  },
+  ProductList,
   Query: {
     category: (obj, args, context) => context.dataSources.db.getCategory(args.categoryId).then(x => reduceCategory(x[0])),
     allCategories: (obj, args, context) => context.dataSources.db.listCategories().then(reduceAllCategories),
@@ -552,17 +497,7 @@ const resolvers = {
       if (!x || x.length == 0) return Promise.reject(new Error('Product does not exist'))
       return reduceProduct(x[0])
     }),
-    allProducts: (obj, args, context) => context.dataSources.db.listProducts(args).then(results => {
-      const [ rows, countRow, categories, subcategories ] = results
-      return {
-        total: countRow[0].nRecords,
-        skip: args.skip,
-        limit: args.limit,
-        records: rows.map(reduceProduct),
-        categories: reduceAllCategories(categories),
-        subcategories: subcategories ? reduceAllCategories(subcategories) : null,
-      }
-    }),
+    allProducts: (obj, args, context) => { return { args } },
     saleCategories: (obj, args, context) => context.dataSources.db.listSaleCategories().then(reduceAllCategories),
     cart: (obj, args, context) => getOrder(context.dataSources.db, args.orderId, args.shipping, args.county, args.promo),
     user: async (obj, { token }, context) => {

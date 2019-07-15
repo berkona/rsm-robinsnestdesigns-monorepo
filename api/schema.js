@@ -184,18 +184,18 @@ const typeDefs = gql`
     id: Int!
     title: String!
     comments: String
+    image: String
   }
 
   type SubCategory {
     id: Int!
     title: String!
     comments: String
+    image: String
   }
 
   type ProductList {
     total: Int!
-    skip: Int!
-    limit: Int!
     records: [Product!]!
     categories: [Category!]!
     subcategories: [SubCategory!]

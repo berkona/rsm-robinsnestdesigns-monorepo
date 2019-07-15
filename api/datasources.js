@@ -428,6 +428,70 @@ class MyDB extends SQLDataSource {
     return dbWithRetry(() => this.getCached(query, CACHE_TTL))
   }
 
+  listProductTotal(args) {
+    args = validateArgs(args)
+    const searchQueryNoAs = buildSearchQuery(this.db, args)
+    const searchQuery = searchQueryNoAs.as('Search')
+    const countQuery = this.db.count('* as nRecords').from(searchQuery)
+    const self = this
+    return dbWithRetry(() => self.getCached(countQuery, CACHE_TTL))
+  }
+
+  listProductsCategories(args) {
+    args = validateArgs(args)
+    const searchQueryNoAs = buildSearchQuery(this.db, args)
+    const categoryQuery = this.db.select(categoryFields)
+      .from('Category')
+      .orderBy('Category', 'ASC')
+      .whereIn('Category.ID',
+        this.db.select('Category')
+          .from(searchQueryNoAs.clone().as('Search1'))
+          .innerJoin('Products', 'Products.ID', 'Search1.ID')
+          .union(
+            this.db.select('CategoryB as Category')
+              .from(searchQueryNoAs.clone().as('Search2'))
+              .innerJoin('Products', 'Products.ID', 'Search2.ID')
+          )
+          .union(
+            this.db.select('CategoryC as Category')
+              .from(searchQueryNoAs.clone().as('Search3'))
+              .innerJoin('Products', 'Products.ID', 'Search3.ID')
+          )
+      )
+      const self = this
+      return dbWithRetry(() => self.getCached(categoryQuery, CACHE_TTL))
+  }
+
+  listProductsSubcategories(args) {
+    args = validateArgs(args)
+    const searchQueryNoAs = buildSearchQuery(this.db, args)
+    const subcategoryQuery = this.db.select(
+      'Subcategory.ID as ID',
+      'Subcategory.Subcategory as Category',
+      'Comments'
+    )
+    .from('Subcategory')
+    .where('Subcategory.Category', '=', args.categoryId)
+    .orderBy('Subcategory.Subcategory', 'ASC')
+    .whereIn('Subcategory.ID',
+      this.db.select('Subcategory')
+        .from(searchQueryNoAs.clone().as('Search1'))
+        .innerJoin('Products', 'Products.ID', 'Search1.ID')
+        .union(
+          this.db.select('SubcategoryB as Subcategory')
+            .from(searchQueryNoAs.clone().as('Search2'))
+            .innerJoin('Products', 'Products.ID', 'Search2.ID')
+        )
+        .union(
+          this.db.select('SubcategoryC as Subcategory')
+            .from(searchQueryNoAs.clone().as('Search3'))
+            .innerJoin('Products', 'Products.ID', 'Search3.ID')
+        )
+    )
+    const self = this
+    return dbWithRetry(() => self.getCached(subcategoryQuery, CACHE_TTL))
+  }
+
   listProducts(args) {
     args = validateArgs(args)
 
@@ -465,68 +529,8 @@ class MyDB extends SQLDataSource {
         .orderBy('Products.ID', 'desc')
     }
 
-    const countQuery = this.db.count('* as nRecords').from(searchQuery.clone())
-
-    const categoryQuery = this.db.select(categoryFields)
-      .from('Category')
-      .orderBy('Category', 'ASC')
-      .whereIn('Category.ID',
-        this.db.select('Category')
-          .from(searchQueryNoAs.clone().as('Search1'))
-          .innerJoin('Products', 'Products.ID', 'Search1.ID')
-          .union(
-            this.db.select('CategoryB as Category')
-              .from(searchQueryNoAs.clone().as('Search2'))
-              .innerJoin('Products', 'Products.ID', 'Search2.ID')
-          )
-          .union(
-            this.db.select('CategoryC as Category')
-              .from(searchQueryNoAs.clone().as('Search3'))
-              .innerJoin('Products', 'Products.ID', 'Search3.ID')
-          )
-      )
-
-    const queries = [
-      dataQuery,
-      countQuery,
-      categoryQuery
-    ]
-
-    if (args.categoryId) {
-      const subcategoryQuery = this.db.select(
-        'Subcategory.ID as ID',
-        'Subcategory.Subcategory as Category',
-        'Comments'
-      )
-      .from('Subcategory')
-      .where('Subcategory.Category', '=', args.categoryId)
-      .orderBy('Subcategory.Subcategory', 'ASC')
-      .whereIn('Subcategory.ID',
-        this.db.select('Subcategory')
-          .from(searchQueryNoAs.clone().as('Search1'))
-          .innerJoin('Products', 'Products.ID', 'Search1.ID')
-          .union(
-            this.db.select('SubcategoryB as Subcategory')
-              .from(searchQueryNoAs.clone().as('Search2'))
-              .innerJoin('Products', 'Products.ID', 'Search2.ID')
-          )
-          .union(
-            this.db.select('SubcategoryC as Subcategory')
-              .from(searchQueryNoAs.clone().as('Search3'))
-              .innerJoin('Products', 'Products.ID', 'Search3.ID')
-          )
-      )
-
-      queries.push(subcategoryQuery)
-    }
-
-    // for (var i = 0; i < queries.length; i++) {
-    //   console.log('query[' + i + ']:')
-    //   console.log(queries[i].toString())
-    //   console.log()
-    // }
     const self = this
-    return Promise.all(queries.map(q => dbWithRetry(() => self.getCached(q, CACHE_TTL))))
+    return dbWithRetry(() => self.getCached(dataQuery, CACHE_TTL))
   }
 
   tryUpsertUser(email, user) {

@@ -14,7 +14,9 @@ export const ProductLink = (props) => (
 )
 
 export const CategoryLink = (props) => (
-  <Link href={`/category?categoryId=${props.categoryId}`} prefetch>
+  <Link href={`/category?categoryId=${props.categoryId}`}
+        as={`/category/${props.categoryId}`}
+        prefetch>
     {props.children}
   </Link>
 )

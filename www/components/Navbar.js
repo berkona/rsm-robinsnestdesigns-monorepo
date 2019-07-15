@@ -11,6 +11,8 @@ import { SearchLinkStr } from './Links'
 import { withRouter } from 'next/router'
 import { parseCookies } from 'nookies'
 import { CurrentUserContext } from '../lib/auth'
+import { CATEGORY_GET, SUBCATEGORY_GET_ONE } from '../constants/queries'
+import { Query } from 'react-apollo'
 
 class MyNavbar extends React.Component {
   static contextType = CurrentUserContext
@@ -98,6 +100,11 @@ class MyNavbar extends React.Component {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ml-auto">
+            <Nav.Item className="xs-d-block sm-d-none">
+              <Link href="/categories" passHref>
+                <Nav.Link>Browse categories</Nav.Link>
+              </Link>
+            </Nav.Item>
             <Nav.Item>
               <Link href="/subscribe" passHref>
                 <Nav.Link>Subscribe</Nav.Link>

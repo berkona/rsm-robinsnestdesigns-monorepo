@@ -114,12 +114,6 @@ export default () => (
       padding: 0px;
   }
 
-  @media (max-width: 1200px) {
-      #page_border {
-          max-width: calc(100% - 30px);
-      }
-  }
-
   #page_border_inner {
       /* border: 1px solid #002b70; */
       border-top: 0px;
@@ -168,6 +162,7 @@ export default () => (
       border-right: 1px solid #cccccc;
       border-bottom: 1px solid #cccccc;
       font-size: 14px;
+      margin-left: -15px;
   }
 
   /************ Home page styles **********************/
@@ -662,6 +657,12 @@ export default () => (
       color: #fff;
       background-color: #0056b3;
       border-color: #0056b3;
+  }
+
+  @media (min-width: 1200px) {
+    #page_border {
+      max-width: 1140px;
+    }
   }
 
 `}
