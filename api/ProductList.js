@@ -3,8 +3,8 @@ const reduceProduct = require('./reduceProduct')
 
 module.exports = {
   total: async (obj, args, context) => {
-    const countRow = await context.dataSources.db.listProductsTotal(obj.args)
-    return reduceAllCategories(countRow)
+    const [ result ] = await context.dataSources.db.listProductsTotal(obj.args)
+    return result && result.nRecords || 0
   },
   records: async (obj, args, context) => {
     const products = await context.dataSources.db.listProducts(obj.args)
@@ -12,10 +12,13 @@ module.exports = {
   },
   categories: async (obj, args, context) => {
     const categories = await context.dataSources.db.listProductsCategories(obj.args)
-    return reduceAllCategories(categories)
+    const categoriesObj = reduceAllCategories(categories)
+    return categoriesObj
   },
   subcategories: async (obj, args, context) => {
-    const subcategories = await context.dataSources.db.listProductsSubcategories(obj.args)
-    return reduceAllCategories(subcategories)
+    if (obj.args.categoryId) {
+      const subcategories = await context.dataSources.db.listProductsSubcategories(obj.args)
+      return reduceAllCategories(subcategories)
+    }
   },
 }

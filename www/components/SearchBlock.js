@@ -99,8 +99,8 @@ class SearchBlock extends React.Component {
 			<Form>
 				<Form.Group>
 					<Form.Label>Special Offers</Form.Label>
-					<Form.Check type="checkbox" label="On Sale" checked={self.state.onSaleOnly} onChange={self.handleOnSaleOnlyChange}></Form.Check>
-					<Form.Check type="checkbox" label="Recently Added" checked={self.state.newOnly} onChange={self.handleNewOnlyChange}></Form.Check>
+					<Form.Check type="checkbox" label="On Sale" checked={self.state.onSaleOnly == "true"} onChange={self.handleOnSaleOnlyChange}></Form.Check>
+					<Form.Check type="checkbox" label="Recently Added" checked={self.state.newOnly == "true"} onChange={self.handleNewOnlyChange}></Form.Check>
 				</Form.Group>
 
 				<Form.Group controlId="categoryId">

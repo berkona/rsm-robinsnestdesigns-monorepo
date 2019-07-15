@@ -428,7 +428,7 @@ class MyDB extends SQLDataSource {
     return dbWithRetry(() => this.getCached(query, CACHE_TTL))
   }
 
-  listProductTotal(args) {
+  listProductsTotal(args) {
     args = validateArgs(args)
     const searchQueryNoAs = buildSearchQuery(this.db, args)
     const searchQuery = searchQueryNoAs.as('Search')

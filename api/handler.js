@@ -27,7 +27,7 @@ const graphqlHandler = server.createHandler({
   },
 })
 
-const LOG_THRESHOLD = 1000
+const LOG_THRESHOLD = 2000
 
 module.exports = async (req, res) => {
   const startTime = Date.now()

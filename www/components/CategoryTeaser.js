@@ -6,11 +6,12 @@ export default ({ category, children }) => {
   title = title && title.trim()
   subtitle = subtitle && subtitle.trim()
   return  <Card>
-    <Card.Body>
+    <Card.Img variant="top" src={category.image} />
+    <Card.ImgOverlay>
       <Card.Title>{title}</Card.Title>
       <Card.Subtitle>{subtitle}</Card.Subtitle>
       <Card.Text>{category.comments}</Card.Text>
       {children}
-    </Card.Body>
+    </Card.ImgOverlay>
   </Card>
 }

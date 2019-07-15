@@ -474,18 +474,18 @@ const resolvers = {
         sortOrder: 'mostRecent',
       })
       const product = products.map(reduceProduct).filter(p => p && p.hyperlinkedImage)[0]
-      return product.hyperlinkedImage
+      return product && product.hyperlinkedImage
     },
   },
   SubCategory: {
     image: async (obj, args, context) => {
-      let [ product ] = await context.dataSources.db.listProducts({
+      const products = await context.dataSources.db.listProducts({
         subcategoryId: obj.id,
         limit: 200,
         sortOrder: 'mostRecent',
       })
-      product = products.map(reduceProduct).filter(p => p.hyperlinkedImage)[0]
-      return product.hyperlinkedImage
+      const product = products.map(reduceProduct).filter(p => p && p.hyperlinkedImage)[0]
+      return product && product.hyperlinkedImage
     },
   },
   ProductList,
