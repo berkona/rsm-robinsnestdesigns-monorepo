@@ -233,11 +233,14 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
     const relevanceCutoff = (tokens.length-1) * 25
     const queries = tokens.map(SearchAllFields).reduce((a, b) => a.concat(b), [])
     let unionQ = queries.reduce((a, b) => a.unionAll(b)).as('Search_inner')
-    return builder.select('ID')
+    let q = builder.select('ID')
                   .sum('relevance as relevance')
                   .from(unionQ)
                   .groupBy('ID')
-                  .having('relevance', '>', relevanceCutoff)
+    // TODO fix this on mssql?
+    if (process.env.SQL_ENGINE != "mssql")
+       q  = q.having('relevance', '>', relevanceCutoff)
+    return q
   }
 }
 
