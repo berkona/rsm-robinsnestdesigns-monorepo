@@ -82,12 +82,12 @@
     {
       "src": "/googlea7696e4bbcfecd2f.html",
       "dest": "/www/static/googlea7696e4bbcfecd2f.html",
-      "headers": { "cache-control": "immutable" }
+      "headers": { "cache-control": "public,max-age=31536000,immutable" }
     },
     {
       "src": "/_next/static/(?<path>(?:[^/]+/pages|chunks|runtime)/.+)",
       "dest": "/www/_next/static/$path",
-      "headers": { "cache-control": "immutable" }
+      "headers": { "cache-control": "public,max-age=31536000,immutable" }
     },
     {
       "src": "/product/(?<productId>[^/]+).*$",
