@@ -9,6 +9,7 @@ import Loader from '../components/Loader'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
 import gql from 'graphql-tag'
 import Button from 'react-bootstrap/Button'
+import SEO from '../components/SEO'
 
 const CATEGORY_GET = gql`
 query($categoryId: ID!) {

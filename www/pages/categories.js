@@ -7,6 +7,7 @@ import CategoryTeaser from '../components/CategoryTeaser'
 import gql from 'graphql-tag'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
 import Button from 'react-bootstrap/Button'
+import SEO from '../components/SEO'
 
 const CATEGORY_GET = gql`
 query {
