@@ -37,6 +37,7 @@ export default withRouter(({ router }) => <ContentWithSidebar>
     {({ loading, error, data }) => {
       if (!data || !data.category) return <></>
       return <>
+        <SEO title={"Browse " + data.category.title} description={"Browse all the subcategories of " + data.category.title + " at Robin's Nest Designs"} />
         <div className="clearfix" style={{ marginTop: '10px' }}>
           <div className="float-left">
           <Breadcrumb>
