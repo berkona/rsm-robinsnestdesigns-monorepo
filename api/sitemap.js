@@ -184,8 +184,8 @@ const handler = async (hostname) => {
 
   await Promise.all([
     timeAsyncFn(async () => {
-      const categories = await db.listProductCategories()
-      categories.forEach(c => urls.add(makeUrlObj('/category' + c.id)))
+      const categories = await db.listProductsCategories()
+      categories.forEach(c => urls.add(makeUrlObj('/category/' + c.id)))
     }, 'addCategoryUrls'),
     timeAsyncFn(() => addProductUrls(db, urls), 'addProductUrls'),
     timeAsyncFn(() => addSearchUrls(db, urls), 'addSearchUrls')

@@ -61,7 +61,7 @@
       "src": "/search.cfm",
       "status": 301,
       "headers": {
-        "Location": "/search"
+        "Location": "/categories"
       }
     },
     {
