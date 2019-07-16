@@ -108,7 +108,7 @@ const ProductDetail = (props) => (
                />
       <SEO
         title={data.product.name + ' | ' + data.product.category + ' | ' + data.product.subcategory}
-        description={'Check out ' + data.product.name + ' at Robin\'s Nest Designs now. ' + data.product.description}
+        description={'Check out ' + data.product.name + ' and more exclusive items at Robin\'s Nest Designs now. ' + data.product.description}
         keywords={MakeSEOKeywords(data.product)}
       />
       <Row>

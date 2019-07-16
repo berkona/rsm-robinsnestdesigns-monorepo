@@ -69,6 +69,50 @@ query($categoryId: ID) {
 }
 `
 
+export const PRODUCT_GET_PAGE = gql`
+query(
+  $categoryId: ID,
+  $subcategoryId: ID,
+  $searchPhrase: String,
+  $onSaleOnly: Boolean,
+  $newOnly: Boolean,
+  $sort: ProductSortType,
+  $skip: Int!,
+  $limit: Int!) {
+  allProducts(
+    categoryId: $categoryId,
+    subcategoryId: $subcategoryId,
+    searchPhrase: $searchPhrase,
+    onSaleOnly: $onSaleOnly,
+    newOnly: $newOnly,
+    skip: $skip,
+    limit: $limit,
+    sort: $sort) {
+    total
+    records {
+      id
+      sku
+      name
+      category
+      subcategory
+      isOnSale
+      price
+      salePrice
+      saleStart
+      saleEnd
+      description
+      image
+      thumbnail
+      hyperlinkedImage
+      productVariants {
+        id
+        price
+      }
+    }
+  }
+}
+`
+
 export const PRODUCT_GET_ONE = gql`
 query($productId: ID!) {
   product(productId: $productId) {
