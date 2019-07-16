@@ -449,6 +449,19 @@ const getUserFromToken = async (token, db) => {
   return user
 }
 
+const reducePromo = (row) => {
+  return {
+    id: row.ID,
+    coupon: row.Coupon,
+    starts: row.Starts,
+    ends: row.Ends,
+    moneyOff: row.MoneyOff,
+    percentageOff: row.PercentageOff,
+    requiresTotal: row.PriceBreak,
+    freeShipping: !!row.FreeShipping,
+  }
+}
+
 const resolvers = {
   Date: new GraphQLScalarType({
     name: 'Date',
@@ -510,6 +523,13 @@ const resolvers = {
       const wishList = reduceWishList(wlRows)
       return wishList
     },
+    allPromos: async (obj, { token }, context) => {
+      const payload = verifyAuthToken(token)
+      // admin only
+      if (!payload.a) throw new Error('Not authorized')
+      const promos = await context.dataSources.db.listPromos()
+      return promos.map(reducePromo)
+    }
     // isInWishlist: (obj, { token, productId }, context) => context.dataSources.db.isInWishlist(verifyAuthToken(token).uid, productId),
   },
   Mutation: {
@@ -678,6 +698,46 @@ const resolvers = {
       await context.dataSources.db.updateSubcategory(subcategoryId, subcategory)
       const [ row ] = await context.dataSources.db.getSubcategory(subcategoryId)
       return reduceCategory(row)
+    },
+    addPromo: async (obj, { token, promo }, context) => {
+      const payload = verifyAuthToken(token)
+      // admin only
+      if (!payload.a) throw new Error('Not authorized')
+      const patch = {
+        Coupon: promo.coupon,
+        Starts: promo.starts,
+        Ends: promo.ends,
+        PriceBreak: promo.requiresTotal,
+        MoneyOff: promo.moneyOff,
+        PercentageOff: promo.percentageOff,
+        FreeShipping: promo.freeShipping,
+      }
+      const [ id ] = await context.dataSources.db.insertPromo(patch)
+      const row = await context.dataSources.db.getPromoById(id)
+      return reducePromo(row)
+    },
+    updatePromo: async (obj, { token, promoId, promo }, context) => {
+      const payload = verifyAuthToken(token)
+      // admin only
+      if (!payload.a) throw new Error('Not authorized')
+      const patch = {
+        Coupon: promo.coupon,
+        Starts: promo.starts,
+        Ends: promo.ends,
+        PriceBreak: promo.requiresTotal,
+        MoneyOff: promo.moneyOff,
+        PercentageOff: promo.percentageOff,
+        FreeShipping: promo.freeShipping,
+      }
+      await context.dataSources.db.updatePromo(promoId, patch)
+      const row = await context.dataSources.db.getPromoById(id)
+      return reducePromo(row)
+    },
+    removePromo: async (obj, { token, promoId }, context) => {
+      const payload = verifyAuthToken(token)
+      // admin only
+      if (!payload.a) throw new Error('Not authorized')
+      await context.dataSources.db.deletePromo(promoId)
     },
   },
   Product: {

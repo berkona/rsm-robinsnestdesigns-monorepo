@@ -27,6 +27,16 @@ export default (props) => (
           <a>Modify Categories</a>
         </Link>
       </li>
+      <li>
+        <Link href="/admin/promo-create">
+          <a>Create Promo</a>
+        </Link>
+      </li>
+      <li>
+        <Link href="/admin/promos">
+          <a>Modify Promos</a>
+        </Link>
+      </li>
     </ul>
   </div></Col>
 )

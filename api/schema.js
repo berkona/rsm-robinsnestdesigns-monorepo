@@ -37,6 +37,28 @@ const typeDefs = gql`
     freeShipping: Boolean
   }
 
+  input PromoPatch {
+    coupon: String
+    starts: Date
+    ends: Date
+    requiresTotal: Float
+    requiresSubcategory: ID
+    percentageOff: Float
+    moneyOff: Float
+    freeShipping: Boolean
+  }
+
+  input PromoInput {
+    coupon: String!
+    starts: Date!
+    ends: Date!
+    requiresTotal: Float
+    requiresSubcategory: ID
+    percentageOff: Float
+    moneyOff: Float
+    freeShipping: Boolean
+  }
+
   scalar Date
 
   type WishListItem {
@@ -80,6 +102,9 @@ const typeDefs = gql`
     updateSubcategory(token: String!, subcategoryId: ID!, subcategory: SubCategoryInput!): SubCategory!
     removeSubcategory(token: String!, subcategoryId: ID!): Boolean
 
+    addPromo(token: String!, promo: PromoInput!): Promo!
+    updatePromo(token: String!, promoId: ID!, promo: PromoPatch!): Promo!
+    removePromo(token: String!, promoId: ID!): Boolean
   }
 
   input CategoryInput {
