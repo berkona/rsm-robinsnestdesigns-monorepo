@@ -142,7 +142,7 @@ class SearchEngine {
   }
 
   /**
-   * Returns a query which returns a table of (record, relevance) based on relevance of record to searchPhrase
+   * Returns a query which returns a table of (id, relevance) based on relevance of record to searchPhrase
    */
   search(searchPhrase) {
     if (!searchPhrase || !(typeof searchPhrase == "string")) {
@@ -150,23 +150,27 @@ class SearchEngine {
     }
 
     const keywords = this.tokenizerFn(searchPhrase).filter(isValidKeyword)
-    if (!keywords || keywords.length === 0) {
+
+    if (!keywords || keywords.length == 0) {
       // TODO: return everything
-      return this.knex.select('record as id', '0 as relevance')
+      return this.knex.select('record as id', knex.raw('0 as relevance'))
                       .from(this.keywordTableName)
                       .distinct()
     }
 
-    // do searchKeyword(keywords[0])
-    //      .unionAll(builder => searchKeyword(keywords[1]))
-    //      .unionAll(builder => searchKeyword(keywords[2]))
-    //      .unionAll(builder => searchKeyword(keywords[3]))
-    //    ...
-
-    let innerQuery = this._searchKeyword(keywords[0], this.knex)
-    for (let i = 1; i < keywords.length; i++) {
-      innerQuery = innerQuery.unionAll(builder => this._searchKeyword(keywords[i], builder))
+    const self = this
+    const _searchKeyword = (keyword) => {
+      return self.knex
+        .select('record', 'weight')
+        .from(this.keywordTableName)
+        .where('keyword', keyword)
     }
+
+    let innerQuery = _searchKeyword(keywords[0])
+    for (let i = 1; i < keywords.length; i++) {
+      innerQuery = innerQuery.unionAll(_searchKeyword(keywords[i]))
+    }
+
     innerQuery = innerQuery.as('_SearchEngine_inner')
 
     return this.knex

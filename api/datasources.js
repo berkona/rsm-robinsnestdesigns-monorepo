@@ -148,28 +148,21 @@ const WherePrice = (query, operator, value) => {
 const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, onSaleOnly, newOnly, priceRange }) => {
   const now = new Date().toISOString()
 
-  const makeQuery = (weight) => {
-    let q = builder;
-
-    // seems a bit hacky to me but prolly saves some cycles in DB
-    const searchFields = [ knex.raw(`${weight} as relevance`), 'Products.ID' ]
-    q = q.select(searchFields)
-    q = q.from('Products').where('Active', 1).whereNotNull('Products.Category')
+  const makeQueryWithSuffix = (suffix) => {
+    let q = builder.select([
+      'Products.ID as ID',
+      searchPhrase ? 'relevance' : knex.raw('1 as relevance')
+    ])
+    .from('Products')
+    .where('Active', 1)
+    .whereNotNull('Products.Category')
 
     if (categoryId) {
-      q = q.where(builder => builder
-        .orWhere('Products.Category', categoryId)
-        .orWhere('Products.CategoryB', categoryId)
-        .orWhere('Products.CategoryC', categoryId)
-      )
+      q = q.where('Products.Category' + suffix, categoryId)
     }
 
     if (subcategoryId) {
-      q = q.where(builder => builder
-        .orWhere('Products.SubCategory', subcategoryId)
-        .orWhere('Products.SubCategoryB', subcategoryId)
-        .orWhere('Products.SubCategoryC', subcategoryId)
-      )
+      q = q.where('Products.SubCategory' + suffix, subcategoryId)
     }
 
     if (onSaleOnly) {
@@ -183,7 +176,6 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
     }
 
     if (priceRange) {
-
       if (priceRange.lower >= 0
        && priceRange.higher >= 0
        && priceRange.higher < priceRange.lower) {
@@ -199,34 +191,59 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
       }
     }
 
+    if (searchPhrase && searchEngine.tokenizerFn(searchPhrase).length > 0) {
+      q = q.innerJoin(searchEngine.search(searchPhrase).as('_Search'), '_Search.id', 'Products.ID')
+    }
+
     return q
   }
 
-  const SearchAllFields = (searchPhrase) => {
-    return [
-        makeQuery(100).where('Products.ItemID', searchPhrase),
-        makeQuery(50).where('Products.ItemName', 'like', `% ${searchPhrase}%`),
-        makeQuery(25).where('Products.Keywords', 'like', `% ${searchPhrase}%`),
-        makeQuery(5).where('Products.Description', 'like', `% ${searchPhrase}%`),
-    ]
-  }
+  /**
+  Builds queries like:
 
-  // save work b/c we don't need to do a regex
-  const tokens = SearchTokens(searchPhrase)
-  if (!searchPhrase || tokens.length == 0) {
-    return makeQuery(1)
+  SELECT {productsFields} FROM Products
+    WHERE Active = 1 and Category is not null
+    (categoryId?
+      and Category = {categoryId}
+    )
+    (subcategoryId?
+      and SubCategory = {subcategoryId}
+    )
+    (searchPhrase?
+      INNER JOIN {searchQuery} as _Search ON _Search.id = Products.ID
+    )
+  UNION
+  SELECT {productsFields} FROM Products
+    WHERE Active = 1 and Category is not null
+    (categoryId?
+      and CategoryB = {categoryId}
+    )
+    (subcategoryId?
+      and SubCategoryB = {subcategoryId}
+    )
+    (searchPhrase?
+      INNER JOIN {searchQuery} as _Search ON _Search.id = Products.ID
+    )
+  UNION
+  SELECT {productsFields} FROM Products
+    WHERE Active = 1 and Category is not null
+    (categoryId?
+      and CategoryC = {categoryId}
+    )
+    (subcategoryId?
+      and SubCategoryC = {subcategoryId}
+    )
+    (searchPhrase?
+      INNER JOIN {searchQuery} as _Search ON _Search.id = Products.ID
+    )
+
+   */
+  if (categoryId || subcategoryId) {
+    return makeQueryWithSuffix('')
+      .union(makeQueryWithSuffix('B'))
+      .union(makeQueryWithSuffix('C'))
   } else {
-    const relevanceCutoff = (tokens.length-1) * 25
-    const queries = tokens.map(SearchAllFields).reduce((a, b) => a.concat(b), [])
-    let unionQ = queries.reduce((a, b) => a.unionAll(b)).as('Search_inner')
-    let q = builder.select('ID')
-                  .sum('relevance as relevance')
-                  .from(unionQ)
-                  .groupBy('ID')
-    // TODO fix this on mssql?
-    if (process.env.SQL_ENGINE != "mssql")
-       q  = q.having('relevance', '>', relevanceCutoff)
-    return q
+    return makeQueryWithSuffix('')
   }
 }
 
