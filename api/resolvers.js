@@ -1,162 +1,29 @@
-const { GraphQLScalarType } = require('graphql');
-const { Kind } = require('graphql/language');
-const paypal = require('@paypal/checkout-server-sdk');
+const { GraphQLScalarType } = require('graphql')
+const { Kind } = require('graphql/language')
+const paypal = require('@paypal/checkout-server-sdk')
 const paypalClient = require('./paypal')
 const ProductList = require('./ProductList')
 const sendEmail = require('./email')
 const reduceAllCategories = require('./reduceAllCategories')
 const reduceProduct = require('./reduceProduct')
 const reduceCategory = require('./reduceCategory')
+const reduceUser = require('./reduceUser')
+const reduceCartItem = require('./reduceCartItem')
+const reduceWishList = require('./reduceWishList')
+const reducePromo = require('./reducePromo')
 const signS3Url = require('./signS3Url')
 const searchEngine = require('./searchEngine')
+const { isOnSale } = require('./utils')
+const {
+  generateAuthToken,
+  verifyAuthToken,
+  register,
+  signin,
+  getUserFromToken,
+} = require('./auth')
 
 // Provide resolver functions for your schema fields
 module.exports = exports = {}
-
-const reduceUser = (row) => {
-  return {
-    id: row.ID,
-    email: row.Email,
-    firstName: row.FirstName,
-    lastName: row.LastName,
-    address: row.Address,
-    city: row.City,
-    state: row.State,
-    zip: row.Zip,
-    country: row.Country,
-    phone: row.Phone,
-  }
-}
-
-const isOnSale = (obj) => obj.salePrice && obj.saleStart && obj.saleEnd && obj.salePrice > 0 && IsWithinDateRange(Date.now(), ParseDate(obj.saleStart), ParseDate(obj.saleEnd)) || false
-
-const reduceCartItem = (cartItem) => {
-  const product = reduceProduct(cartItem)
-  const variant = !cartItem.Option ? null
-    : product.productVariants
-      .filter(x => x.text == cartItem.Option)
-      .map(x => x.id)[0]
-
-  let price
-  if (variant) {
-    const variantObj = product.productVariants.filter(x => x.id == variant)[0]
-    if (!variantObj) throw new Error('Invalid CartItem.variant in DB, did product change?')
-    price =  variantObj.price
-  } else if (isOnSale(product)) {
-    price = product.salePrice
-  } else {
-    price = product.price
-  }
-
-  return {
-    id: cartItem.CartItemId,
-    qty: cartItem.Quantity,
-    price,
-    product,
-    variant,
-  }
-}
-
-const TAX_REGEX = /^2(7|8)\d{3}$/
-const TAXS_TMP = {
-  'Durham': 7.5,
-}
-const DEFAULT_TAX_RATE = 7.0
-
-const canApplyPromo = (promo, items, subtotal) => {
-  return promo.PriceBreak == null || Number.parseFloat(subtotal) > promo.PriceBreak
-}
-
-const calcPromo = (promo, subtotal, shipping) => {
-  if (promo.PercentageOff) {
-    return ( Number.parseFloat(subtotal) * promo.PercentageOff ).toFixed(2)
-  } else if (promo.FreeShipping) {
-    return shipping || '0.00'
-  } else {
-    return promo.MoneyOff || '0.00'
-  }
-}
-
-const reduceOrder = (orderId, rows, shipping, county, promo) => {
-  const items = rows.map(reduceCartItem)
-
-  let subtotal = items.map((ci) => ci.price * ci.qty).reduce((a, b) => a + b, 0)
-  subtotal = subtotal.toFixed(2)
-
-  shipping = Number.parseFloat(subtotal) < 75 ? (shipping || '3.99') : '0.00'
-
-  let discount = '0.00'
-  if (promo && canApplyPromo(promo, items, subtotal)) {
-    discount = calcPromo(promo, subtotal, shipping) || '0.00'
-  }
-
-  const taxableTotal = (Number.parseFloat(subtotal) + Number.parseFloat(shipping) - Number.parseFloat(discount)).toFixed(2)
-
-  let tax = '0.00'
-  if (county) {
-    let taxRate = TAXS_TMP[county] || DEFAULT_TAX_RATE
-    tax = Number.parseFloat(taxableTotal) * (Number.parseFloat(taxRate) / 100.0)
-    tax = tax.toFixed(2)
-  }
-
-  let total = Number.parseFloat(taxableTotal) + Number.parseFloat(tax)
-  total = total.toFixed(2)
-
-  return {
-    id: orderId,
-    placed: false,
-    items,
-    subtotal,
-    shipping,
-    discount,
-    tax,
-    total,
-  }
-}
-
-var jwt = require('jsonwebtoken');
-
-const JWT_SECRET = process.env.JWT_SECRET || 'a test jwt secret';
-const JWT_ISSUER = process.env.JWT_ISSUER || 'rsm-graphql-node';
-const JWT_MAX_AGE = process.env.JWT_MAX_AGE || '14d';
-
-const generateAuthToken = (userId, isAdmin) => {
-  return jwt.sign({ uid: userId, a: isAdmin === true }, JWT_SECRET, { algorithm: 'HS256', expiresIn: JWT_MAX_AGE, issuer: JWT_ISSUER });
-}
-
-const verifyAuthToken = (token) => {
-  return jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'], issuer: JWT_ISSUER, maxAge: JWT_MAX_AGE })
-}
-
-const register = (obj, args, context) => {
-  return context.dataSources.db.tryUpsertUser(args.email, { Email: args.email, Password: args.password }).then(() => signin(obj, args, context))
-}
-
-const admin_emails = [
-    'jon@solipsisdev.com',
-    'robin@robinsnestdesigns.com',
-]
-
-const signin = (obj, args, context) => {
-  return context.dataSources.db.findUser(args.email).then((user) => {
-    if (!user) {
-      return Promise.reject(new Error('User does not exist'));
-    } else {
-      // TODO upgrade password storage...
-      if (args.password === user.Password) {
-        user = reduceUser(user)
-        const isAdmin = admin_emails.filter(email => user.email == email).length > 0 || false
-        const token = generateAuthToken(user.id, isAdmin)
-        return {
-          token,
-          user,
-        }
-      } else {
-        return Promise.reject(new Error('Username or password does not match'));
-      }
-    }
-  })
-}
 
 const addToCart = async (obj, args, context) => {
   let cartId = args.orderId
@@ -416,46 +283,6 @@ async function getPaypalOrder(paypalOrderId) {
   return Object.assign({}, result, {
     amount: result.purchase_units[0].amount.value,
   })
-}
-
-const reduceWishList = (rows) => {
-    return rows.map((row) => {
-      return {
-        id: row.WishListID,
-        dateAdded: row.AddedDate || new Date(),
-        product: reduceProduct(row),
-      }
-    })
-}
-
-const IsWithinDateRange = (timestamp, rangeStart, rangeEnd) => {
-  return timestamp > rangeStart && timestamp < rangeEnd
-}
-
-const ParseDate = (dateStr) => {
-  const retVal = Number.parseInt(dateStr)
-  return Number.isNaN(retVal) ? Date.parse(dateStr) : retVal
-}
-
-const getUserFromToken = async (token, db) => {
-  const { uid } = verifyAuthToken(token)
-  const userRow = await db.findUserById(uid)
-  if (!userRow) throw new Error('user does not exist')
-  const user = reduceUser(userRow)
-  return user
-}
-
-const reducePromo = (row) => {
-  return {
-    id: row.ID,
-    coupon: row.Coupon,
-    starts: row.Starts,
-    ends: row.Ends,
-    moneyOff: row.MoneyOff,
-    percentageOff: row.PercentageOff,
-    requiresTotal: row.PriceBreak,
-    freeShipping: !!row.FreeShipping,
-  }
 }
 
 const resolvers = {
