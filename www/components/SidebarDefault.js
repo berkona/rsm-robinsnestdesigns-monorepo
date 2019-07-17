@@ -6,6 +6,6 @@ import TopLinks from '../components/TopLinks'
 export default () => <Sidebar>
   <div style={{ padding: '5px 10px 5px 10px' }}>
     <TopLinks />
-    <CategoryLinks />
+    <CategoryLinks useCategoryLinks={true} />
   </div>
 </Sidebar>

@@ -1,6 +1,6 @@
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
-import { SearchLink } from './Links'
+import { SearchLink, CategoryLink } from './Links'
 import { withRouter } from 'next/router'
 
 export const sidebarQuery = gql`
@@ -46,13 +46,19 @@ const CategoryLinks_inner = (props) => (
           <ul>
             { prefixObj.children.map(c => (
                 <li key={`sidebar-category-${c.id}`}>
-                  <SearchLink categoryId={c.id}
-                    searchPhrase={props.searchPhrase}
-                    onSaleOnly={props.onSaleOnly}
-                    newOnly={props.newOnly}
-                    >
-                    <a style={{ fontSize: '16px' }}>{c.suffix}</a>
-                  </SearchLink>
+                  {
+                    props.useCategoryLinks
+                    ? <CategoryLink categoryId={c.id}>
+                        <a style={{ fontSize: '16px' }}>{c.suffix}</a>
+                      </CategoryLink>
+                    : <SearchLink categoryId={c.id}
+                      searchPhrase={props.searchPhrase}
+                      onSaleOnly={props.onSaleOnly}
+                      newOnly={props.newOnly}
+                      >
+                        <a style={{ fontSize: '16px' }}>{c.suffix}</a>
+                    </SearchLink>
+                  }
                 </li>
               )
             )}
@@ -66,6 +72,7 @@ const CategoryLinks_inner = (props) => (
 
 const CategoryLinks = withRouter((props) => (
   props.categories ? <CategoryLinks_inner
+    useCategoryLinks={props.useCategoryLinks || false}
     sortedCategories={arrangeCategories(props.categories)}
     searchPhrase={props.router.query.searchPhrase}
     onSaleOnly={props.router.query.onSaleOnly}
@@ -76,6 +83,7 @@ const CategoryLinks = withRouter((props) => (
       if (loading) return <div>Loading sidebar...</div>
       if (error) return <div>Error fetching data: <p>{error.toString()}</p></div>
       return <CategoryLinks_inner
+        useCategoryLinks={props.useCategoryLinks || false}
         sortedCategories={arrangeCategories(data.allProducts.categories)}
         searchPhrase={props.router.query.searchPhrase}
         onSaleOnly={props.router.query.onSaleOnly}
