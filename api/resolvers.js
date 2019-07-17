@@ -2,20 +2,16 @@ const { GraphQLScalarType } = require('graphql');
 const { Kind } = require('graphql/language');
 const paypal = require('@paypal/checkout-server-sdk');
 const paypalClient = require('./paypal')
-
 const ProductList = require('./ProductList')
-
 const sendEmail = require('./email')
-
 const reduceAllCategories = require('./reduceAllCategories')
 const reduceProduct = require('./reduceProduct')
 const reduceCategory = require('./reduceCategory')
-
 const signS3Url = require('./signS3Url')
+const searchEngine = require('./searchEngine')
 
 // Provide resolver functions for your schema fields
 module.exports = exports = {}
-
 
 const reduceUser = (row) => {
   return {
@@ -613,7 +609,9 @@ const resolvers = {
       console.log('insertProduct result',result)
       const [ resultId ] = result
       const [ row ] = await context.dataSources.db.getProduct(resultId)
-      return reduceProduct(row)
+      const product = reduceProduct(row)
+      await searchEngine.add(product)
+      return product
     },
     updateProduct: async(obj, { token, productId, productData }, context) => {
       const payload = verifyAuthToken(token)
@@ -657,7 +655,10 @@ const resolvers = {
       console.log('updateProduct', productId, patch)
       await context.dataSources.db.updateProduct(productId, patch)
       const [ row ] = await context.dataSources.db.getProduct(productId)
-      return reduceProduct(row)
+      const product = reduceProduct(row)
+      await searchEngine.remove(product.id)
+      await searchEngine.add(product)
+      return product
     },
     removeProduct: async (obj, { token, productId }, context) => {
       const payload = verifyAuthToken(token)
@@ -666,6 +667,7 @@ const resolvers = {
       const [ row ] = await context.dataSources.db.getProduct(productId)
       if (!row) throw new Error('product does not exist')
       await context.dataSources.db.updateProduct(productId, { Active: 0 })
+      await searchEngine.remove(productId)
     },
     addCategory: async(obj, { token, category }, context) => {
       const payload = verifyAuthToken(token)
@@ -682,6 +684,7 @@ const resolvers = {
       await context.dataSources.db.updateCategory(categoryId, category)
       const [ row ] = await context.dataSources.db.getCategory(categoryId)
       return reduceCategory(row)
+      // todo update searchEngine
     },
     addSubcategory: async (obj, { token, subcategory }, context) => {
       const payload = verifyAuthToken(token)
@@ -698,6 +701,7 @@ const resolvers = {
       await context.dataSources.db.updateSubcategory(subcategoryId, subcategory)
       const [ row ] = await context.dataSources.db.getSubcategory(subcategoryId)
       return reduceCategory(row)
+      // todo update searchEngine
     },
     addPromo: async (obj, { token, promo }, context) => {
       const payload = verifyAuthToken(token)
