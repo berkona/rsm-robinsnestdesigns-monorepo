@@ -63,7 +63,7 @@ export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
                   .filter(field => MODIFIABLE_FIELDS.indexOf(field) !== -1)
                   .forEach(field => productData[field] = newProduct[field])
                 productData.productVariants = (productData.productVariants || []).map(x => { return { price: x.price, text: x.text } })
-                mutationFn({ variables: { productData, } }).then(() => Router.push('/admin/products'))
+                mutationFn({ variables: { productData, } }).then(({ data: { createProduct: { id } } }) => Router.push('/admin/product-details?productId=' + id))
               }}
             />
             { error && <ApolloError error={error} />}
