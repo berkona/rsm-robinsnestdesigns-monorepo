@@ -290,10 +290,10 @@ const typeDefs = gql`
     subcategory: String!
     subcategoryId: ID!
     productVariants: [ProductVariant!]!
-    category2: ID!
-    subcategory2: ID!
-    category3: ID!
-    subcategory3: ID!
+    category2: ID
+    subcategory2: ID
+    category3: ID
+    subcategory3: ID
     keywords: String!
   }
 
