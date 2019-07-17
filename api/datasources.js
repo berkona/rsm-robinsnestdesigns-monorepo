@@ -425,8 +425,8 @@ class MyDB extends SQLDataSource {
     const query = this.db.select(productFields)
     .from('Products')
     .where('Products.ID', productId)
-    .leftJoin('Category', 'Products.Category', 'Category.ID')
-    .leftJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
+    .innerJoin('Category', 'Products.Category', 'Category.ID')
+    .innerJoin('Subcategory', 'Products.SubCategory', 'Subcategory.ID')
     return dbWithRetry(() => this.getCached(query, CACHE_TTL))
   }
 

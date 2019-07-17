@@ -5,7 +5,7 @@ const stopword = require('stopword')
 const defaultTokenizerFn = (searchPhrase) => {
   let words = searchPhrase
     .split(' ')
-    .map(s => s.trim().replace(/\W+/, '').lower())
+    .map(s => s.trim().replace(/\W+/, '').toLowerCase())
     .filter(isValidKeyword)
   words = stopword.removeStopwords(words)
   words = words
