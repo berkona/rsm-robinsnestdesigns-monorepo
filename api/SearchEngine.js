@@ -16,10 +16,12 @@ const defaultTokenizerFn = (searchPhrase) => {
 
 
 // validate a configuration object
-const validateConfiguration = (obj, requiredParams, defaults) => {
+const validateObject = (obj, requiredParams, defaults) => {
+  if (!obj) throw new Error('obj must be an object')
   for (const p of requiredParams) {
     if (!obj[p]) throw new Error(p + ' is a required parameter')
   }
+  defaults = defaults || {}
   return Object.assign({}, defaults, obj)
 }
 
@@ -67,7 +69,7 @@ class SearchEngine {
 
    */
   constructor(config) {
-    config = validateConfiguration(
+    config = validateObject(
       config,
       [ 'knex', 'keywordTableName', 'searchFields' ],
       {
@@ -75,7 +77,7 @@ class SearchEngine {
         idFieldName: 'id',
       }
     )
-    config.searchFields = config.searchFields.map(searchField => validateConfiguration(searchField, ['fieldName', 'weight']))
+    config.searchFields = config.searchFields.map(searchField => validateObject(searchField, ['fieldName', 'weight']))
     for (const key in config) {
       this[key] = config[key]
     }
@@ -85,8 +87,9 @@ class SearchEngine {
    * Insert a record into the search engine database
    */
   async add(record) {
+    record = validateObject(record, [ this.idFieldName ])
     const recordId = validateId(record[this.idFieldName])
-    await this._init()
+    await this.init()
     const keywordMap = {}
     for (const searchField of this.searchFields) {
       const { fieldName, weight } = searchField
@@ -106,19 +109,25 @@ class SearchEngine {
         keywordMap[keyword].weight += weight
       })
     }
-    for (const keyword in keywordMap) {
-      const { weight } = keywordMap[keyword]
-      await this.knex(this.keywordTableName).insert({
-        keyword,
-        weight,
-        record: recordId,
-      })
-    }
+    await this.knex.transaction(tx => {
+      const inserts = []
+      for (const keyword in keywordMap) {
+        const { weight } = keywordMap[keyword]
+        const p = tx.insert({
+          keyword,
+          weight,
+          record: recordId,
+        })
+        .into(this.keywordTableName)
+        inserts.push(p)
+      }
+      return Promise.all(inserts)
+    })
   }
 
   async has(recordId) {
     recordId = validateId(recordId)
-    await this._init()
+    await this.init()
     const count = await this.knex.count('* as count').from(this.keywordTableName).where('record', recordId)
     return count > 0
   }
@@ -128,7 +137,7 @@ class SearchEngine {
    */
   async remove(recordId) {
     recordId = validateId(recordId)
-    await this._init()
+    await this.init()
     await this.knex(this.keywordTableName).where('record', recordId).del()
   }
 
@@ -168,7 +177,7 @@ class SearchEngine {
   }
 
   // lazy init all the stuff we need
-  async _init() {
+  async init() {
     const isTableCreated = await this.knex.schema.hasTable(this.keywordTableName)
     if (!isTableCreated) {
       await this.knex.schema.createTable(this.keywordTableName, table => {
