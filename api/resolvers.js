@@ -592,6 +592,7 @@ const resolvers = {
         CategoryC: productData.category3 || null,
         SubCategoryC: productData.subcategory3 | null,
         Keywords: productData.keywords || null,
+        Added: new Date(),
       }
 
       const fields = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
