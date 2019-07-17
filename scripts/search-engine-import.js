@@ -22,6 +22,7 @@ const CONCURRENCY_GROWTH_FACTOR = 16
 const CONCURRENCY_GROWTH_MIN = 1
 
 const processAllProducts = async (db) => {
+  const promises = []
   try {
 
     const query = knex.select('ID as productId')
@@ -39,8 +40,6 @@ const processAllProducts = async (db) => {
     let nTotal = 0
     let averageTimeToComplete = 0
     let lastBumpTime = 0
-
-    const promises = []
 
     for await (const { productId } of query) {
 
@@ -73,13 +72,17 @@ const processAllProducts = async (db) => {
           averageTimeToComplete += deltaAverageTime / nTotal
           nRunning--
         })
-
       promises.push(p)
     }
     await Promise.all(promises)
     console.log('Finished import')
   } catch (err) {
     console.error('Retrying import due to error', err)
+    try {
+      await Promise.all(promises)
+    } catch (promiseErr) {
+      console.error('Could not finish waiting for all promises:', promiseErr)
+    }
     await processAllProducts(db)
   }
 }

@@ -235,7 +235,6 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
   } else {
     query = makeQueryWithSuffix('')
   }
-  console.log('buildSearchQuery', query.toString())
   return query
 }
 
@@ -444,6 +443,7 @@ class MyDB extends SQLDataSource {
     const searchQueryNoAs = buildSearchQuery(this.db, args)
     const searchQuery = searchQueryNoAs.as('Search')
     const countQuery = this.db.count('* as nRecords').from(searchQuery)
+    console.log('listProductsTotal', countQuery.toString())
     const self = this
     return dbWithRetry(() => self.getCached(countQuery, CACHE_TTL))
   }
@@ -469,6 +469,7 @@ class MyDB extends SQLDataSource {
               .innerJoin('Products', 'Products.ID', 'Search3.ID')
           )
       )
+      console.log('listProductsCategories', categoryQuery.toString())
       const self = this
       return dbWithRetry(() => self.getCached(categoryQuery, CACHE_TTL))
   }
@@ -499,6 +500,7 @@ class MyDB extends SQLDataSource {
             .innerJoin('Products', 'Products.ID', 'Search3.ID')
         )
     )
+    console.log('listProductsSubcategories', subcategoryQuery.toString())
     const self = this
     return dbWithRetry(() => self.getCached(subcategoryQuery, CACHE_TTL))
   }
@@ -508,7 +510,6 @@ class MyDB extends SQLDataSource {
 
     const searchQueryNoAs = buildSearchQuery(this.db, args)
     const searchQuery = searchQueryNoAs.as('Search')
-    //console.log('listProducts', searchQuery.toString())
 
     let dataQuery =  this.db.select(productFields)
       .from(searchQuery.clone())
@@ -539,7 +540,7 @@ class MyDB extends SQLDataSource {
         .orderBy('relevance', 'desc')
         .orderBy('Products.ID', 'desc')
     }
-
+    console.log('listProducts', dataQuery.toString())
     const self = this
     return dbWithRetry(() => self.getCached(dataQuery, CACHE_TTL))
   }
