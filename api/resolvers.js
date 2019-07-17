@@ -575,6 +575,7 @@ const resolvers = {
       if (!payload.a) throw new Error('Not authorized')
 
       const patch = {
+        Active: true,
         ItemID: productData.sku,
         ItemName: productData.name,
         ItemPrice: productData.price,
