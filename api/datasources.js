@@ -666,4 +666,3 @@ class MyDB extends SQLDataSource {
 }
 
 exports.MyDB = MyDB
-exports.knex = knex

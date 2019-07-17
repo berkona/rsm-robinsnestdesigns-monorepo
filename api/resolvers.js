@@ -749,5 +749,4 @@ const resolvers = {
   },
 }
 
-exports.verifyAuthToken = verifyAuthToken
 exports.resolvers = resolvers
