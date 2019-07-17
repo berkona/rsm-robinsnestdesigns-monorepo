@@ -56,3 +56,5 @@ const reduceOrder = (orderId, rows, shipping, county, promo) => {
     total,
   }
 }
+
+module.exports = reduceOrder

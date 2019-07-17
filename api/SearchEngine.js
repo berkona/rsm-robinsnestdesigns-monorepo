@@ -11,7 +11,7 @@ const defaultTokenizerFn = (searchPhrase) => {
   words = words
     .map(s => snowball.stemword(s, 'english'))
     .filter(isValidKeyword)
-  return words
+  return Array.from(new Set(words))
 }
 
 
@@ -77,10 +77,32 @@ class SearchEngine {
         idFieldName: 'id',
       }
     )
+    if (!Array.isArray(config.searchFields))
+      throw new Error('config.searchField is not an array')
     config.searchFields = config.searchFields.map(searchField => validateObject(searchField, ['fieldName', 'weight']))
     for (const key in config) {
       this[key] = config[key]
     }
+  }
+
+  // lazy init all the stuff we need here
+  async init() {
+    if (this.isInitialized) return
+
+    const isTableCreated = await this.knex.schema.hasTable(this.keywordTableName)
+    if (!isTableCreated) {
+      await this.knex.schema.createTable(this.keywordTableName, table => {
+        table.increments('id')
+        table.string('keyword')
+        table.integer('record')
+        table.integer('weight')
+        table.index('keyword')
+        table.index('record')
+        table.unique(['keyword', 'record'])
+      })
+    }
+    // todo detect if keyword table if not matching spec above
+    this.isInitialized = true
   }
 
   /**
@@ -143,6 +165,7 @@ class SearchEngine {
 
   /**
    * Returns a query which returns a table of (id, relevance) based on relevance of record to searchPhrase
+   * Only call this after you've await'd init() or some other function (they all await init first)
    */
   search(searchPhrase) {
     if (!searchPhrase || !(typeof searchPhrase == "string")) {
@@ -178,26 +201,6 @@ class SearchEngine {
       .sum('weight as relevance')
       .from(innerQuery)
       .groupBy('record')
-  }
-
-  // lazy init all the stuff we need
-  async init() {
-    const isTableCreated = await this.knex.schema.hasTable(this.keywordTableName)
-    if (!isTableCreated) {
-      await this.knex.schema.createTable(this.keywordTableName, table => {
-        table.increments('id')
-        table.string('keyword')
-        table.integer('record')
-        table.integer('weight')
-      })
-    }
-  }
-
-  async _searchKeyword(keyword, builder) {
-    return builder
-      .select('record', 'weight')
-      .from(this.keywordTableName)
-      .where('keyword', keyword)
   }
 }
 

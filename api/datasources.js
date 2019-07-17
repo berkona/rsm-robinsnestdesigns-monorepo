@@ -102,17 +102,6 @@ const productFields =  [
   'Keywords',
 ]
 
-const sw = require ('stopword');
-
-const SearchTokens = (searchPhrase) => {
-  // todo support ""?
-  searchPhrase = searchPhrase || ''
-  searchPhrase = searchPhrase.trim()
-  const withStopwords = searchPhrase.split(' ').map(w => w.trim())
-  const noStopwords = sw.removeStopwords(withStopwords)
-  return noStopwords
-}
-
 /* produces SQL like:
 (  (Price1 > 0 AND Price1 $operator $value)
  OR (
@@ -238,13 +227,16 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
     )
 
    */
+  let query = null
   if (categoryId || subcategoryId) {
-    return makeQueryWithSuffix('')
+    query = makeQueryWithSuffix('')
       .union(makeQueryWithSuffix('B'))
       .union(makeQueryWithSuffix('C'))
   } else {
-    return makeQueryWithSuffix('')
+    query = makeQueryWithSuffix('')
   }
+  console.log('buildSearchQuery', query.toString())
+  return query
 }
 
 class MyDB extends SQLDataSource {
