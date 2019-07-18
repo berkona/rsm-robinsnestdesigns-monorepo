@@ -286,6 +286,22 @@ async function getPaypalOrder(paypalOrderId) {
   })
 }
 
+const getImage = async (db, storeGetFn, storeSetFn, listProductsArgs) => {
+  let image = await storeGetFn()
+  if (image) return image
+  const [ { nRecords } ] = await db.listProductsTotal(listProductsArgs)
+  for (let skip = 0; skip < nRecords; skip += 50) {
+    const products = await db.listProducts(Object.assign({ skip }, listProductsArgs))
+    const product = products.map(reduceProduct).filter(p => p && p.hyperlinkedImage)[0]
+    image = product && product.hyperlinkedImage
+    if (image) {
+      await storeSetFn(image)
+      return image
+    }
+  }
+  return null
+}
+
 const resolvers = {
   Date: new GraphQLScalarType({
     name: 'Date',
@@ -304,27 +320,26 @@ const resolvers = {
     },
   }),
   Category: {
-    image: async (obj, args, context) => {
-      const products = await context.dataSources.db.listProducts({
+    image: (obj, args, { dataSources: { db } }) => getImage(
+      db,
+      () =>  db.getCategoryImage(obj.id),
+      (image) => db.updateCategory(obj.id, { image, }),
+      {
         categoryId: obj.id,
-        limit: 200,
         sortOrder: 'mostRecent',
-      })
-      const product = products.map(reduceProduct).filter(p => p && p.hyperlinkedImage)[0]
-      return product && product.hyperlinkedImage
-    },
+      }
+    ),
   },
   SubCategory: {
-    image: async (obj, args, context) => {
-      const products = await context.dataSources.db.listProducts({
+    image: async (obj, args, { dataSources: { db } }) => getImage(
+      db,
+      () =>  db.getSubcategoryImage(obj.id),
+      (image) => db.updateSubcategory(obj.id, { image, }),
+      {
         subcategoryId: obj.id,
-        limit: 200,
         sortOrder: 'mostRecent',
-      })
-      console.log('SubCategory.image.products', products)
-      const product = products.map(reduceProduct).filter(p => p && p.hyperlinkedImage)[0]
-      return product && product.hyperlinkedImage
-    },
+      }
+    ),
   },
   ProductList,
   Query: {

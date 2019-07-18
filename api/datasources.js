@@ -66,7 +66,7 @@ const productFields =  [
   'Products.ItemPrice as ItemPrice',
   effectivePriceCase,
   'Thumbnail',
-  'Image',
+  'Products.Image as Image',
   'Hyperlinked_Image as hyperlinkedImage',
   'SalePrice',
   'Sale_Start',
@@ -243,6 +243,23 @@ class MyDB extends SQLDataSource {
   constructor() {
     super()
     this.knex = knex
+    this._hasMigrated = false
+  }
+
+  async migrate() {
+    if (this._hasMigrated) return
+    this._hasMigrated = true
+
+    if (!(await this.knex.schema.hasColumn('Category', 'image'))) {
+      await this.knex.schema.alterTable('Category', table => {
+        table.string('image').nullable()
+      })
+    }
+    if (!(await this.knex.schema.hasColumn('Subcategory', 'image'))) {
+      await this.knex.schema.alterTable('Subcategory', table => {
+        table.string('image').nullable()
+      })
+    }
   }
 
   async getWishList(uid) {
@@ -340,10 +357,18 @@ class MyDB extends SQLDataSource {
     return this.db('Category').insert({ Category: title, Comments: comments })
   }
 
-  updateCategory(categoryId, { title, comments }) {
+  async getCategoryImage(categoryId) {
     if (!categoryId) return Promise.reject(`categoryId is required`)
-    if (!title) return Promise.reject(`title is required`)
-    return this.db('Category').where('ID', categoryId).limit(1).update({ Category: title, Comments: comments })
+    await this.migrate()
+    const query = this.db.select('image').from('Category').where('ID', categoryId)
+    const [ { image } ] = await dbWithRetry(() => this.getCached(query, CACHE_TTL))
+    return image
+  }
+
+  async updateCategory(categoryId, { title, comments, image }) {
+    if (!categoryId) return Promise.reject(`categoryId is required`)
+    await this.migrate()
+    return await this.db('Category').where('ID', categoryId).limit(1).update({ Category: title, Comments: comments, image })
   }
 
   listCategories() {
@@ -396,14 +421,21 @@ class MyDB extends SQLDataSource {
       .where('ID', subcategoryId), CACHE_TTL))
   }
 
-  updateSubcategory(subcategoryId, { categoryId, title, comments }) {
+  async getSubcategoryImage(subcategoryId) {
+    if (!subcategoryId) return Promise.reject(`subcategoryId is required`)
+    await this.migrate()
+    const query = this.db.select('image').from('Subcategory').where('ID', subcategoryId)
+    const [ { image } ] = await dbWithRetry(() => this.getCached(query, CACHE_TTL))
+    return image
+  }
+
+  async updateSubcategory(subcategoryId, { categoryId, title, comments, image }) {
     if (!subcategoryId) throw new Error('subcategory ID is required')
-    if (!categoryId) throw new Error('categoryId is required')
-    if (!title) throw new Error('title is required')
-    return this.db('Subcategory')
+    await this.migrate()
+    return await this.db('Subcategory')
       .where('ID', subcategoryId)
       .limit(1)
-      .update({ Category: categoryId, Subcategory: title, Comments: comments })
+      .update({ Category: categoryId, Subcategory: title, Comments: comments, image })
   }
 
   listSubcategories(categoryId) {
