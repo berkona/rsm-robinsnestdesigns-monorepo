@@ -321,6 +321,7 @@ const resolvers = {
         limit: 200,
         sortOrder: 'mostRecent',
       })
+      console.log('SubCategory.image.products', products)
       const product = products.map(reduceProduct).filter(p => p && p.hyperlinkedImage)[0]
       return product && product.hyperlinkedImage
     },

@@ -138,13 +138,14 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
   const now = new Date().toISOString()
 
   const makeQueryWithSuffix = (suffix) => {
+    const doSearch = searchPhrase && searchEngine.tokenizerFn(searchPhrase).length > 0
     let q = builder.select([
       'Products.ID as ID',
-      searchPhrase ? 'relevance' : knex.raw('1 as relevance')
+      doSearch ? 'relevance' : knex.raw('1 as relevance')
     ])
     .from('Products')
     .where('Active', 1)
-    .whereNotNull('Products.Category')
+    .whereNotNull('Products.Category' + suffix)
 
     if (categoryId) {
       q = q.where('Products.Category' + suffix, categoryId)
@@ -180,7 +181,7 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
       }
     }
 
-    if (searchPhrase && searchEngine.tokenizerFn(searchPhrase).length > 0) {
+    if (doSearch) {
       q = q.innerJoin(searchEngine.search(searchPhrase).as('_Search'), '_Search.id', 'Products.ID')
     }
 

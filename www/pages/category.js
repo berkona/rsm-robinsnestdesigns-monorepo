@@ -29,6 +29,7 @@ query($categoryId: ID!) {
       id
       title
       comments
+      image
     }
   }
 }

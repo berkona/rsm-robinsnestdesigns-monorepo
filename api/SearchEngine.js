@@ -2,18 +2,33 @@ const snowball = require('node-snowball');
 const stopword = require('stopword')
 
 // helpers
-const defaultTokenizerFn = (searchPhrase) => {
-  let words = searchPhrase
-    .split(' ')
-    .map(s => s.trim().replace(/\W+/, '').toLowerCase())
-    .filter(isValidKeyword)
-  words = stopword.removeStopwords(words)
-  words = words
-    .map(s => snowball.stemword(s, 'english'))
-    .filter(isValidKeyword)
-  return Array.from(new Set(words))
-}
 
+/**
+  The default tokenizer function uses the following pipeline:
+  - Split by whitespace
+  - Trim and remove special chars from tokens
+  - Regularize input by lowercasing
+  - Convert all words to lemma versions
+  - Clamp strings to length 255 (max size of keyword due to varchar limits)
+  - Remove stopwords and tokens of size 0
+  - Remove duplicates
+*/
+const defaultTokenizerFn = (searchPhrase) => {
+  return Array.from(
+    new Set(
+      stopword.removeStopwords(
+        searchPhrase
+          .split(' ')
+          .filter(s => s)
+          .map(s => s.trim())
+          .map(s => s.replace(/\W+/, ''))
+          .map(s => s.toLowerCase())
+          .map(s => snowball.stemword(s, 'english'))
+          .map(s => s.slice(0, 255))
+      ).filter(isValidKeyword)
+    )
+  )
+}
 
 // validate a configuration object
 const validateObject = (obj, requiredParams, defaults) => {
@@ -33,7 +48,9 @@ const validateId = (id) => {
   return id
 }
 
-const isValidKeyword = (keyword) => keyword && keyword.match(/^\w+$/)
+const isValidKeyword = (keyword) => keyword && keyword.length > 0
+
+const matchColumnName = (fieldName) => 'matches_' + fieldName
 
 /**
 
@@ -61,6 +78,9 @@ class SearchEngine {
    - tokenizerFn - fn!
    - idFieldName - string - defaults to 'id'
 
+   tokenizerFn should be a function which accepts a string "searchPhrase"
+   and returns an array which is the set of keywords related to the searchPhrase
+
    SearchFieldConfig - object with the shape:
    {
      fieldName: String!
@@ -78,8 +98,14 @@ class SearchEngine {
       }
     )
     if (!Array.isArray(config.searchFields))
-      throw new Error('config.searchField is not an array')
+      throw new Error('config.searchFields is not an array')
     config.searchFields = config.searchFields.map(searchField => validateObject(searchField, ['fieldName', 'weight']))
+    config.searchFields.forEach(searchField => {
+      const isValidColumnName = /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(searchField.fieldName)
+      if (!isValidColumnName) {
+        throw new Error('field ' + searchField.fieldName + ' must be a possible valid sql column name')
+      }
+    })
     for (const key in config) {
       this[key] = config[key]
     }
@@ -92,16 +118,43 @@ class SearchEngine {
     const isTableCreated = await this.knex.schema.hasTable(this.keywordTableName)
     if (!isTableCreated) {
       await this.knex.schema.createTable(this.keywordTableName, table => {
-        table.increments('id')
-        table.string('keyword')
-        table.integer('record')
-        table.integer('weight')
-        table.index('keyword')
-        table.index('record')
-        table.unique(['keyword', 'record'])
+        table.string('keyword').notNullable()
+        table.integer('record').unsigned().notNullable()
+        table.primary(['keyword', 'record'])
+      })
+    } else {
+      const hasKeywordColumn = await this.knex.schema.hasColumn(this.keywordTableName, 'keyword')
+      const hasRecordColumn = await this.knex.schema.hasColumn(this.keywordTableName, 'record')
+      // TODO: check if primary key is correct here
+      if (!hasKeywordColumn || !hasRecordColumn) {
+        await this.knex.schema.table(table => {
+          if (!hasKeywordColumn)
+            table.string('keyword').notNullable()
+          if (!hasRecordColumn)
+            table.integer('record').unsigned().notNullable()
+        })
+      }
+    }
+
+    // traverse searchFields and ensure all columns are setup for calculating relevance score
+    const requiredColumns = []
+
+    await Promise.all(this.searchFields.map(async searchField => {
+      const columnName = matchColumnName(searchField.fieldName)
+      const hasColumn = await this.knex.schema.hasColumn(this.keywordTableName, columnName)
+      if (!hasColumn) {
+        requiredColumns.push(columnName)
+      }
+    }))
+
+    if (requiredColumns.length > 0) {
+      await this.knex.schema.alterTable(this.keywordTableName, table => {
+        requiredColumns.forEach(columnName => {
+          table.integer(columnName).defaultTo(0)
+        })
       })
     }
-    // todo detect if keyword table if not matching spec above
+
     this.isInitialized = true
   }
 
@@ -114,7 +167,7 @@ class SearchEngine {
     await this.init()
     const keywordMap = {}
     for (const searchField of this.searchFields) {
-      const { fieldName, weight } = searchField
+      const { fieldName } = searchField
       if (!(record[fieldName] && typeof record[fieldName] == "string")) {
         continue
       }
@@ -124,22 +177,19 @@ class SearchEngine {
           throw new Error('keyword was invalid: ' + keyword)
         }
         if (!keywordMap[keyword]) {
-          keywordMap[keyword] = {
-            weight: 0
-          }
+          keywordMap[keyword] = {}
         }
-        keywordMap[keyword].weight += weight
+        const colName = matchColumnName(fieldName)
+        keywordMap[keyword][colName] = (keywordMap[keyword][colName] || 0) + 1
       })
     }
     await this.knex.transaction(tx => {
       const inserts = []
       for (const keyword in keywordMap) {
-        const { weight } = keywordMap[keyword]
-        const p = tx.insert({
+        const p = tx.insert(Object.assign({
           keyword,
-          weight,
           record: recordId,
-        })
+        }, keywordMap[keyword]))
         .into(this.keywordTableName)
         inserts.push(p)
       }
@@ -184,7 +234,7 @@ class SearchEngine {
     const self = this
     const _searchKeyword = (keyword) => {
       return self.knex
-        .select('record', 'weight')
+        .select('record', self.knex.raw(this.searchFields.map(searchField => matchColumnName(searchField.fieldName) + ' * ' + searchField.weight).join(' + ') + ' as weight'))
         .from(this.keywordTableName)
         .where('keyword', keyword)
     }
