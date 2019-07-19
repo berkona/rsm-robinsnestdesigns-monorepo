@@ -1,22 +1,8 @@
 const { SQLDataSource } = require("datasource-sql")
-
-if (!process.env.SQL_ENGINE || !process.env.SQL_PORT || !process.env.SQL_HOST || !process.env.SQL_USER || !process.env.SQL_PWD || !process.env.SQL_DB) {
-  throw new Error('You must set the environmental variables: SQL_ENGINE, SQL_PORT, SQL_HOST, SQL_USER, SQL_PWD, SQL_DB before starting server')
-}
+const knex = require('./knex')
+const searchEngine = require('./searchEngine')
 
 const CACHE_TTL = 300
-
-const knex = require('knex')({
-  client: process.env.SQL_ENGINE,
-  connection: {
-    host: process.env.SQL_HOST,
-    user: process.env.SQL_USER,
-    port: process.env.SQL_PORT,
-    password: process.env.SQL_PWD,
-    database: process.env.SQL_DB,
-  },
-  pool: { min: 0, max: 4 }
-})
 
 const WaitPromise = (ms) => {
   return new Promise((resolve, reject) => {
@@ -50,7 +36,8 @@ const validateArgs = (args) => {
 const categoryFields = [
   'Category.ID as ID',
   'Category.Category as Category',
-  'Category.Comments as Comments'
+  'Category.Comments as Comments',
+  'Category.image as image',
 ]
 
 const cartItemFields = [
@@ -80,7 +67,7 @@ const productFields =  [
   'Products.ItemPrice as ItemPrice',
   effectivePriceCase,
   'Thumbnail',
-  'Image',
+  'Products.Image as Image',
   'Hyperlinked_Image as hyperlinkedImage',
   'SalePrice',
   'Sale_Start',
@@ -115,17 +102,6 @@ const productFields =  [
   'SubCategoryC',
   'Keywords',
 ]
-
-const sw = require ('stopword');
-
-const SearchTokens = (searchPhrase) => {
-  // todo support ""?
-  searchPhrase = searchPhrase || ''
-  searchPhrase = searchPhrase.trim()
-  const withStopwords = searchPhrase.split(' ').map(w => w.trim())
-  const noStopwords = sw.removeStopwords(withStopwords)
-  return noStopwords
-}
 
 /* produces SQL like:
 (  (Price1 > 0 AND Price1 $operator $value)
@@ -162,28 +138,22 @@ const WherePrice = (query, operator, value) => {
 const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, onSaleOnly, newOnly, priceRange }) => {
   const now = new Date().toISOString()
 
-  const makeQuery = (weight) => {
-    let q = builder;
-
-    // seems a bit hacky to me but prolly saves some cycles in DB
-    const searchFields = [ knex.raw(`${weight} as relevance`), 'Products.ID' ]
-    q = q.select(searchFields)
-    q = q.from('Products').where('Active', 1).whereNotNull('Products.Category')
+  const makeQueryWithSuffix = (suffix) => {
+    const doSearch = searchPhrase && searchEngine.tokenizerFn(searchPhrase).length > 0
+    let q = builder.select([
+      'Products.ID as ID',
+      doSearch ? 'relevance' : knex.raw('1 as relevance')
+    ])
+    .from('Products')
+    .where('Active', 1)
+    .whereNotNull('Products.Category' + suffix)
 
     if (categoryId) {
-      q = q.where(builder => builder
-        .orWhere('Products.Category', categoryId)
-        .orWhere('Products.CategoryB', categoryId)
-        .orWhere('Products.CategoryC', categoryId)
-      )
+      q = q.where('Products.Category' + suffix, categoryId)
     }
 
     if (subcategoryId) {
-      q = q.where(builder => builder
-        .orWhere('Products.SubCategory', subcategoryId)
-        .orWhere('Products.SubCategoryB', subcategoryId)
-        .orWhere('Products.SubCategoryC', subcategoryId)
-      )
+      q = q.where('Products.SubCategory' + suffix, subcategoryId)
     }
 
     if (onSaleOnly) {
@@ -197,7 +167,6 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
     }
 
     if (priceRange) {
-
       if (priceRange.lower >= 0
        && priceRange.higher >= 0
        && priceRange.higher < priceRange.lower) {
@@ -213,41 +182,101 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
       }
     }
 
+    if (doSearch) {
+      const matchSku = builder.select(
+        'Products.ID as id',
+        knex.raw('9999 as relevance')
+      )
+      .from('Products')
+      .where('ItemID', searchPhrase)
+
+      q = q.innerJoin(
+        matchSku.union(searchEngine.search(searchPhrase)).as('_Search' + suffix),
+        '_Search.id', 'Products.ID'
+      )
+    }
+
     return q
   }
 
-  const SearchAllFields = (searchPhrase) => {
-    return [
-        makeQuery(100).where('Products.ItemID', searchPhrase),
-        makeQuery(50).where('Products.ItemName', 'like', `% ${searchPhrase}%`),
-        makeQuery(25).where('Products.Keywords', 'like', `% ${searchPhrase}%`),
-        makeQuery(5).where('Products.Description', 'like', `% ${searchPhrase}%`),
-    ]
-  }
+  /**
+  Builds queries like:
 
-  // save work b/c we don't need to do a regex
-  const tokens = SearchTokens(searchPhrase)
-  if (!searchPhrase || tokens.length == 0) {
-    return makeQuery(1)
+  SELECT {productsFields} FROM Products
+    WHERE Active = 1 and Category is not null
+    (categoryId?
+      and Category = {categoryId}
+    )
+    (subcategoryId?
+      and SubCategory = {subcategoryId}
+    )
+    (searchPhrase?
+      INNER JOIN {searchQuery} as _Search ON _Search.id = Products.ID
+    )
+  UNION
+  SELECT {productsFields} FROM Products
+    WHERE Active = 1 and Category is not null
+    (categoryId?
+      and CategoryB = {categoryId}
+    )
+    (subcategoryId?
+      and SubCategoryB = {subcategoryId}
+    )
+    (searchPhrase?
+      INNER JOIN {searchQuery} as _Search ON _Search.id = Products.ID
+    )
+  UNION
+  SELECT {productsFields} FROM Products
+    WHERE Active = 1 and Category is not null
+    (categoryId?
+      and CategoryC = {categoryId}
+    )
+    (subcategoryId?
+      and SubCategoryC = {subcategoryId}
+    )
+    (searchPhrase?
+      INNER JOIN {searchQuery} as _Search ON _Search.id = Products.ID
+    )
+
+   */
+  let query = null
+  if (categoryId || subcategoryId) {
+    query = makeQueryWithSuffix('')
+      .union(makeQueryWithSuffix('B'))
+      .union(makeQueryWithSuffix('C'))
   } else {
-    const relevanceCutoff = (tokens.length-1) * 25
-    const queries = tokens.map(SearchAllFields).reduce((a, b) => a.concat(b), [])
-    let unionQ = queries.reduce((a, b) => a.unionAll(b)).as('Search_inner')
-    let q = builder.select('ID')
-                  .sum('relevance as relevance')
-                  .from(unionQ)
-                  .groupBy('ID')
-    // TODO fix this on mssql?
-    if (process.env.SQL_ENGINE != "mssql")
-       q  = q.having('relevance', '>', relevanceCutoff)
-    return q
+    query = makeQueryWithSuffix('')
   }
+  return query
 }
 
 class MyDB extends SQLDataSource {
   constructor() {
     super()
     this.knex = knex
+    this._hasMigrated = false
+  }
+
+  async migrate() {
+    if (this._hasMigrated)
+      return await this._migrationPromise
+    this._hasMigrated = true
+    this._migrationPromise = (async () => {
+      console.log('Automigrating database')
+      if (!(await this.knex.schema.hasColumn('Category', 'image'))) {
+        console.log('Category needs column image')
+        await this.knex.schema.alterTable('Category', table => {
+          table.string('image').nullable()
+        })
+      }
+      if (!(await this.knex.schema.hasColumn('Subcategory', 'image'))) {
+        console.log('Subcategory needs column image')
+        await this.knex.schema.alterTable('Subcategory', table => {
+          table.string('image').nullable()
+        })
+      }
+    })()
+    return await this._migrationPromise
   }
 
   async getWishList(uid) {
@@ -329,9 +358,9 @@ class MyDB extends SQLDataSource {
     this.db('Promotions').where('ID', promoId).limit(1).del()
   }
 
-  getCategory(categoryId) {
+  async getCategory(categoryId) {
     if (!categoryId) return Promise.reject(`categoryId is required`)
-
+    await this.migrate()
     const query = this.db
       .select(categoryFields)
       .from('Category')
@@ -345,10 +374,18 @@ class MyDB extends SQLDataSource {
     return this.db('Category').insert({ Category: title, Comments: comments })
   }
 
-  updateCategory(categoryId, { title, comments }) {
+  async getCategoryImage(categoryId) {
     if (!categoryId) return Promise.reject(`categoryId is required`)
-    if (!title) return Promise.reject(`title is required`)
-    return this.db('Category').where('ID', categoryId).limit(1).update({ Category: title, Comments: comments })
+    await this.migrate()
+    const query = this.db.select('image').from('Category').where('ID', categoryId)
+    const [ { image } ] = await dbWithRetry(() => this.getCached(query, CACHE_TTL))
+    return image
+  }
+
+  async updateCategory(categoryId, { title, comments, image }) {
+    if (!categoryId) return Promise.reject(`categoryId is required`)
+    await this.migrate()
+    return await this.db('Category').where('ID', categoryId).limit(1).update({ Category: title, Comments: comments, image })
   }
 
   listCategories() {
@@ -390,25 +427,34 @@ class MyDB extends SQLDataSource {
     return this.db('Subcategory').insert({ Category: categoryId, Subcategory: title, Comments: comments })
   }
 
-  getSubcategory(subcategoryId) {
+  async getSubcategory(subcategoryId) {
     if (!subcategoryId) throw new Error('subcategory ID is required')
+    await this.migrate()
     return dbWithRetry(() => this.getCached(this.db.select(
         'Subcategory.ID as ID',
         'Subcategory.Subcategory as Category',
-        'Comments'
+        'Comments',
+        'Subcategory.image as image',
       )
       .from('Subcategory')
       .where('ID', subcategoryId), CACHE_TTL))
   }
 
-  updateSubcategory(subcategoryId, { categoryId, title, comments }) {
+  async getSubcategoryImage(subcategoryId) {
+    if (!subcategoryId) return Promise.reject(`subcategoryId is required`)
+    await this.migrate()
+    const query = this.db.select('image').from('Subcategory').where('ID', subcategoryId)
+    const [ { image } ] = await dbWithRetry(() => this.getCached(query, CACHE_TTL))
+    return image
+  }
+
+  async updateSubcategory(subcategoryId, { categoryId, title, comments, image }) {
     if (!subcategoryId) throw new Error('subcategory ID is required')
-    if (!categoryId) throw new Error('categoryId is required')
-    if (!title) throw new Error('title is required')
-    return this.db('Subcategory')
+    await this.migrate()
+    return await this.db('Subcategory')
       .where('ID', subcategoryId)
       .limit(1)
-      .update({ Category: categoryId, Subcategory: title, Comments: comments })
+      .update({ Category: categoryId, Subcategory: title, Comments: comments, image })
   }
 
   listSubcategories(categoryId) {
@@ -449,6 +495,7 @@ class MyDB extends SQLDataSource {
     const searchQueryNoAs = buildSearchQuery(this.db, args)
     const searchQuery = searchQueryNoAs.as('Search')
     const countQuery = this.db.count('* as nRecords').from(searchQuery)
+    console.log('listProductsTotal', countQuery.toString())
     const self = this
     return dbWithRetry(() => self.getCached(countQuery, CACHE_TTL))
   }
@@ -474,6 +521,7 @@ class MyDB extends SQLDataSource {
               .innerJoin('Products', 'Products.ID', 'Search3.ID')
           )
       )
+      console.log('listProductsCategories', categoryQuery.toString())
       const self = this
       return dbWithRetry(() => self.getCached(categoryQuery, CACHE_TTL))
   }
@@ -484,7 +532,8 @@ class MyDB extends SQLDataSource {
     const subcategoryQuery = this.db.select(
       'Subcategory.ID as ID',
       'Subcategory.Subcategory as Category',
-      'Comments'
+      'Comments',
+      'Subcategory.image as image'
     )
     .from('Subcategory')
     .where('Subcategory.Category', '=', args.categoryId)
@@ -504,6 +553,7 @@ class MyDB extends SQLDataSource {
             .innerJoin('Products', 'Products.ID', 'Search3.ID')
         )
     )
+    console.log('listProductsSubcategories', subcategoryQuery.toString())
     const self = this
     return dbWithRetry(() => self.getCached(subcategoryQuery, CACHE_TTL))
   }
@@ -513,7 +563,6 @@ class MyDB extends SQLDataSource {
 
     const searchQueryNoAs = buildSearchQuery(this.db, args)
     const searchQuery = searchQueryNoAs.as('Search')
-    //console.log('listProducts', searchQuery.toString())
 
     let dataQuery =  this.db.select(productFields)
       .from(searchQuery.clone())
@@ -544,7 +593,7 @@ class MyDB extends SQLDataSource {
         .orderBy('relevance', 'desc')
         .orderBy('Products.ID', 'desc')
     }
-
+    console.log('listProducts', dataQuery.toString())
     const self = this
     return dbWithRetry(() => self.getCached(dataQuery, CACHE_TTL))
   }
@@ -680,4 +729,3 @@ class MyDB extends SQLDataSource {
 }
 
 exports.MyDB = MyDB
-exports.knex = knex

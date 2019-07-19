@@ -3,8 +3,8 @@ const reduceProduct = require('./reduceProduct')
 
 module.exports = {
   total: async (obj, args, context) => {
-    const [ result ] = await context.dataSources.db.listProductsTotal(obj.args)
-    return result && result.nRecords || 0
+    const [ { nRecords } ] = await context.dataSources.db.listProductsTotal(obj.args)
+    return nRecords || 0
   },
   records: async (obj, args, context) => {
     const products = await context.dataSources.db.listProducts(obj.args)

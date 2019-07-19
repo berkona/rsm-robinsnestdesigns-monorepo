@@ -205,14 +205,14 @@ const typeDefs = gql`
   }
 
   type Category {
-    id: Int!
+    id: ID!
     title: String!
     comments: String
     image: String
   }
 
   type SubCategory {
-    id: Int!
+    id: ID!
     title: String!
     comments: String
     image: String

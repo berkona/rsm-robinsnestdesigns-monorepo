@@ -1,4 +1,6 @@
 function reduceProduct(row) {
+  if (!row) return null
+
   const productVariants = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ].reduce((arr, nVariant) => {
     const priceField = 'Price' + nVariant
     const optionField = 'Option' + nVariant

@@ -29,6 +29,7 @@ query($categoryId: ID!) {
       id
       title
       comments
+      image
     }
   }
 }
@@ -51,7 +52,17 @@ export default withRouter(({ router }) => <ContentWithSidebar>
           </Breadcrumb>
           </div>
         </div>
+
         {data.category.comments && <p>{data.category.comments}</p>}
+
+        <SearchLink categoryId={router.query.categoryId}
+                    sortOrder="mostRecent">
+          <Button variant="primary">
+            View all items in category
+          </Button>
+        </SearchLink>
+
+        <hr />
       </>
     }
   </Query>

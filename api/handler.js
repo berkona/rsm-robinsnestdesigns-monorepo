@@ -1,8 +1,8 @@
 const { ApolloServer } = require('apollo-server-micro')
-
-const { knex, MyDB } = require('./datasources')
+const { MyDB } = require('./datasources')
 const { typeDefs } = require('./schema')
-const { verifyAuthToken, resolvers } = require('./resolvers')
+const { resolvers } = require('./resolvers')
+const knex = require('./knex')
 
 const isDev = process.env.NODE_ENV !== 'production'
 
