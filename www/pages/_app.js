@@ -11,6 +11,7 @@ import { CurrentUserProvider } from '../lib/auth'
 import { initGA, PageView } from '../lib/next-ga-ec'
 const USER_TOKEN = 'USER_TOKEN'
 const USER_CART = 'CUSTOMERID'
+import { hotjar } from 'react-hotjar';
 
 NProgress.configure({
   showSpinner: false,
@@ -47,6 +48,9 @@ class MyApp extends App {
       currentUserCartId: cookies && cookies[USER_CART],
     }
     initGA("UA-4561227-5")
+    if (process.browser) {
+      hotjar.initialize(1409743, 6)
+    }
   }
 
   componentDidMount() {
