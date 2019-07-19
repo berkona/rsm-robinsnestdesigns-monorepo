@@ -183,7 +183,17 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
     }
 
     if (doSearch) {
-      q = q.innerJoin(searchEngine.search(searchPhrase).as('_Search'), '_Search.id', 'Products.ID')
+      const matchSku = builder.select(
+        'Products.ID as id',
+        knex.raw('9999 as relevance')
+      )
+      .from('Products')
+      .where('ItemID', searchPhrase)
+
+      q = q.innerJoin(
+        matchSku.union(searchEngine.search(searchPhrase)).as('_Search' + suffix),
+        '_Search.id', 'Products.ID'
+      )
     }
 
     return q
