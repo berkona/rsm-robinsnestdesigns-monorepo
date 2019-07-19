@@ -10,6 +10,10 @@ const searchEngine = new SearchEngine({
     { fieldName: 'keywords', weight: 100 },
     { fieldName: 'category', weight: 50 },
     { fieldName: 'subcategory', weight: 50 },
+    { fieldName: 'category2', weight: 50 },
+    { fieldName: 'subcategory2', weight: 50 },
+    { fieldName: 'category3', weight: 50 },
+    { fieldName: 'subcategory3', weight: 50 },
     { fieldName: 'description', weight: 25 },
   ],
 })

@@ -26,6 +26,10 @@ const redirectUrls = [
     src: /\/Results\.cfm\?KeyWords=(.+)/,
     dest: (_, searchPhrase) => `/search/?searchPhrase=${searchPhrase}`
   },
+  {
+    src: /\/detail.cfm\?ID=(\d+)/,
+    dest: (_, productId) => `/product/${productId}`
+  },
 ]
 
 export default async (req, res) => {

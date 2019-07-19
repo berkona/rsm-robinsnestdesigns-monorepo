@@ -8,6 +8,22 @@ const nextTick = () => new Promise((resolve, reject) => setTimeout(() => resolve
 const processProduct = async (db, productId) => {
   const [ row ] = await db.getProduct(productId)
   const product = reduceProduct(row)
+
+  // we have to get extra data
+  const getTitle = async (fn) => {
+    const [ result ] = await fn()
+    return result && result.Category
+  }
+
+  if (product.category2)
+    product.category2 = await getTitle(() => db.getCategory(product.category2))
+  if (product.category3)
+    product.category3 = await getTitle(() => db.getCategory(product.category3))
+  if (product.subcategory2)
+    product.subcategory2 = await getTitle(() => db.getSubcategory(product.subcategory2))
+  if (product.subcategory3)
+    product.subcategory3 = await getTitle(() => db.getSubcategory(product.subcategory3))
+
   await searchEngine.add(product)
 }
 
@@ -16,15 +32,20 @@ const processSuccess = (productId) => console.log('Imported', productId)
 const processError = (productId, error) => console.error('Error importing', productId, error)
 
 const THROTTLE_THRESHOLD = 0.05
-const THROTTLE_DOWN_TIME_FACTOR = 1/8
-const THROTTLE_UP_TIME_FACTOR = 1/2
-const CONCURRENCY_GROWTH_FACTOR = 16
-const CONCURRENCY_GROWTH_MIN = 1
+const THROTTLE_DOWN_TIME_FACTOR = 3
+const THROTTLE_UP_TIME_FACTOR = 3
+const CONCURRENCY_GROWTH_FACTOR = 2
+const CONCURRENCY_GROWTH_MIN = 2
 
 const processAllProducts = async (db) => {
   const promises = []
+  let concurrency = 32
+  let nRunning = 0
+  let nTotal = 0
+  let lastBumpTime = 0
+  let averageLatency = 0
+  let averageThroughput = 0
   try {
-
     const query = knex.select('ID as productId')
                       .from('Products')
                       .where('Active', 1)
@@ -34,12 +55,6 @@ const processAllProducts = async (db) => {
                         .distinct()
                       )
                       .stream()
-
-    let concurrency = CONCURRENCY_GROWTH_MIN
-    let nRunning = 0
-    let nTotal = 0
-    let averageTimeToComplete = 0
-    let lastBumpTime = 0
 
     for await (const { productId } of query) {
 
@@ -56,20 +71,20 @@ const processAllProducts = async (db) => {
         .catch(processError.bind(null, productId))
         .finally(() => {
           const endTime = Date.now()
-          const deltaTime = endTime - startTime
-          const deltaAverageTime = deltaTime - averageTimeToComplete
-          const threshV = averageTimeToComplete * THROTTLE_THRESHOLD
-          if (Date.now() - lastBumpTime > (concurrency * THROTTLE_DOWN_TIME_FACTOR) * averageTimeToComplete && deltaAverageTime > threshV) {
-            lastBumpTime = Date.now()
-            concurrency = Math.max(CONCURRENCY_GROWTH_MIN, concurrency - concurrency *  THROTTLE_DOWN_TIME_FACTOR)
-            console.log('Slowdown detected, reducing concurrency', deltaAverageTime, threshV, averageTimeToComplete, concurrency)
-          } else if (Date.now() - lastBumpTime > (concurrency * THROTTLE_UP_TIME_FACTOR) * averageTimeToComplete && deltaAverageTime > -threshV) {
-            lastBumpTime = Date.now()
-            concurrency += Math.max(CONCURRENCY_GROWTH_FACTOR / concurrency, CONCURRENCY_GROWTH_MIN)
-            console.log('Speedup detected, increasing concurrency', deltaAverageTime, threshV, averageTimeToComplete, concurrency)
-          }
+          const latency = endTime - startTime
+          const deltaLatency = latency - averageLatency
           nTotal++
-          averageTimeToComplete += deltaAverageTime / nTotal
+          averageLatency += deltaLatency / nTotal
+          const threshV = averageLatency * THROTTLE_THRESHOLD
+          if (Date.now() - lastBumpTime > THROTTLE_DOWN_TIME_FACTOR * averageLatency && deltaLatency > threshV) {
+            lastBumpTime = Date.now()
+            concurrency = Math.max(CONCURRENCY_GROWTH_MIN, concurrency - CONCURRENCY_GROWTH_FACTOR)
+            console.log('Slowdown detected, reducing concurrency', latency, averageLatency, threshV, concurrency)
+          } else if (Date.now() - lastBumpTime > THROTTLE_UP_TIME_FACTOR * averageLatency && deltaLatency < -threshV) {
+            lastBumpTime = Date.now()
+            concurrency += CONCURRENCY_GROWTH_FACTOR
+            console.log('Speedup detected, increasing concurrency', latency, averageLatency, threshV, concurrency)
+          }
           nRunning--
         })
       promises.push(p)

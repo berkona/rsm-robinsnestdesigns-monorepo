@@ -3,10 +3,14 @@ const stopword = require('stopword')
 
 // helpers
 
+// TODO: investigate solving issues like $9.99/$9,99 becoming 9 99
+const ENGLISH_WORDS_PUNCT_REGEX = /([\s\-\.\,\;\\\/\(\)\{\}\[\]\|]+)/
+
 /**
   The default tokenizer function uses the following pipeline:
-  - Split by whitespace
-  - Trim and remove special chars from tokens
+  - Split by whitespace, hyphen, period, comma, semi-colon, pipe, and all
+    slashes/braces/brackets
+  - Trim and remove special chars (\W) from tokens
   - Regularize input by lowercasing
   - Convert all words to lemma versions
   - Clamp strings to length 255 (max size of keyword due to varchar limits)
@@ -17,8 +21,8 @@ const defaultTokenizerFn = (searchPhrase) => {
   return Array.from(
     new Set(
       stopword.removeStopwords(
-        searchPhrase
-          .split(' ')
+        (searchPhrase || "" )
+          .split(ENGLISH_WORDS_PUNCT_REGEX)
           .filter(s => s)
           .map(s => s.trim())
           .map(s => s.replace(/\W+/, ''))
@@ -54,9 +58,11 @@ const matchColumnName = (fieldName) => 'matches_' + fieldName
 
 /**
 
-  A search engine middleware for knex.
+  A text search engine middleware for knex.
 
-  Gives knex developers an Abstract Data Structure for searching databases in a unified and efficient manner.  The ADS should support the following operations:
+  Gives knex developers an Abstract Data Structure for searching databases in
+  a unified and efficient manner. The ADS should support the following
+  operations:
   - add(record)
   - has(recordId)
   - remove(recordId)
@@ -64,22 +70,49 @@ const matchColumnName = (fieldName) => 'matches_' + fieldName
 
   Updates are supported by sequential remove(recordId) + add(record) ops.
 
-  Fuzzy matching and query expansion is supported by a user defined tokenizer function
+  # How does it work?
+
+  The search engine uses a table to store an inverted index of a collection
+  of documents with columns recording # of matches per field.
+
+  This allows for fast fuzzy matching over a large set of documents with
+  relevance ranking.
+
+  This is an optimized solution for text search meant to be combined with your
+  own query building techniques to provide filtering, facet searching, etc.
+
+  The target table's schema will be adjusted to fit the needs of the current
+  instance, so don't point it anything whose data you like obviously.
+
+  Searches over different document sets should target different tables.
+
+  Fuzzy matching and query expansion is supported by a user defined tokenizer
+  function (see constructor)
+
+  Currently, the search engine supports changing search field weights and
+  removing search fields implicitly via our data model.
+
+  Adding a new search field requires rebuilding the entire index
+  (i.e., remove(record), add(record) ...), fields that were not present in
+  config when object was added will default to 0 match score
 
  */
 class SearchEngine {
 
   /**
 
-  The constructor accepts one argument which is the config object of shape:
+  The constructor accepts one argument which is an object with the following fields:
    - knex - KnexClient!
    - keywordTableName - string!
    - searchFields - [SearchFieldConfig!]!
    - tokenizerFn - fn!
    - idFieldName - string - defaults to 'id'
 
-   tokenizerFn should be a function which accepts a string "searchPhrase"
-   and returns an array which is the set of keywords related to the searchPhrase
+   "tokenizerFn" should be a monotonic pure function which accepts a string "searchPhrase"
+   and returns an array which is the set of keywords related to the searchPhrase.
+   Consider it to be a hash from the string space to a set of keyword matches: (record, weight) pairs.
+   Two strings which resolve to exactly the same set of keyword matches can be consider the semantically the same.
+   Careful understanding of this principle allows for fuzzy matching and query expansion via this fn.
 
    SearchFieldConfig - object with the shape:
    {
@@ -114,6 +147,7 @@ class SearchEngine {
   // lazy init all the stuff we need here
   async init() {
     if (this.isInitialized) return
+    this.isInitialized = true
 
     const isTableCreated = await this.knex.schema.hasTable(this.keywordTableName)
     if (!isTableCreated) {
@@ -154,8 +188,6 @@ class SearchEngine {
         })
       })
     }
-
-    this.isInitialized = true
   }
 
   /**
@@ -186,14 +218,12 @@ class SearchEngine {
     await this.knex.transaction(tx => {
       const inserts = []
       for (const keyword in keywordMap) {
-        const p = tx.insert(Object.assign({
+        inserts.push(Object.assign({
           keyword,
           record: recordId,
         }, keywordMap[keyword]))
-        .into(this.keywordTableName)
-        inserts.push(p)
       }
-      return Promise.all(inserts)
+      return tx.insert(inserts).into(this.keywordTableName)
     })
   }
 

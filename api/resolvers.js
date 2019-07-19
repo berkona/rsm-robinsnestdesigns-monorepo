@@ -454,6 +454,22 @@ const resolvers = {
       const [ resultId ] = result
       const [ row ] = await context.dataSources.db.getProduct(resultId)
       const product = reduceProduct(row)
+
+      // we have to get extra data
+      const getTitle = async (fn) => {
+        const [ result ] = await fn()
+        return result && result.Category
+      }
+
+      if (product.category2)
+        product.category2 = await getTitle(() => db.getCategory(product.category2))
+      if (product.category3)
+        product.category3 = await getTitle(() => db.getCategory(product.category3))
+      if (product.subcategory2)
+        product.subcategory2 = await getTitle(() => db.getSubcategory(product.subcategory2))
+      if (product.subcategory3)
+        product.subcategory3 = await getTitle(() => db.getSubcategory(product.subcategory3))
+
       await searchEngine.add(product)
       return product
     },
@@ -500,6 +516,22 @@ const resolvers = {
       await context.dataSources.db.updateProduct(productId, patch)
       const [ row ] = await context.dataSources.db.getProduct(productId)
       const product = reduceProduct(row)
+
+      // we have to get extra data
+      const getTitle = async (fn) => {
+        const [ result ] = await fn()
+        return result && result.Category
+      }
+
+      if (product.category2)
+        product.category2 = await getTitle(() => db.getCategory(product.category2))
+      if (product.category3)
+        product.category3 = await getTitle(() => db.getCategory(product.category3))
+      if (product.subcategory2)
+        product.subcategory2 = await getTitle(() => db.getSubcategory(product.subcategory2))
+      if (product.subcategory3)
+        product.subcategory3 = await getTitle(() => db.getSubcategory(product.subcategory3))
+
       await searchEngine.remove(product.id)
       await searchEngine.add(product)
       return product

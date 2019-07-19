@@ -36,7 +36,8 @@ const validateArgs = (args) => {
 const categoryFields = [
   'Category.ID as ID',
   'Category.Category as Category',
-  'Category.Comments as Comments'
+  'Category.Comments as Comments',
+  'Category.image as image',
 ]
 
 const cartItemFields = [
@@ -513,7 +514,8 @@ class MyDB extends SQLDataSource {
     const subcategoryQuery = this.db.select(
       'Subcategory.ID as ID',
       'Subcategory.Subcategory as Category',
-      'Comments'
+      'Comments',
+      'Subcategory.image as image'
     )
     .from('Subcategory')
     .where('Subcategory.Category', '=', args.categoryId)
