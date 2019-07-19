@@ -52,9 +52,7 @@ export default withRouter(({ router }) => <ContentWithSidebar>
           </Breadcrumb>
           </div>
         </div>
-
-        {data.category.comments && <p>{data.category.comments}</p>}
-
+        { data.category.comments && <p dangerouslySetInnerHTML={{ __html: data.category.comments }}></p> }
         <SearchLink categoryId={router.query.categoryId}
                     sortOrder="mostRecent">
           <Button variant="primary">
