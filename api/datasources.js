@@ -258,19 +258,25 @@ class MyDB extends SQLDataSource {
   }
 
   async migrate() {
-    if (this._hasMigrated) return
+    if (this._hasMigrated)
+      return await this._migrationPromise
     this._hasMigrated = true
-
-    if (!(await this.knex.schema.hasColumn('Category', 'image'))) {
-      await this.knex.schema.alterTable('Category', table => {
-        table.string('image').nullable()
-      })
-    }
-    if (!(await this.knex.schema.hasColumn('Subcategory', 'image'))) {
-      await this.knex.schema.alterTable('Subcategory', table => {
-        table.string('image').nullable()
-      })
-    }
+    this._migrationPromise = (async () => {
+      console.log('Automigrating database')
+      if (!(await this.knex.schema.hasColumn('Category', 'image'))) {
+        console.log('Category needs column image')
+        await this.knex.schema.alterTable('Category', table => {
+          table.string('image').nullable()
+        })
+      }
+      if (!(await this.knex.schema.hasColumn('Subcategory', 'image'))) {
+        console.log('Subcategory needs column image')
+        await this.knex.schema.alterTable('Subcategory', table => {
+          table.string('image').nullable()
+        })
+      }
+    })()
+    return await this._migrationPromise
   }
 
   async getWishList(uid) {
@@ -352,9 +358,9 @@ class MyDB extends SQLDataSource {
     this.db('Promotions').where('ID', promoId).limit(1).del()
   }
 
-  getCategory(categoryId) {
+  async getCategory(categoryId) {
     if (!categoryId) return Promise.reject(`categoryId is required`)
-
+    await this.migrate()
     const query = this.db
       .select(categoryFields)
       .from('Category')
@@ -421,12 +427,14 @@ class MyDB extends SQLDataSource {
     return this.db('Subcategory').insert({ Category: categoryId, Subcategory: title, Comments: comments })
   }
 
-  getSubcategory(subcategoryId) {
+  async getSubcategory(subcategoryId) {
     if (!subcategoryId) throw new Error('subcategory ID is required')
+    await this.migrate()
     return dbWithRetry(() => this.getCached(this.db.select(
         'Subcategory.ID as ID',
         'Subcategory.Subcategory as Category',
-        'Comments'
+        'Comments',
+        'Subcategory.image as image',
       )
       .from('Subcategory')
       .where('ID', subcategoryId), CACHE_TTL))

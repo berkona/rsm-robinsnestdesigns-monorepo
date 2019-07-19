@@ -70,6 +70,13 @@ const matchColumnName = (fieldName) => 'matches_' + fieldName
 
   Updates are supported by sequential remove(recordId) + add(record) ops.
 
+  # Is it fast?
+
+  Based on provisional results using advanced timing techniques (i.e, *one missisippi, two missisippi...*) we present the following results:
+  Test	                     LIKE Match	   Inverted Index
+  1 keyword x 40k records	   5s	           3s
+  5 keywords x 40k records	 18s	         3s
+
   # How does it work?
 
   The search engine uses a table to store an inverted index of a collection
@@ -146,54 +153,60 @@ class SearchEngine {
 
   // lazy init all the stuff we need here
   async init() {
-    if (this.isInitialized) return
+    if (this.isInitialized) {
+      return await this.initPromise
+    }
+
     this.isInitialized = true
+    this.initPromise = (async () => {
+      // yes, this IS a race condition... PRs welcome
+      const isTableCreated = await this.knex.schema.hasTable(this.keywordTableName)
+      if (!isTableCreated) {
+        await this.knex.schema.createTable(this.keywordTableName, table => {
+          table.string('keyword').notNullable()
+          table.integer('record').unsigned().notNullable()
+          table.primary(['keyword', 'record'])
+        })
+      } else {
+        const hasKeywordColumn = await this.knex.schema.hasColumn(this.keywordTableName, 'keyword')
+        const hasRecordColumn = await this.knex.schema.hasColumn(this.keywordTableName, 'record')
+        // TODO: check if primary key is correct here
+        if (!hasKeywordColumn || !hasRecordColumn) {
+          await this.knex.schema.table(table => {
+            if (!hasKeywordColumn)
+              table.string('keyword').notNullable()
+            if (!hasRecordColumn)
+              table.integer('record').unsigned().notNullable()
+          })
+        }
+      }
 
-    const isTableCreated = await this.knex.schema.hasTable(this.keywordTableName)
-    if (!isTableCreated) {
-      await this.knex.schema.createTable(this.keywordTableName, table => {
-        table.string('keyword').notNullable()
-        table.integer('record').unsigned().notNullable()
-        table.primary(['keyword', 'record'])
-      })
-    } else {
-      const hasKeywordColumn = await this.knex.schema.hasColumn(this.keywordTableName, 'keyword')
-      const hasRecordColumn = await this.knex.schema.hasColumn(this.keywordTableName, 'record')
-      // TODO: check if primary key is correct here
-      if (!hasKeywordColumn || !hasRecordColumn) {
-        await this.knex.schema.table(table => {
-          if (!hasKeywordColumn)
-            table.string('keyword').notNullable()
-          if (!hasRecordColumn)
-            table.integer('record').unsigned().notNullable()
+      // traverse searchFields and ensure all columns are setup for calculating relevance score
+      const requiredColumns = []
+
+      await Promise.all(this.searchFields.map(async searchField => {
+        const columnName = matchColumnName(searchField.fieldName)
+        const hasColumn = await this.knex.schema.hasColumn(this.keywordTableName, columnName)
+        if (!hasColumn) {
+          requiredColumns.push(columnName)
+        }
+      }))
+
+      if (requiredColumns.length > 0) {
+        await this.knex.schema.alterTable(this.keywordTableName, table => {
+          requiredColumns.forEach(columnName => {
+            table.integer(columnName).notNullable().defaultTo(0)
+          })
         })
       }
-    }
-
-    // traverse searchFields and ensure all columns are setup for calculating relevance score
-    const requiredColumns = []
-
-    await Promise.all(this.searchFields.map(async searchField => {
-      const columnName = matchColumnName(searchField.fieldName)
-      const hasColumn = await this.knex.schema.hasColumn(this.keywordTableName, columnName)
-      if (!hasColumn) {
-        requiredColumns.push(columnName)
-      }
-    }))
-
-    if (requiredColumns.length > 0) {
-      await this.knex.schema.alterTable(this.keywordTableName, table => {
-        requiredColumns.forEach(columnName => {
-          table.integer(columnName).defaultTo(0)
-        })
-      })
-    }
+    })()
+    await this.initPromise
   }
 
   /**
    * Insert a record into the search engine database
    */
-  async add(record) {
+  async add(record, currentTransaction) {
     record = validateObject(record, [ this.idFieldName ])
     const recordId = validateId(record[this.idFieldName])
     await this.init()
@@ -215,7 +228,7 @@ class SearchEngine {
         keywordMap[keyword][colName] = (keywordMap[keyword][colName] || 0) + 1
       })
     }
-    await this.knex.transaction(tx => {
+    const addTxn = tx => {
       const inserts = []
       for (const keyword in keywordMap) {
         inserts.push(Object.assign({
@@ -224,7 +237,12 @@ class SearchEngine {
         }, keywordMap[keyword]))
       }
       return tx.insert(inserts).into(this.keywordTableName)
-    })
+    }
+    if (currentTransaction) {
+      return addTxn(currentTransaction)
+    } else {
+      await this.knex.transaction(addTxn)
+    }
   }
 
   async has(recordId) {
@@ -237,10 +255,32 @@ class SearchEngine {
   /**
    * Remove a record from the search engine database
    */
-  async remove(recordId) {
+  async remove(recordId, txn) {
     recordId = validateId(recordId)
+    const builder = txn || this.knex
     await this.init()
-    await this.knex(this.keywordTableName).where('record', recordId).del()
+    await builder(this.keywordTableName).where('record', recordId).del()
+  }
+
+  /**
+   * Re-calculate the matches for every record in the index
+   */
+  async rebuild(fetchFn) {
+    if (!fetchFn || typeof fetchFn != 'function')
+      throw new Error('fetchFn must be an async fn')
+    const self = this
+    await self.init()
+    const query = this.knex.select('record as id').from(this.keywordTableName).distinct().stream()
+    const rebuildSingle = async (id) => {
+      const record = await fetchFn(id)
+      await self.knex.transaction(async tx => {
+        await self.remove(id, tx)
+        await self.add(record, tx)
+      })
+    }
+    for await (const row of query) {
+      await rebuildSingle(row.id)
+    }
   }
 
   /**
