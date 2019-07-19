@@ -1,6 +1,8 @@
 import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { BatchHttpLink } from "apollo-link-batch-http";
+import { RetryLink } from "apollo-link-retry";
+import { ApolloLink } from 'apollo-link';
 import { BASE_URL } from '../constants/config'
 import { resolve } from 'url'
 import { WISHLIST_QUERY_ALL } from '../constants/queries'
@@ -34,10 +36,24 @@ function create (initialState, req) {
   const httpLink = new BatchHttpLink({
     uri: getAPIUrl(req)
   })
+  const retryLink = new RetryLink({
+    delay: {
+      initial: 300,
+      max: Infinity,
+      jitter: true
+    },
+    attempts: {
+      max: 10,
+      retryIf: (error, _operation) => !!error
+    }
+  })
   const client = new ApolloClient({
     connectToDevTools: process.browser,
     ssrMode: !process.browser, // Disables forceFetch on the server (so queries are only run once)
-    link: httpLink,
+    link: ApolloLink.from([
+      retryLink,
+      httpLink,
+    ]),
     cache,
     typeDefs,
     resolvers: {
