@@ -27,7 +27,6 @@
     { "src": "api/handler.js", "use": "@now/node" },
     { "src": "api/sitemap.js", "use": "@now/node" },
     { "src": "api/redirect.js", "use": "@now/node" },
-    { "src": "content/home/*", "use": "@now/static" }
   ],
   "routes": [
     {
@@ -63,13 +62,6 @@
       "status": 301,
       "headers": {
         "Location": "/categories"
-      }
-    },
-    {
-      "src": "/content/(.*)",
-      "dest": "/content/$1",
-      "headers": {
-        "cache-control": "s-maxage=300, max-age=0"
       }
     },
     { "src": "/graphql", "dest": "api/handler.js" },
