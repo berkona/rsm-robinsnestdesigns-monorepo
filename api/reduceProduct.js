@@ -9,7 +9,7 @@ function reduceProduct(row) {
       arr.push({
         id,
         price: Number.parseFloat(row[priceField]),
-        text: row[optionField],
+        text: row[optionField] || "",
       })
     }
     return arr
