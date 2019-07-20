@@ -3,7 +3,6 @@ import Row from 'react-bootstrap/Row'
 import ContentWithSidebar from '../components/ContentWithSidebar'
 import ProductListTeaser from '../components/ProductListTeaser'
 import { SearchLink } from '../components/Links'
-import Carousel from 'react-bootstrap/Carousel'
 import gql from 'graphql-tag'
 import { Query } from 'react-apollo'
 import Loader from '../components/Loader'
@@ -14,6 +13,7 @@ import { ProductLink} from '../components/Links'
 import ProductImage from '../components/ProductImage'
 import { resolve } from 'url'
 import { BASE_URL } from '../constants/config'
+import HomePageCarousel from '../components/HomePageCarousel'
 
 const FIND_ONE_PRODUCT = gql`
 query($categoryId: ID, $onSaleOnly: Boolean, $newOnly: Boolean) {
@@ -127,12 +127,7 @@ const Index = (props) => (
     `}</style>
     <ContentWithSidebar>
       <div id="homeContent" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
-        <Carousel controls={false} style={{ marginTop: '16px' }}>
-          {props.carouselItems.map((url, i) => <Carousel.Item key={url}>
-            <div dangerouslySetInnerHTML={{ __html: props['carouselItem-' + i + '-html'] }}>
-            </div>
-          </Carousel.Item>)}
-        </Carousel>
+        <HomePageCarousel />
         <hr />
         <Row>
           <Col xs={12}>
@@ -183,25 +178,5 @@ const Index = (props) => (
     </ContentWithSidebar>
   </>
 )
-
-let indexContentCache = null
-
-Index.getInitialProps = async () => {
-  if (indexContentCache) return indexContentCache
-  const indexRes = await fetch(resolve(BASE_URL, '/content/home/index.json'))
-  const indexData = await indexRes.json()
-  let initialProps = {
-    carouselItems: indexData.items || []
-  }
-  for (let i = 0; i < initialProps.carouselItems.length; i++) {
-    let fName = initialProps.carouselItems[i]
-    const res = await fetch(resolve(BASE_URL, '/content/home/' + fName))
-    const data = await res.text()
-    let propName = 'carouselItem-' + i + '-html'
-    initialProps[propName] = data
-  }
-  indexContentCache = initialProps
-  return initialProps
-}
 
 export default Index
