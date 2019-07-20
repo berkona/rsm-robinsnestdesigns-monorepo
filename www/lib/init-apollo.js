@@ -1,3 +1,4 @@
+import { toIdValue } from 'apollo-utilities';
 import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { BatchHttpLink } from "apollo-link-batch-http";
@@ -32,7 +33,14 @@ function getAPIUrl(req) {
 
 function create (initialState, req) {
   // Check out https://github.com/zeit/next.js/pull/4611 if you want to use the AWSAppSyncClient
-  const cache = new InMemoryCache().restore(initialState || {});
+  const cache = new InMemoryCache({
+    cacheRedirects: {
+      Query: {
+        product: (_, args) => toIdValue(cache.config.dataIdFromObject({ __typename: 'Product', id: args.productId })),
+        category: (_, args) => toIdValue(cache.config.dataIdFromObject({ __typename: 'Category', id: args.categoryId }))
+      }
+    }
+  }).restore(initialState || {});
   const httpLink = new BatchHttpLink({
     uri: getAPIUrl(req)
   })
