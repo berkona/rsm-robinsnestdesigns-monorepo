@@ -3,7 +3,7 @@ import carouselItems from '../content/home'
 
 export default () => <>
   <Carousel controls={false}
-            className="d-xs-none"
+            className="d-none d-sm-block"
             style={{ marginTop: '16px' }}>
     {
       (carouselItems || []).map((__html, i) => (
@@ -13,4 +13,12 @@ export default () => <>
       ))
     }
   </Carousel>
+  {
+    (carouselItems || []).map((__html, i) => (
+      <div key={i} className="d-block d-sm-none">
+        <div dangerouslySetInnerHTML={{ __html, }}></div>
+        <hr />
+      </div>
+    ))
+  }
 </>
