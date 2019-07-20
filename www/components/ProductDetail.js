@@ -20,23 +20,24 @@ export const pageQuery = gql`
 query($id: ID!) {
   product(productId: $id) {
     id
+    sku
     name
     qtyInStock
     category
     categoryId
     subcategory
     subcategoryId
-    sku
     isOnSale
     price
     salePrice
     saleStart
     saleEnd
+    description
     image
     thumbnail
     hyperlinkedImage
-    description
     productVariants {
+      id
       price
       text
     }

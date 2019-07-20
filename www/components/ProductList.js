@@ -33,8 +33,11 @@ query(
       id
       sku
       name
+      qtyInStock
       category
+      categoryId
       subcategory
+      subcategoryId
       isOnSale
       price
       salePrice
@@ -47,6 +50,7 @@ query(
       productVariants {
         id
         price
+        text
       }
     }
   }
@@ -129,6 +133,7 @@ const ProductList = (props) => {
             <div id="results">
               <Container>
                 <Row>
+                  { total == 0 && <p>There are no items matching this search</p> }
                   {
                     data.allProducts.records.map((item, idx) => (
                       props.colSize
@@ -141,7 +146,7 @@ const ProductList = (props) => {
               {
                 !isTeaser
                   ? <>
-                      <hr align="CENTER" size="3" width="400" color="Black"></hr>
+                      <hr />
                       <div align="CENTER" style={{ marginBottom: '10px' }}>
                         {[...pageLinks]}
                       </div>

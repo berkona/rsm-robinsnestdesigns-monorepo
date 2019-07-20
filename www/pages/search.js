@@ -1,4 +1,5 @@
 import Col from 'react-bootstrap/Col'
+import Row from 'react-bootstrap/Row'
 import Sidebar from '../components/Sidebar'
 import ProductList from '../components/ProductList'
 import SearchBlock from '../components/SearchBlock'
@@ -9,6 +10,9 @@ import gql from 'graphql-tag'
 import { Query } from 'react-apollo'
 import SEO from '../components/SEO'
 import { PRODUCT_GET_PAGE } from '../constants/queries'
+import Button from 'react-bootstrap/Button'
+import { FaTimes, FaPlus } from 'react-icons/fa'
+import { SearchLink } from '../components/Links'
 
 export const seoQuery = gql`
 query($categoryId: ID!) {
@@ -140,6 +144,56 @@ const SearchPageSEO = (props) => {
     </Query>
 }
 
+const FilterButtons = ({ searchPhrase, categoryId, subcategoryId, onSaleOnly, newOnly }) => <>
+  <style jsx global>{`
+  .filter-button {
+    display: inline-block;
+    margin-bottom: 10px;
+    margin-left: 10px;
+
+  }
+  .filter-button .btn {
+    border-radius: 32px;
+  }
+  `}</style>
+  <div className="filter-button">
+  { onSaleOnly
+    && <SearchLink searchPhrase={searchPhrase} categoryId={categoryId} subcategoryId={subcategoryId} newOnly={newOnly}>
+      <a>
+        <Button>
+          On Sale Only <FaTimes />
+        </Button>
+      </a>
+    </SearchLink>
+    || <SearchLink searchPhrase={searchPhrase} categoryId={categoryId} subcategoryId={subcategoryId} newOnly={newOnly} onSaleOnly={true}>
+      <a>
+        <Button variant="secondary">
+          On Sale Only
+        </Button>
+      </a>
+    </SearchLink>
+  }
+  </div>
+  <div className="filter-button">
+  { newOnly
+    && <SearchLink searchPhrase={searchPhrase} categoryId={categoryId} subcategoryId={subcategoryId} onSaleOnly={onSaleOnly}>
+      <a>
+        <Button>
+          New Only <FaTimes />
+        </Button>
+      </a>
+    </SearchLink>
+    || <SearchLink searchPhrase={searchPhrase} categoryId={categoryId} subcategoryId={subcategoryId} onSaleOnly={onSaleOnly} newOnly={true}>
+      <a>
+        <Button variant="secondary">
+          New Only
+        </Button>
+      </a>
+    </SearchLink>
+  }
+  </div>
+</>
+
 class SearchPage extends React.Component {
   constructor(props) {
     super(props)
@@ -169,14 +223,18 @@ class SearchPage extends React.Component {
           </Sidebar>
         </Col>
         <Col id="content" xs={12} sm={6} md={9}>
-          <div className="clearfix" style={{ marginTop: '10px' }}>
+          <div className="clearfix" style={{ margin: '16px 0px' }}>
             <div className="float-left">
               <Breadcrumb query={this.props.router.query} />
+            </div>
+            <div className="float-left">
+              <FilterButtons {...this.props.router.query} />
             </div>
             <div className="float-right">
               <SortWidget />
             </div>
           </div>
+          <hr />
           <div id="results">
             <ProductList
               searchPhrase={this.props.router.query.searchPhrase}

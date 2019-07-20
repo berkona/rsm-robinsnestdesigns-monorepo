@@ -192,7 +192,7 @@ const buildSearchQuery = (builder, { categoryId, subcategoryId, searchPhrase, on
 
       q = q.innerJoin(
         matchSku.union(searchEngine.search(searchPhrase)).as('_Search' + suffix),
-        '_Search.id', 'Products.ID'
+        '_Search' + suffix + '.id', 'Products.ID'
       )
     }
 
