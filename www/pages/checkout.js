@@ -133,14 +133,14 @@ class CheckoutPage extends React.Component {
                                 name="ncResident_Yes"
                                 label="Yes"
                                 checked={this.state.shippingZip == '27712' }
-                                onClick={() => this.setState({ shippingZip: '27712' })}
+                                onChange={() => this.setState({ shippingZip: '27712' })}
                               />
                               <Form.Check
                                 type="radio"
                                 name="ncResident_No"
                                 label="No"
                                 checked={this.state.shippingZip == '00000' }
-                                onClick={() => this.setState({ shippingZip: '00000' })}
+                                onChange={() => this.setState({ shippingZip: '00000' })}
                               />
                             </fieldset>
                           </Form.Group>
@@ -166,14 +166,14 @@ class CheckoutPage extends React.Component {
                                 name="shippingMethod"
                                 label="First Class Mail: $3.99"
                                 checked={this.state.shippingCost == '3.99'}
-                                onClick={() => this.setState({ shippingCost: '3.99'})}
+                                onChange={() => this.setState({ shippingCost: '3.99'})}
                               />
                               <Form.Check
                                 type="radio"
                                 name="shippingMethod"
                                 label="Priority Mail: $7.99"
                                 checked={this.state.shippingCost == '7.99'}
-                                onClick={() => this.setState({ shippingCost: '7.99' })}
+                                onChange={() => this.setState({ shippingCost: '7.99' })}
                               />
                               <Form.Check
                                   type="radio"
@@ -223,8 +223,8 @@ class CheckoutPage extends React.Component {
                             <Form.Check
                               name="shippingMethod"
                               label="I agree"
-                              checked={this.state.agreeToPolicies}
-                              onClick={() => this.setState({ agreeToPolicies: event.target.checked})}
+                              checked={this.state.agreeToPolicies || false}
+                              onChange={() => this.setState({ agreeToPolicies: event.target.checked})}
                             >
                             </Form.Check>
                           </Form.Group>
@@ -300,7 +300,9 @@ class CheckoutPage extends React.Component {
                         &&
                         <Mutation mutation={placeCartOrder} variables={{ orderId: currentUser.getCartId(), shipping: Number.parseFloat(this.state.shippingCost), county: this.state.county, promo: this.state.promo }}>
                           {(mutationFn, { loading, error, data }) =>
-                            error
+                            loading
+                            ? <p>Please wait...</p>
+                            : error
                             ? <p>Network error: {error.toString()}</p>
                             : !data
                               ? <InlineQuery query={GET_PAYPAL_CLIENT_ID}>
