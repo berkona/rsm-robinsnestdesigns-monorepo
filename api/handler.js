@@ -1,4 +1,4 @@
-const { ApolloServer } = require('apollo-server-micro')
+const { ApolloServer } = require('./apollo-server')
 const { MyDB } = require('./datasources')
 const { typeDefs } = require('./schema')
 const { resolvers } = require('./resolvers')
