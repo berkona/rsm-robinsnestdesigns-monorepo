@@ -148,7 +148,7 @@
     {
       "src": "(?<requestPath>.*\\.cfm)",
       "status": 301,
-      "dest": "https://hu4h16ypz8.execute-api.us-east-1.amazonaws.com/prod/redirect/$requestPath",
+      "dest": "https://hu4h16ypz8.execute-api.us-east-1.amazonaws.com/prod/redirect/$requestPath"
     },
     {
       "src": "/(.*)",
