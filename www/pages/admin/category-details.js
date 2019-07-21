@@ -86,7 +86,7 @@ export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
   <hr />
   <Button variant="outline-dark">
     <Link href={"/admin/subcategory-create?categoryId=" + props.router.query.categoryId }>
-      Add Subcategory
+      <a>Add Subcategory</a>
     </Link>
   </Button>
 </div></Col>)

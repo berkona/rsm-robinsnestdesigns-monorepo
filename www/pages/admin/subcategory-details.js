@@ -21,13 +21,21 @@ mutation($token: String!, $subcategoryId: ID!, $subcategory: SubCategoryInput!) 
   }
 }
 `
+
+const REMOVE_SUBCATEGORY = gql`
+mutation($token: String!, $subcategoryId: ID!) {
+  removeSubcategory(token: $token, subcategoryId: $subcategoryId)
+}
+`
+
 export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
-  <h1>Modify Category</h1>
+  <h1>Modify Subcategory</h1>
   <hr />
   <Query query={SUBCATEGORY_GET_ONE} variables={{ categoryId: props.router.query.categoryId }}>
     {({ loading, error, data }) => {
       if (loading) return <Loader />
       if (error) return <ApolloError error={error} />
+      const backToCategory = () => Router.push('/admin/category-details?categoryId=' + props.router.query.categoryId)
       const { allSubcategories } = data
       if (!allSubcategories) return <p>No data</p>
       const category = allSubcategories.filter(c => c.id == props.router.query.subcategoryId)[0]
@@ -46,9 +54,14 @@ export default withRouter((props) => <Col><div style={{ padding: '24px'}}>
                 category={category}
                 onSubmit={newCategory => {
                   mutationFn({ variables: { subcategory: Object.assign({}, newCategory, { categoryId: props.router.query.categoryId }) } })
-                    .then(() => Router.push('/admin/category-details?categoryId=' + props.router.query.categoryId))
+                    .then(backToCategory)
                 }}
               /></>
+            }}
+          </Mutation>
+          <Mutation mutation={REMOVE_SUBCATEGORY} variables={{ token: currentUser.getToken(), subcategoryId: props.router.query.subcategoryId  }}>
+            {(mutationFn, { loading, error, data }) => {
+              return <div style={{ marginTop: '48px' }}><Button variant="danger" onClick={() => mutationFn().then(backToCategory)}>Remove Subcategory</Button></div>
             }}
           </Mutation>
         </>}
