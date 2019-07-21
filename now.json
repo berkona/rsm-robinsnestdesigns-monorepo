@@ -147,10 +147,7 @@
     },
     {
       "src": "/(?<requestPath>.*\\.cfm)",
-      "status": 301,
-      "headers": {
-        "Location": "https://hu4h16ypz8.execute-api.us-east-1.amazonaws.com/prod/redirect/$requestPath"
-      }
+      "dest": "https://hu4h16ypz8.execute-api.us-east-1.amazonaws.com/prod/redirect/$requestPath"
     },
     {
       "src": "/(.*)",
