@@ -146,7 +146,7 @@
       }
     },
     {
-      "src": "^(/.*\\.cfm)$",
+      "src": "(/.*\\.cfm)",
       "dest": "https://hu4h16ypz8.execute-api.us-east-1.amazonaws.com/prod/redirect",
       "headers": {
         "x-request-path": "$1"
