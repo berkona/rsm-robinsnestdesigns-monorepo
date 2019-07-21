@@ -11,8 +11,6 @@ import PriceDisplay from '../components/PriceDisplay'
 import { Impression } from '../lib/next-ga-ec'
 import { ProductLink} from '../components/Links'
 import ProductImage from '../components/ProductImage'
-import { resolve } from 'url'
-import { BASE_URL } from '../constants/config'
 import HomePageCarousel from '../components/HomePageCarousel'
 
 const FIND_ONE_PRODUCT = gql`

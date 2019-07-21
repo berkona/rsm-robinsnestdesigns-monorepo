@@ -4,8 +4,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { BatchHttpLink } from "apollo-link-batch-http";
 import { RetryLink } from "apollo-link-retry";
 import { ApolloLink } from 'apollo-link';
-import { BASE_URL } from '../constants/config'
-import { resolve } from 'url'
+import { API_URL } from '../constants/config'
 import { WISHLIST_QUERY_ALL } from '../constants/queries'
 import fetch from 'isomorphic-unfetch'
 import gql from 'graphql-tag'
@@ -25,14 +24,7 @@ if (!process.browser) {
 
 const defaultValidHostRegex = /^[a-zA-Z0-9_\/\-\.]+.now\.sh$/
 
-function getAPIUrl(req) {
-  return process.browser
-    ? '/graphql'
-    : resolve(BASE_URL, '/graphql')
-}
-
 function create (initialState, req) {
-  // Check out https://github.com/zeit/next.js/pull/4611 if you want to use the AWSAppSyncClient
   const cache = new InMemoryCache({
     cacheRedirects: {
       Query: {
@@ -42,7 +34,7 @@ function create (initialState, req) {
     }
   }).restore(initialState || {});
   const httpLink = new BatchHttpLink({
-    uri: getAPIUrl(req)
+    uri: API_URL
   })
   const retryLink = new RetryLink({
     delay: {

@@ -17,7 +17,7 @@ import { PayPalButton } from "react-paypal-button-v2"
 import { checkoutOpenPaypalEvent, checkoutDoneEvent } from '../lib/react-ga'
 import Router from 'next/router'
 import Button from 'react-bootstrap/Button'
-import { PAYPAL_CLIENTID_LIVE } from '../constants/config'
+import InlineQuery from '../components/InlineQuery'
 
 const placeCartOrder = gql`
 mutation($orderId: ID!, $paypalOrderId: ID!, $shipping: Float!, $county: String, $promo: String) {
@@ -39,6 +39,14 @@ query($token: String!) {
     zip
     country
     phone
+  }
+}
+`
+
+const GET_PAYPAL_CLIENT_ID = gql`
+query {
+  siteinfo {
+    paypalClientId
   }
 }
 `
@@ -295,66 +303,68 @@ class CheckoutPage extends React.Component {
                             error
                             ? <p>Network error: {error.toString()}</p>
                             : !data
-                              ? <PayPalButton
-                                 options={{ clientId: PAYPAL_CLIENTID_LIVE }}
-                                 amount={cartData.cart.total}
-                                 createOrder={(data, actions) => {
-                                   checkoutOpenPaypalEvent(cartData.cart.items)
-                                   return actions.order.create({
-                                     purchase_units: [{
-                                       amount: {
-                                         currency: 'USD',
-                                         value: cartData.cart.total,
-                                         breakdown: {
-                                           item_total: makeAmount(cartData.cart.subtotal),
-                                           shipping: makeAmount(cartData.cart.shipping),
-                                           tax_total: makeAmount(cartData.cart.tax),
-                                           discount: makeAmount(cartData.cart.discount),
-                                         }
-                                       },
-                                       description: 'Your order with Robin\'s Nest Designs',
-                                       invoice_id: currentUser.getCartId(),
-                                       soft_descriptor: 'RobinsNestDesigns',
-                                       items: cartData.cart.items.map(({ product, qty, price }) => {
-                                         return {
-                                           sku: product.sku,
-                                           name: product.name,
-                                           unit_amount: makeAmount(price),
-                                           quantity: qty,
-                                           description: product.description && product.description.slice(0, 127) || '',
-                                           category: 'PHYSICAL_GOODS',
-                                         }
-                                       })
-                                     }]
-                                   })
-                                 }}
-                                 onSuccess={(details, data) => {
-                                   console.log('Paypal payment received', details, data)
-                                   const paypalOrderId = data && data.orderID;
-                                   if (!paypalOrderId) {
-                                     console.log('invalid paypal order id')
-                                     return Promise.reject(new Error('invalid order id returned'))
-                                   } else {
-                                     return mutationFn({ variables: { paypalOrderId }}).then(
-                                       () => {
-                                         currentUser.deleteCartId()
-                                         Router.push('/order/' + currentUser.getCartId())
-                                         // TODO: add coupon
-                                         checkoutDoneEvent(cartData.cart.items, paypalOrderId,
-                                           details.purchase_units[0].amount.value,
-                                           details.purchase_units[0].amount.breakdown.tax_total.value,
-                                           details.purchase_units[0].amount.breakdown.shipping.value
-                                         )
-                                       },
-                                       (err) => console.log('backend place order error', err)
-                                     )
-                                   }
-                                 }}
-                                 catchError={(err) => {
-                                   console.error("paypal txn error", err)
-                                   this.setState({ paypalError: err.toString() })
-                                 }}
-                                 />
+                              ? <InlineQuery query={GET_PAYPAL_CLIENT_ID}>
+                                  {({ siteinfo: { paypalClientId } }) => <PayPalButton
+                                   options={{ clientId: paypalClientId }}
+                                   amount={cartData.cart.total}
+                                   createOrder={(data, actions) => {
+                                     checkoutOpenPaypalEvent(cartData.cart.items)
+                                     return actions.order.create({
+                                       purchase_units: [{
+                                         amount: {
+                                           currency: 'USD',
+                                           value: cartData.cart.total,
+                                           breakdown: {
+                                             item_total: makeAmount(cartData.cart.subtotal),
+                                             shipping: makeAmount(cartData.cart.shipping),
+                                             tax_total: makeAmount(cartData.cart.tax),
+                                             discount: makeAmount(cartData.cart.discount),
+                                           }
+                                         },
+                                         description: 'Your order with Robin\'s Nest Designs',
+                                         invoice_id: currentUser.getCartId(),
+                                         soft_descriptor: 'RobinsNestDesigns',
+                                         items: cartData.cart.items.map(({ product, qty, price }) => {
+                                           return {
+                                             sku: product.sku,
+                                             name: product.name,
+                                             unit_amount: makeAmount(price),
+                                             quantity: qty,
+                                             description: product.description && product.description.slice(0, 127) || '',
+                                             category: 'PHYSICAL_GOODS',
+                                           }
+                                         })
+                                       }]
+                                     })
+                                   }}
+                                   onSuccess={(details, data) => {
+                                     console.log('Paypal payment received', details, data)
+                                     const paypalOrderId = data && data.orderID;
+                                     if (!paypalOrderId) {
+                                       console.log('invalid paypal order id')
+                                       return Promise.reject(new Error('invalid order id returned'))
+                                     } else {
+                                       return mutationFn({ variables: { paypalOrderId }}).then(
+                                         () => {
+                                           currentUser.deleteCartId()
+                                           Router.push('/order/' + currentUser.getCartId())
+                                           // TODO: add coupon
+                                           checkoutDoneEvent(cartData.cart.items, paypalOrderId,
+                                             details.purchase_units[0].amount.value,
+                                             details.purchase_units[0].amount.breakdown.tax_total.value,
+                                             details.purchase_units[0].amount.breakdown.shipping.value
+                                           )
+                                         },
+                                         (err) => console.log('backend place order error', err)
+                                       )
+                                     }
+                                   }}
+                                   catchError={(err) => {
+                                     console.error("paypal txn error", err)
+                                     this.setState({ paypalError: err.toString() })
+                                   }}
+                                   />}
+                                 </InlineQuery>
                               : <p>Order placed</p>
                             }
                         </Mutation>

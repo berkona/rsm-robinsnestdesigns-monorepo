@@ -3,30 +3,9 @@
   "name": "robins-nest-designs",
   "alias": ["beta.robinsnestdesigns.com"],
   "regions": [ "iad1" ],
-  "env": {
-    "SQL_ENGINE": "mssql",
-    "SQL_PORT": "1433",
-    "SQL_HOST": "@sql-host-pegweb-prod",
-    "SQL_USER": "@sql-user-pegweb-prod",
-    "SQL_PWD": "@sql-pwd-pegweb-prod",
-    "SQL_DB": "@sql-db-pegweb-prod",
-    "PAYPAL_CLIENTID": "@paypal-client-id-rsm-live",
-    "PAYPAL_CLIENTSECRET": "@paypal-client-secret-rsm-live",
-    "API_URL": "@api-url-beta",
-    "JWT_SECRET": "@jwt-secret",
-    "JWT_ISSUER": "@jwt-issuer",
-    "JWT_MAX_AGE": "@jwt-max-age",
-    "AWSAccessKeyId": "@awsaccesskeyid",
-    "AWSSecretKey": "@awssecretkey",
-    "AWSUploadBucket": "@aws-upload-bucket-prod",
-    "SITE_URL": "@site-url-beta",
-    "MAILGUN_API_KEY": "@mailgun-api-key"
-  },
+  "env": {},
   "builds": [
-    { "src": "www/next.config.js", "use": "@now/next" },
-    { "src": "api/handler.js", "use": "@now/node" },
-    { "src": "api/sitemap.js", "use": "@now/node" },
-    { "src": "api/redirect.js", "use": "@now/node" }
+    { "src": "www/next.config.js", "use": "@now/next" }
   ],
   "routes": [
     {
@@ -64,10 +43,9 @@
         "Location": "/categories"
       }
     },
-    { "src": "/graphql", "dest": "api/handler.js" },
     {
       "src": "/sitemap.xml",
-      "dest": "api/sitemap.js",
+      "dest": "https://yj2v5susjc.execute-api.us-east-1.amazonaws.com/dev/sitemap",
       "headers": {
         "cache-control": "public,max-age=86400,s-maxage=86400"
       }
@@ -168,8 +146,11 @@
       }
     },
     {
-      "src": "/(.*)\\.cfm$",
-      "dest": "api/redirect.js"
+      "src": "(/.*\\.cfm)$",
+      "dest": "https://yj2v5susjc.execute-api.us-east-1.amazonaws.com/dev/redirect",
+      "headers": {
+        "x-request-path": "$1"
+      }
     },
     {
       "src": "/(.*)",
