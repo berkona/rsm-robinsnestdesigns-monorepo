@@ -464,13 +464,13 @@ const resolvers = {
       }
 
       if (product.category2)
-        product.category2 = await getTitle(() => db.getCategory(product.category2))
+        product.category2 = await getTitle(() => context.dataSources.db.getCategory(product.category2))
       if (product.category3)
-        product.category3 = await getTitle(() => db.getCategory(product.category3))
+        product.category3 = await getTitle(() => context.dataSources.db.getCategory(product.category3))
       if (product.subcategory2)
-        product.subcategory2 = await getTitle(() => db.getSubcategory(product.subcategory2))
+        product.subcategory2 = await getTitle(() => context.dataSources.db.getSubcategory(product.subcategory2))
       if (product.subcategory3)
-        product.subcategory3 = await getTitle(() => db.getSubcategory(product.subcategory3))
+        product.subcategory3 = await getTitle(() => context.dataSources.db.getSubcategory(product.subcategory3))
 
       await searchEngine.add(product)
       return product
