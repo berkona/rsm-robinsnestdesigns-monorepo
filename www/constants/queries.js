@@ -101,6 +101,7 @@ query(
       saleStart
       saleEnd
       description
+      qtyInStock
       image
       thumbnail
       hyperlinkedImage
@@ -121,6 +122,7 @@ query($productId: ID!) {
     name
     description
     price
+    qtyInStock
     salePrice
     saleStart
     saleEnd
