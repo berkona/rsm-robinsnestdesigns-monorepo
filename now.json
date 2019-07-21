@@ -45,7 +45,7 @@
     },
     {
       "src": "/sitemap.xml",
-      "dest": "https://yj2v5susjc.execute-api.us-east-1.amazonaws.com/dev/sitemap",
+      "dest": "https://hu4h16ypz8.execute-api.us-east-1.amazonaws.com/prod/sitemap",
       "headers": {
         "cache-control": "public,max-age=86400,s-maxage=86400"
       }
@@ -146,8 +146,8 @@
       }
     },
     {
-      "src": "(/.*\\.cfm)$",
-      "dest": "https://yj2v5susjc.execute-api.us-east-1.amazonaws.com/dev/redirect",
+      "src": "^(/.*\\.cfm)$",
+      "dest": "https://hu4h16ypz8.execute-api.us-east-1.amazonaws.com/prod/redirect",
       "headers": {
         "x-request-path": "$1"
       }
