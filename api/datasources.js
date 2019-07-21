@@ -371,7 +371,7 @@ class MyDB extends SQLDataSource {
 
   insertCategory({ title, comments }) {
     if (!title) return Promise.reject(`title is required`)
-    return this.db('Category').insert({ Category: title, Comments: comments })
+    return this.db('Category').insert({ Category: title, Comments: comments }).returning('ID')
   }
 
   async getCategoryImage(categoryId) {
@@ -424,7 +424,7 @@ class MyDB extends SQLDataSource {
   insertSubcategory({ categoryId, title, comments }) {
     if (!title) throw new Error('title is required')
     if (!categoryId) throw new Error('categoryId is required')
-    return this.db('Subcategory').insert({ Category: categoryId, Subcategory: title, Comments: comments })
+    return this.db('Subcategory').insert({ Category: categoryId, Subcategory: title, Comments: comments }).returning('ID')
   }
 
   async getSubcategory(subcategoryId) {
@@ -603,7 +603,7 @@ class MyDB extends SQLDataSource {
       if (result) {
         return Promise.reject(new Error('User already exists'))
       } else {
-        return this.db('CustomerAccounts').insert(user)
+        return this.db('CustomerAccounts').insert(user).returning('ID')
       }
     })
   }
@@ -715,7 +715,7 @@ class MyDB extends SQLDataSource {
   }
 
   placeOrder(orderData) {
-    return this.db('CustomerInfo').insert(orderData)
+    return this.db('CustomerInfo').insert(orderData).returning('ID')
   }
 
   getCustomerInfo(orderId) {
